@@ -1,0 +1,52 @@
+loc_0:
+    stwu r1,-0x110(r1)
+    mflr r0
+    stw r0,0x114(r1)
+    stw r31,0x10C(r1)
+    stw r30,0x108(r1)
+    mr r30,r3
+    mr r31,r4
+    addi r3,r1,0xC0
+    lis r4,-0x0                   [R_PPC_ADDR16_HA(10, 5, "loc_E70")]
+    addi r4,r4,-0x0               [R_PPC_ADDR16_LO(10, 5, "loc_E70")]
+    mr r5,r30
+loc_2C:
+    bl loc_2C                     [R_PPC_REL24(0, 0, "printf__sprintf")]
+    addi r3,r1,0x8
+    addi r4,r1,0xC0
+    lwz r5,0x438(r31)
+    li r6,-0x0
+    li r7,-0x0
+loc_44:
+    bl loc_44                     [R_PPC_REL24(0, 0, "gfFileIORequest__setReadParam1")]
+    addi r3,r1,0x8
+loc_4C:
+    bl loc_4C                     [R_PPC_REL24(0, 0, "gfFileIO__readSDFile")]
+    cmpwi r3,-0x0
+    beq- loc_88
+    lis r4,0x1
+    lis r6,-0x0                   [R_PPC_ADDR16_HA(10, 6, "loc_8")]
+    lwz r3,-0x0(r6)               [R_PPC_ADDR16_LO(10, 6, "loc_8")]
+    mr r5,r30
+    subi r0,r4,0x2
+    li r4,0x1
+    rlwinm r6,r0,0,16,31
+loc_74:
+    bl loc_74                     [R_PPC_REL24(0, 0, "gfArchive__getData1")]
+    cmpwi r3,-0x0
+    beq- loc_8C
+    lwz r4,0x438(r31)
+loc_84:
+    bl loc_84                     [R_PPC_REL24(0, 0, "CXUncompression__CXUncompressLZ")]
+loc_88:
+    lwz r3,0x438(r31)
+loc_8C:
+    lwz r30,0x108(r1)
+    lwz r31,0x10C(r1)
+    lwz r0,0x114(r1)
+    mtlr r0
+    lwz r1,-0x0(r1)
+    blr
+    lfdu f6,-0x3334(r12)
+    lfdu f6,-0x3334(r12)
+    lfdu f6,-0x3334(r12)

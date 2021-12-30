@@ -1,0 +1,74 @@
+{
+  "Name": "sora_menu_sel_char",
+  "Type": "rel",
+  "ModuleID": 10,
+  "ModuleAlign": 32,
+  "BSSAlign": 8,
+  "FixSize": 135552,
+  "Sections": [
+    null,
+    {
+      "Path": "Section[1].def",
+      "SectionID": 1,
+      "HasCode": true,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[2].def",
+      "SectionID": 2,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[3].def",
+      "SectionID": 3,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[4].def",
+      "SectionID": 4,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[5].def",
+      "SectionID": 5,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[6].def",
+      "SectionID": 6,
+      "HasCode": false,
+      "IsBSS": true,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[7].def",
+      "SectionID": 7,
+      "HasCode": true,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 28
+    },
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ]
+}
