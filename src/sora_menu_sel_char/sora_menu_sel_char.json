@@ -8,7 +8,7 @@
   "Sections": [
     null,
     {
-      "Path": "Section[1].def",
+      "Path": "asm/main.asm",
       "SectionID": 1,
       "HasCode": true,
       "IsBSS": false,
@@ -16,7 +16,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "Section[2].def",
+      "Path": "ctor.asm",
       "SectionID": 2,
       "HasCode": false,
       "IsBSS": false,
@@ -24,7 +24,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "Section[3].def",
+      "Path": "dtor.asm",
       "SectionID": 3,
       "HasCode": false,
       "IsBSS": false,
@@ -32,7 +32,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "Section[4].def",
+      "Path": "rodata/rodata.asm",
       "SectionID": 4,
       "HasCode": false,
       "IsBSS": false,
@@ -40,7 +40,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "Section[5].def",
+      "Path": "data/data.asm",
       "SectionID": 5,
       "HasCode": false,
       "IsBSS": false,
@@ -48,7 +48,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "Section[6].def",
+      "Path": "bss/bss.asm",
       "SectionID": 6,
       "HasCode": false,
       "IsBSS": true,
@@ -56,7 +56,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "Section[7].def",
+      "Path": "asm/brawlex.asm",
       "SectionID": 7,
       "HasCode": true,
       "IsBSS": false,

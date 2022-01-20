@@ -1036,44 +1036,14 @@ loc_E20:
         .4byte 0x64000000
         .4byte 0x00000000
 loc_E30:
-        .4byte 0x6D6F5F6D
-        .4byte 0x656E752E
-        .4byte 0x63707000
-        .4byte 0x00000000
-loc_E40:
-        .4byte 0x2F707269
-        .4byte 0x76617465
-        .4byte 0x2F776969
-        .4byte 0x2F617070
-        .4byte 0x2F727362
-        .4byte 0x652F7066
-        .4byte 0x2F427261
-        .4byte 0x776C4578
-        .4byte 0x2F435353
-        .4byte 0x526F7374
-        .4byte 0x65722E64
-        .4byte 0x61740000
+		.asciz "mo_menu.cpp"
+		.balign 0x10
+rosterFilepath:
+		.asciz "/private/wii/app/rsbe/pf/BrawlEx/CSSRoster.dat"
+		.balign 4
 loc_E70:
-        .4byte 0x2F707269
-        .4byte 0x76617465
-        .4byte 0x2F776969
-        .4byte 0x2F617070
-        .4byte 0x2F727362
-        .4byte 0x652F7066
-        .4byte 0x2F6D656E
-        .4byte 0x752F636F
-        .4byte 0x6D6D6F6E
-        .4byte 0x2F636861
-        .4byte 0x725F6275
-        .4byte 0x73745F74
-        .4byte 0x65782F4D
-        .4byte 0x656E5365
-        .4byte 0x6C636872
-        .4byte 0x46616365
-        .4byte 0x42253032
-        .4byte 0x64302E62
-        .4byte 0x72726573
-        .4byte 0x00000000
+		.asciz "/private/wii/app/rsbe/pf/menu/common/char_bust_tex/MenSelchrFaceB%02d0.brres"
+		.balign 4
         .4byte 0x03000300
         .4byte 0x03000300
         .4byte 0x03000300
