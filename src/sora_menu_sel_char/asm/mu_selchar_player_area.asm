@@ -270,7 +270,7 @@ muSelCharPlayerArea_getCharPicTexResFile:
     /* 00011098: */    bl __unresolved                          [R_PPC_REL24(0, 4, "loc_800AF600")]
     /* 0001109C: */    mr r4,r31
 loc_110A0:
-    /* 000110A0: */    bl loc_110A0                             [R_PPC_REL24(10, 7, "loc_0")]
+    /* 000110A0: */    bl loc_110A0                             [R_PPC_REL24(10, 7, "BrawlEx__loadTextureFile")]
     /* 000110A4: */    nop
     /* 000110A8: */    nop
     /* 000110AC: */    nop

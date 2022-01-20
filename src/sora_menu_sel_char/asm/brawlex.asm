@@ -1,4 +1,4 @@
-BrawlEx__loadRosterData:
+BrawlEx__loadTextureFile:
     /* 00000000: */    stwu r1,-0x110(r1)
     /* 00000004: */    mflr r0
     /* 00000008: */    stw r0,0x114(r1)
