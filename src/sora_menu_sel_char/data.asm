@@ -1041,9 +1041,6 @@ loc_E30:
 BrawlEx__rosterFilepath:
         .asciz "/private/wii/app/RSBE/pf/BrawlEx/CSSRoster.dat"
 		.balign 4
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
         .4byte 0x0020AF30
         .4byte 0x00000001
         .4byte 0x0000000C
