@@ -4,7 +4,7 @@
   "ModuleID": 10,
   "ModuleAlign": 32,
   "BSSAlign": 8,
-  "FixSize": 135552,
+  "FixSize": 135504,
   "Sections": [
     null,
     {
@@ -16,7 +16,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "ctor.asm",
+      "Path": "ctors.asm",
       "SectionID": 2,
       "HasCode": false,
       "IsBSS": false,
@@ -24,7 +24,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "dtor.asm",
+      "Path": "dtors.asm",
       "SectionID": 3,
       "HasCode": false,
       "IsBSS": false,
@@ -32,7 +32,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "rodata/rodata.asm",
+      "Path": "rodata.asm",
       "SectionID": 4,
       "HasCode": false,
       "IsBSS": false,
@@ -40,7 +40,7 @@
       "ExpandSize": 0
     },
     {
-      "Path": "data/data.asm",
+      "Path": "data.asm",
       "SectionID": 5,
       "HasCode": false,
       "IsBSS": false,
@@ -48,21 +48,14 @@
       "ExpandSize": 0
     },
     {
-      "Path": "bss/bss.asm",
+      "Path": "bss.asm",
       "SectionID": 6,
       "HasCode": false,
       "IsBSS": true,
       "Expand": false,
       "ExpandSize": 0
     },
-    {
-      "Path": "asm/brawlex.asm",
-      "SectionID": 7,
-      "HasCode": true,
-      "IsBSS": false,
-      "Expand": false,
-      "ExpandSize": 28
-    },
+    null,
     null,
     null,
     null,

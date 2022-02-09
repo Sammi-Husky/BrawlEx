@@ -268,17 +268,16 @@ muSelCharPlayerArea_getCharPicTexResFile:
     /* 00011090: */    mr r3,r4
     /* 00011094: */    bl __unresolved                          [R_PPC_REL24(0, 4, "loc_800AF82C")]
     /* 00011098: */    bl __unresolved                          [R_PPC_REL24(0, 4, "loc_800AF600")]
-    /* 0001109C: */    mr r4,r31
-loc_110A0:
-    /* 000110A0: */    bl loc_110A0                             [R_PPC_REL24(10, 7, "BrawlEx__loadTextureFile")]
-    /* 000110A4: */    nop
-    /* 000110A8: */    nop
-    /* 000110AC: */    nop
-    /* 000110B0: */    nop
-    /* 000110B4: */    nop
-    /* 000110B8: */    nop
-    /* 000110BC: */    nop
-    /* 000110C0: */    nop
+    /* 0001109C: */    lis r4,0x1
+    /* 000110A0: */    lis r6,0x0                               [R_PPC_ADDR16_HA(10, 6, "loc_8")]
+    /* 000110A4: */    mr r5,r3
+    /* 000110A8: */    lwz r3,0x0(r6)                           [R_PPC_ADDR16_LO(10, 6, "loc_8")]
+    /* 000110AC: */    subi r0,r4,0x2
+    /* 000110B0: */    li r4,0x1
+    /* 000110B4: */    rlwinm r6,r0,0,16,31
+    /* 000110B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData1")]
+    /* 000110BC: */    lwz r4,0x438(r31)
+    /* 000110C0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "CXUncompression__CXUncompressLZ")]
     /* 000110C4: */    lwz r3,0x438(r31)
     /* 000110C8: */    lis r4,0x4
     /* 000110CC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSCache__DCFlushRange")]

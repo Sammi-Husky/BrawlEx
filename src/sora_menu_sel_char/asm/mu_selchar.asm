@@ -582,8 +582,8 @@ loc_80C:
     /* 00000844: */    stw r0,0x624(r30)
     /* 00000848: */    stwu r1,-0xC0(r1)
     /* 0000084C: */    addi r3,r1,0x8
-    /* 00000850: */    lis r4,0x0                               [R_PPC_ADDR16_HA(10, 5, "rosterFilepath")]
-    /* 00000854: */    addi r4,r4,0x0                           [R_PPC_ADDR16_LO(10, 5, "rosterFilepath")]
+    /* 00000850: */    lis r4,0x0                               [R_PPC_ADDR16_HA(10, 5, "BrawlEx__rosterFilepath")]
+    /* 00000854: */    addi r4,r4,0x0                           [R_PPC_ADDR16_LO(10, 5, "BrawlEx__rosterFilepath")]
     /* 00000858: */    addi r5,r30,0x42C
     /* 0000085C: */    li r6,0x0
     /* 00000860: */    li r7,0x0

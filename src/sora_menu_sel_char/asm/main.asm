@@ -32,7 +32,6 @@ loc_1DEB8:
     /* 0001DECC: */    mtlr r0
     /* 0001DED0: */    addi r1,r1,0x10
     /* 0001DED4: */    blr
-	
 __exit:
     /* 0001DED8: */    stwu r1,-0x10(r1)
     /* 0001DEDC: */    mflr r0

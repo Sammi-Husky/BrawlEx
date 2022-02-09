@@ -1038,12 +1038,39 @@ loc_E20:
 loc_E30:
 		.asciz "mo_menu.cpp"
 		.balign 0x10
-rosterFilepath:
-		.asciz "/private/wii/app/rsbe/pf/BrawlEx/CSSRoster.dat"
+BrawlEx__rosterFilepath:
+        .asciz "/private/wii/app/RSBE/pf/BrawlEx/CSSRoster.dat"
 		.balign 4
-loc_E70:
-		.asciz "/private/wii/app/rsbe/pf/menu/common/char_bust_tex/MenSelchrFaceB%02d0.brres"
-		.balign 4
+        .4byte 0x00000000
+        .4byte 0x00000000
+        .4byte 0x00000000
+        .4byte 0x0020AF30
+        .4byte 0x00000001
+        .4byte 0x0000000C
+        .4byte 0x00000014
+        .4byte 0x00000000
+        .4byte 0x00380038
+        .4byte 0x00000005
+        .4byte 0x00000040
+        .4byte 0x00000000
+        .4byte 0x00000000
+        .4byte 0x00000001
+        .4byte 0x00000001
+        .4byte 0x00000000
+        .4byte 0x00000000
+        .4byte 0x00000000
+        .4byte 0x00000000
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
         .4byte 0x03000300
         .4byte 0x03000300
         .4byte 0x03000300
@@ -2555,6 +2582,38 @@ loc_E70:
         .4byte 0x03000300
         .4byte 0xC400BC00
         .4byte 0x55002400
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
+        .4byte 0x03000300
         .4byte 0x03000300
         .4byte 0x03000300
         .4byte 0x03000300
