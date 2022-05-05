@@ -25294,7 +25294,7 @@ loc_17C6C:
 loc_17CFC:
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17D80")]
         .4byte 0x00000000
-        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "loc_3F6DC")]
+        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "muAdvSelchrCTask__processDefault")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processBegin")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processAnim")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processUpdate")]
@@ -25316,7 +25316,7 @@ loc_17CFC:
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processDebug")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__renderDebug")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__init")]
-        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "muAdvSelchrCTask__printRushMembers")]
+        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "muAdvSelchrCTask____dt")]
 loc_17D60:
         .4byte 0x6D754164
         .4byte 0x7653656C
