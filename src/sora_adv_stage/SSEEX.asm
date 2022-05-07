@@ -48,3 +48,5 @@ loc_storeTeamMemberCount:
 
 # TODO: Have case to add only if SSE has been completed
 # TODO: Force setMenuData to pop up to select fighters? (will probs get overidden by selection)
+
+# TODO: Investigate if any offsets were missed, (visual bug with the Select number not going down as Fighters are selected)

@@ -1282,7 +1282,7 @@ loc_1F888:
     /* 0001F888: */    lwz r3,0x38(r31)
     /* 0001F88C: */    cmpwi r3,0x0
     /* 0001F890: */    beq- loc_1F8DC
-    /* 0001F894: */    lwz r0,0xC24(r3)
+    /* 0001F894: */    lwz r0,muAdvSelchrCTask_0xC24(r3)
     /* 0001F898: */    cmpwi r0,0x0
     /* 0001F89C: */    beq- loc_1FBC0
     /* 0001F8A0: */    lbz r0,0x62(r31)

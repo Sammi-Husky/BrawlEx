@@ -1,3 +1,6 @@
+.set addedMembers, 120
+.set muAdvSelchrCTask_0xC24, 0xC24 + addedMembers*4
+
 globaldestructorchain____register_global_object:
     /* 00000000: */    lis r6,0x0                               [R_PPC_ADDR16_HA(1, 6, "loc_0")]
     /* 00000004: */    lwz r0,0x0(r6)                           [R_PPC_ADDR16_LO(1, 6, "loc_0")]
