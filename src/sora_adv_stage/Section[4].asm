@@ -1,4 +1,4 @@
-.set testAddedMembers, 0
+.set testAddedMembers, 10
 .set addedMembers, 120
 
 loc_0:

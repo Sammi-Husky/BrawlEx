@@ -1607,7 +1607,7 @@ loc_3F3E4:
     /* 0003F3EC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameMatCol")]
     /* 0003F3F0: */    addi r24,r24,0x1
     /* 0003F3F4: */    addi r23,r23,0x4
-    /* 0003F3F8: */    cmpwi r24,0x28
+    /* 0003F3F8: */    cmpwi r24,0x28 + testAddedMembers # addedMembers
     /* 0003F3FC: */    blt+ loc_3F3E4
     /* 0003F400: */    mr r3,r27
     /* 0003F404: */    bl muAdvSelchrCTask__attachMemberToTeamPanel
@@ -1700,9 +1700,9 @@ loc_3F528:
 loc_3F54C:
     /* 0003F54C: */    cmpwi r28,0x0
     /* 0003F550: */    lwz r24,0xA8(r30)
-    /* 0003F554: */    li r3,0x60
+    /* 0003F554: */    li r3,0x60 + 2*testAddedMembers # 2*addedMembers
     /* 0003F558: */    bne- loc_3F560
-    /* 0003F55C: */    li r3,0x38
+    /* 0003F55C: */    li r3,0x38 + testAddedMembers # addedNumbers
 loc_3F560:
     /* 0003F560: */    addi r0,r29,0x1
     /* 0003F564: */    add r3,r29,r3
@@ -2521,7 +2521,7 @@ muAdvSelchrCTask__moveCharCursor:
     /* 00040128: */    mflr r0
     /* 0004012C: */    cmpwi r4,0x0
     /* 00040130: */    stw r0,0x24(r1)
-    /* 00040134: */    li r0,0x37
+    /* 00040134: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 00040138: */    stw r31,0x1C(r1)
     /* 0004013C: */    stw r30,0x18(r1)
     /* 00040140: */    stw r29,0x14(r1)
@@ -2532,7 +2532,7 @@ muAdvSelchrCTask__moveCharCursor:
     /* 00040154: */    add r4,r3,r4
     /* 00040158: */    lwz r31,muAdvSelchrCTask_0x934(r4)
     /* 0004015C: */    bne- loc_40164
-    /* 00040160: */    li r0,0x36
+    /* 00040160: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_40164:
     /* 00040164: */    rlwinm r0,r0,2,0,29
     /* 00040168: */    lwz r12,0x0(r31)
@@ -2568,11 +2568,11 @@ muAdvSelchrCTask__dispNumber:
     /* 000401DC: */    stw r31,0x2C(r1)
     /* 000401E0: */    stw r30,0x28(r1)
     /* 000401E4: */    mr r30,r5
-    /* 000401E8: */    li r5,0x60
+    /* 000401E8: */    li r5,0x60 + 2*testAddedMembers # 2*addedNumbers
     /* 000401EC: */    stw r29,0x24(r1)
     /* 000401F0: */    mr r29,r3
     /* 000401F4: */    bne- loc_401FC
-    /* 000401F8: */    li r5,0x38
+    /* 000401F8: */    li r5,0x38 + testAddedMembers # addedNumbers
 loc_401FC:
     /* 000401FC: */    xoris r4,r6,0x8000
     /* 00040200: */    lis r0,0x4330
@@ -2614,9 +2614,9 @@ loc_401FC:
 muAdvSelchrCTask__removeNumber:
     /* 00040290: */    cmpwi r4,0x0
     /* 00040294: */    mr r7,r3
-    /* 00040298: */    li r0,0x60
+    /* 00040298: */    li r0,0x60 + 2*testAddedMembers # 2*addedMembers
     /* 0004029C: */    bne- loc_402A4
-    /* 000402A0: */    li r0,0x38
+    /* 000402A0: */    li r0,0x38 + testAddedMembers # addedNumbers
 loc_402A4:
     /* 000402A4: */    lwz r6,muAdvSelchrCTask_0xC1C(r3)
     /* 000402A8: */    add r4,r0,r5
@@ -5110,13 +5110,13 @@ loc_425C8:
     /* 000425D4: */    blt- loc_42620
     /* 000425D8: */    lwz r3,muAdvSelchrCTask_0xC1C(r27)
     /* 000425DC: */    cmpwi r28,0x0
-    /* 000425E0: */    li r0,0x37
+    /* 000425E0: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 000425E4: */    addi r3,r3,0x2
     /* 000425E8: */    rlwinm r3,r3,2,0,29
     /* 000425EC: */    add r3,r27,r3
     /* 000425F0: */    lwz r3,muAdvSelchrCTask_0x934(r3)
     /* 000425F4: */    bne- loc_425FC
-    /* 000425F8: */    li r0,0x36
+    /* 000425F8: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_425FC:
     /* 000425FC: */    rlwinm r0,r0,2,0,29
     /* 00042600: */    lwz r12,0x0(r3)
@@ -5131,13 +5131,13 @@ loc_42620:
     /* 00042620: */    lwz r3,muAdvSelchrCTask_0xC1C(r27)
     /* 00042624: */    cmpwi r28,0x0
     /* 00042628: */    lwz r25,muAdvSelchrCTask_0xABC(r30)
-    /* 0004262C: */    li r0,0x37
+    /* 0004262C: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 00042630: */    addi r3,r3,0x2
     /* 00042634: */    rlwinm r3,r3,2,0,29
     /* 00042638: */    add r3,r27,r3
     /* 0004263C: */    lwz r24,muAdvSelchrCTask_0x934(r3)
     /* 00042640: */    bne- loc_42648
-    /* 00042644: */    li r0,0x36
+    /* 00042644: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_42648:
     /* 00042648: */    rlwinm r0,r0,2,0,29
     /* 0004264C: */    lwz r12,0x0(r24)
@@ -5270,13 +5270,13 @@ loc_427F4:
 loc_42830:
     /* 00042830: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 00042834: */    cmpwi r27,0x0
-    /* 00042838: */    li r0,0x37
+    /* 00042838: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 0004283C: */    addi r3,r3,0x2
     /* 00042840: */    rlwinm r3,r3,2,0,29
     /* 00042844: */    add r3,r26,r3
     /* 00042848: */    lwz r3,muAdvSelchrCTask_0x934(r3)
     /* 0004284C: */    bne- loc_42854
-    /* 00042850: */    li r0,0x36
+    /* 00042850: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_42854:
     /* 00042854: */    rlwinm r0,r0,2,0,29
     /* 00042858: */    lwz r12,0x0(r3)
@@ -5289,9 +5289,9 @@ loc_42854:
     /* 00042874: */    li r25,0x0
 loc_42878:
     /* 00042878: */    cmpwi r27,0x0
-    /* 0004287C: */    li r0,0x60
+    /* 0004287C: */    li r0,0x60 + 2*testAddedMembers # 2*addedMembers
     /* 00042880: */    bne- loc_42888
-    /* 00042884: */    li r0,0x38
+    /* 00042884: */    li r0,0x38 + testAddedMembers # addedNumbers
 loc_42888:
     /* 00042888: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 0004288C: */    add r0,r25,r0
@@ -5308,7 +5308,7 @@ loc_42888:
     /* 000428B8: */    mtctr r12
     /* 000428BC: */    bctrl
     /* 000428C0: */    addi r25,r25,0x1
-    /* 000428C4: */    cmpwi r25,0x28
+    /* 000428C4: */    cmpwi r25,0x28 + testAddedMembers # addedNumbers
     /* 000428C8: */    blt+ loc_42878
     /* 000428CC: */    addi r27,r27,0x1
     /* 000428D0: */    cmpwi r27,0x2
@@ -5357,9 +5357,9 @@ loc_42954:
     /* 00042974: */    rlwinm r0,r0,2,0,29
     /* 00042978: */    add r3,r26,r0
     /* 0004297C: */    lwz r3,muAdvSelchrCTask_0x934(r3)
-    /* 00042980: */    li r0,0x37
+    /* 00042980: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 00042984: */    bne- cr1,loc_4298C
-    /* 00042988: */    li r0,0x36
+    /* 00042988: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_4298C:
     /* 0004298C: */    rlwinm r0,r0,2,0,29
     /* 00042990: */    lwz r12,0x0(r3)
@@ -5377,9 +5377,9 @@ loc_429B0:
     /* 000429BC: */    rlwinm r0,r0,2,0,29
     /* 000429C0: */    add r3,r26,r0
     /* 000429C4: */    lwz r24,muAdvSelchrCTask_0x934(r3)
-    /* 000429C8: */    li r0,0x37
+    /* 000429C8: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 000429CC: */    bne- cr1,loc_429D4
-    /* 000429D0: */    li r0,0x36
+    /* 000429D0: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_429D4:
     /* 000429D4: */    rlwinm r0,r0,2,0,29
     /* 000429D8: */    lwz r12,0x0(r24)
@@ -5422,13 +5422,13 @@ loc_42A4C:
     /* 00042A64: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 00042A68: */    cmpwi r27,0x0
     /* 00042A6C: */    lwz r23,muAdvSelchrCTask_0xABC(r29)
-    /* 00042A70: */    li r0,0x37
+    /* 00042A70: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 00042A74: */    addi r3,r3,0x2
     /* 00042A78: */    rlwinm r3,r3,2,0,29
     /* 00042A7C: */    add r3,r26,r3
     /* 00042A80: */    lwz r24,muAdvSelchrCTask_0x934(r3)
     /* 00042A84: */    bne- loc_42A8C
-    /* 00042A88: */    li r0,0x36
+    /* 00042A88: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_42A8C:
     /* 00042A8C: */    rlwinm r0,r0,2,0,29
     /* 00042A90: */    lwz r12,0x0(r24)
@@ -5452,13 +5452,13 @@ loc_42A8C:
 loc_42AD8:
     /* 00042AD8: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 00042ADC: */    cmpwi r27,0x0
-    /* 00042AE0: */    li r0,0x37
+    /* 00042AE0: */    li r0,0x37 + testAddedMembers # addedMembers
     /* 00042AE4: */    addi r3,r3,0x2
     /* 00042AE8: */    rlwinm r3,r3,2,0,29
     /* 00042AEC: */    add r3,r26,r3
     /* 00042AF0: */    lwz r3,muAdvSelchrCTask_0x934(r3)
     /* 00042AF4: */    bne- loc_42AFC
-    /* 00042AF8: */    li r0,0x36
+    /* 00042AF8: */    li r0,0x36 + testAddedMembers # addedMembers
 loc_42AFC:
     /* 00042AFC: */    rlwinm r0,r0,2,0,29
     /* 00042B00: */    lwz r12,0x0(r3)
