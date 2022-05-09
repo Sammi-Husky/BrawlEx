@@ -1,3 +1,24 @@
+.set muObjectRangeInfoSize, 0xC
+
+.set Data8F8_MenAdvChrC, 0x40
+.set MenAdvChrC_NumModels, 0x4
+.set Data8F8_MenAdvChrCd, Data8F8_MenAdvChrC + MenAdvChrC_NumModels*muObjectRangeInfoSize
+.set MenAdvChrCd_NumModels, 0x2
+.set Data8F8_MenAdvChrCmn, Data8F8_MenAdvChrCd + MenAdvChrCd_NumModels*muObjectRangeInfoSize
+.set MenAdvChrCmn_NumModels, 0x5
+.set Data8F8_ScnMdl, Data8F8_MenAdvChrCmn + MenAdvChrCmn_NumModels*muObjectRangeInfoSize
+.set ScnMdl_NumMdls, 0x3
+.set scnMdlInfoSize, 0x4
+.set Data8F8_0xA8, Data8F8_ScnMdl + ScnMdl_NumMdls*scnMdlInfoSize + 0x4
+.set Data8F8_0xB0, Data8F8_0xA8 + 0x8
+.set Data8F8_0xB4, Data8F8_0xB0 + 0x4
+.set Data8F8_0xB8, Data8F8_0xB4 + 0x4
+.set Data8F8_0xC0, Data8F8_0xB8 + 0x8
+.set Data8F8_0xC8, Data8F8_0xC0 + 0x8
+.set Data8F8_0xCC, Data8F8_0xC8 + 0x4
+.set Data8F8_0xD0, Data8F8_0xCC + 0x4
+.set Data8F8_0xD4, Data8F8_0xD0 + 0x4
+.set Data8F8_0xD8, Data8F8_0xD4 + 0x4
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
@@ -1444,9 +1465,11 @@ muAdvSelchrCTask__createObjResFile:
     /* 0003F1F4: */    lis r31,0x0                              [R_PPC_ADDR16_HA(40, 4, "loc_920")]
     /* 0003F1F8: */    b loc_3F298
 loc_3F1FC:
-    /* 0003F1FC: */    lbz r3,0x5(r26)
+    /* 0003F1FC: */    # lbz r3,0x5(r26)
+    lhz r3,0x6(r26)                             # SSEEX: Load index as half word instead of byte
     /* 0003F200: */    li r29,0x1
-    /* 0003F204: */    lbz r0,0x4(r26)
+    /* 0003F204: */    # lbz r0,0x4(r26)
+    lhz r0,0x4(r26)                             # SSEEX: Load index as half word instead of byte
     /* 0003F208: */    cmplw r0,r3
     /* 0003F20C: */    bge- loc_3F214
     /* 0003F210: */    sub r29,r3,r0
@@ -1456,15 +1479,18 @@ loc_3F214:
 loc_3F21C:
     /* 0003F21C: */    lwz r4,0x0(r26)
     /* 0003F220: */    mr r3,r24
-    /* 0003F224: */    lbz r5,0x6(r26)
+    /* 0003F224: */    # lbz r5,0x6(r26)
+    lbz r5,0x8(r26)                             #
     /* 0003F228: */    li r6,0x0
     /* 0003F22C: */    lwz r7,muAdvSelchrCTask_0xC5C(r22)
     /* 0003F230: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__create")]
-    /* 0003F234: */    lbz r0,0x4(r26)
+    /* 0003F234: */    # lbz r0,0x4(r26)
+    lhz r0,0x4(r26)                             # SSEEX: Load index as half word instead of byte
     /* 0003F238: */    mr r25,r3
     /* 0003F23C: */    lwz r4,0x0(r26)
     /* 0003F240: */    add r0,r0,r27
-    /* 0003F244: */    rlwinm r0,r0,2,0,29
+    /* 0003F244: */    # rlwinm r0,r0,2,0,29
+    mulli r0, r0, 0x4
     /* 0003F248: */    add r5,r22,r0
     /* 0003F24C: */    stw r3,0x710(r5)
     /* 0003F250: */    addi r3,r1,0x8
@@ -1486,7 +1512,7 @@ loc_3F288:
     /* 0003F288: */    cmpw r27,r29
     /* 0003F28C: */    blt+ loc_3F21C
     /* 0003F290: */    addi r28,r28,0x1
-    /* 0003F294: */    addi r26,r26,0x8
+    /* 0003F294: */    addi r26,r26,muObjectRangeInfoSize                          
 loc_3F298:
     /* 0003F298: */    cmpw r28,r23
     /* 0003F29C: */    blt+ loc_3F1FC
@@ -1577,7 +1603,7 @@ muAdvSelchrCTask__initDisp:
     /* 0003F3E0: */    li r24,0x0
 loc_3F3E4:
     /* 0003F3E4: */    lwz r3,muAdvSelchrCTask_0x890(r23)
-    /* 0003F3E8: */    lfs f1,0xB4(r26)
+    /* 0003F3E8: */    lfs f1,Data8F8_0xB4(r26)
     /* 0003F3EC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameMatCol")]
     /* 0003F3F0: */    addi r24,r24,0x1
     /* 0003F3F4: */    addi r23,r23,0x4
@@ -1656,7 +1682,7 @@ loc_3F508:
     /* 0003F508: */    lbz r0,muAdvSelchrCTask_0xC2A(r27)
     /* 0003F50C: */    cmpwi r0,0x0
     /* 0003F510: */    beq- loc_3F650
-    /* 0003F514: */    lfd f31,0xA8(r26)
+    /* 0003F514: */    lfd f31,Data8F8_0xA8(r26)
     /* 0003F518: */    addi r31,r27,muAdvSelchrCTask_0x970
     /* 0003F51C: */    li r28,0x0
     /* 0003F520: */    lis r25,0x4330
@@ -1835,10 +1861,10 @@ loc_3F778:
 loc_3F78C:
     /* 0003F78C: */    lwz r0,0x14(r1)
     /* 0003F790: */    mr r3,r30
-    /* 0003F794: */    addi r4,r31,0x40
+    /* 0003F794: */    addi r4,r31,Data8F8_MenAdvChrC
     /* 0003F798: */    addi r6,r30,0x708
     /* 0003F79C: */    stw r0,0x708(r30)
-    /* 0003F7A0: */    li r5,0x4
+    /* 0003F7A0: */    li r5,MenAdvChrC_NumModels
     /* 0003F7A4: */    bl muAdvSelchrCTask__createObjResFile
     /* 0003F7A8: */    li r0,0x0
     /* 0003F7AC: */    addi r3,r30,muAdvSelchrCTask_0xC44
@@ -1863,10 +1889,10 @@ loc_3F7DC:
 loc_3F7F0:
     /* 0003F7F0: */    lwz r0,0x18(r1)
     /* 0003F7F4: */    mr r3,r30
-    /* 0003F7F8: */    addi r4,r31,0x60
+    /* 0003F7F8: */    addi r4,r31,Data8F8_MenAdvChrCd
     /* 0003F7FC: */    addi r6,r30,0x704
     /* 0003F800: */    stw r0,0x704(r30)
-    /* 0003F804: */    li r5,0x2
+    /* 0003F804: */    li r5,MenAdvChrCd_NumModels
     /* 0003F808: */    bl muAdvSelchrCTask__createObjResFile
     /* 0003F80C: */    li r0,0x0
     /* 0003F810: */    addi r3,r30,muAdvSelchrCTask_0xC48
@@ -1891,13 +1917,13 @@ loc_3F840:
 loc_3F854:
     /* 0003F854: */    lwz r0,0x1C(r1)
     /* 0003F858: */    mr r3,r30
-    /* 0003F85C: */    addi r4,r31,0x70
+    /* 0003F85C: */    addi r4,r31,Data8F8_MenAdvChrCmn
     /* 0003F860: */    addi r6,r30,0x700
     /* 0003F864: */    stw r0,0x700(r30)
-    /* 0003F868: */    li r5,0x5
+    /* 0003F868: */    li r5,MenAdvChrCmn_NumModels
     /* 0003F86C: */    bl muAdvSelchrCTask__createObjResFile
     /* 0003F870: */    lwz r3,muAdvSelchrCTask_0xC5C(r30)
-    /* 0003F874: */    addi r29,r31,0x98
+    /* 0003F874: */    addi r29,r31,Data8F8_ScnMdl
     /* 0003F878: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfHeapManager__getMEMAllocator")]
     /* 0003F87C: */    mr r23,r3
     /* 0003F880: */    li r26,0x0
@@ -2003,7 +2029,7 @@ loc_3F9E0:
     /* 0003F9E8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setMsgData")]
     /* 0003F9EC: */    lwz r5,0x714(r30)
     /* 0003F9F0: */    mr r3,r24
-    /* 0003F9F4: */    lfs f1,0xB0(r31)
+    /* 0003F9F4: */    lfs f1,Data8F8_0xB0(r31)
     /* 0003F9F8: */    li r4,0x0
     /* 0003F9FC: */    lwz r5,0x10(r5)
     /* 0003FA00: */    li r6,0x0
@@ -2051,14 +2077,14 @@ loc_3FA8C:
     /* 0003FA98: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
 loc_3FA9C:
     /* 0003FA9C: */    lwz r4,0xAC(r1)
-    /* 0003FAA0: */    addi r3,r31,0xB8
+    /* 0003FAA0: */    addi r3,r31,Data8F8_0xB8
     /* 0003FAA4: */    lis r0,0x4330
     /* 0003FAA8: */    lwz r24,0x70(r1)
     /* 0003FAAC: */    lbzx r3,r3,r4
     /* 0003FAB0: */    stw r0,0xB0(r1)
     /* 0003FAB4: */    lwz r25,0x74(r1)
     /* 0003FAB8: */    stw r3,0xB4(r1)
-    /* 0003FABC: */    lfd f1,0xC0(r31)
+    /* 0003FABC: */    lfd f1,Data8F8_0xC0(r31)
     /* 0003FAC0: */    lfd f0,0xB0(r1)
     /* 0003FAC4: */    lwz r26,0x78(r1)
     /* 0003FAC8: */    lwz r27,0x7C(r1)
@@ -2126,7 +2152,7 @@ loc_3FBA8:
     /* 0003FBB0: */    lbz r5,muAdvSelchrCTask_0xC20(r30)
     /* 0003FBB4: */    bl muAdvSelchrCTask__calcTeamListScrollYPos
     /* 0003FBB8: */    lwz r3,0x718(r30)
-    /* 0003FBBC: */    lfs f0,0xC8(r31)
+    /* 0003FBBC: */    lfs f0,Data8F8_0xC8(r31)
     /* 0003FBC0: */    lfs f2,0x3C(r3)
     /* 0003FBC4: */    stfs f2,0x20(r1)
     /* 0003FBC8: */    lfs f3,0x40(r3)
@@ -2140,7 +2166,7 @@ loc_3FBA8:
     /* 0003FBE8: */    stfs f1,0x24(r1)
     /* 0003FBEC: */    b loc_3FC00
 loc_3FBF0:
-    /* 0003FBF0: */    lfs f0,0xCC(r31)
+    /* 0003FBF0: */    lfs f0,Data8F8_0xCC(r31)
     /* 0003FBF4: */    fdivs f0,f5,f0
     /* 0003FBF8: */    fadds f0,f3,f0
     /* 0003FBFC: */    stfs f0,0x24(r1)
@@ -2432,10 +2458,10 @@ loc_40018:
     /* 00040040: */    stw r0,0x28(r1)
     /* 00040044: */    fmuls f1,f3,f5
     /* 00040048: */    addi r0,r4,0x6
-    /* 0004004C: */    lfd f4,0xA8(r31)
+    /* 0004004C: */    lfd f4,Data8F8_0xA8(r31)
     /* 00040050: */    mulhw r4,r5,r0
     /* 00040054: */    lfd f2,0x20(r1)
-    /* 00040058: */    lfs f0,0xD0(r31)
+    /* 00040058: */    lfs f0,Data8F8_0xD0(r31)
     /* 0004005C: */    fsubs f2,f2,f4
     /* 00040060: */    add r0,r4,r0
     /* 00040064: */    fmuls f2,f5,f2
@@ -2457,12 +2483,12 @@ loc_40018:
 loc_400A4:
     /* 000400A4: */    cmpwi r4,0x4
     /* 000400A8: */    bne- loc_400B4
-    /* 000400AC: */    lfs f0,0xD4(r31)
+    /* 000400AC: */    lfs f0,Data8F8_0xD4(r31)
     /* 000400B0: */    fsubs f1,f1,f0
 loc_400B4:
     /* 000400B4: */    cmpwi r4,0x5
     /* 000400B8: */    bne- loc_400C4
-    /* 000400BC: */    lfs f0,0xD8(r31)
+    /* 000400BC: */    lfs f0,Data8F8_0xD8(r31)
     /* 000400C0: */    fsubs f1,f1,f0
 loc_400C4:
     /* 000400C4: */    cmpwi r30,0x0
@@ -2475,7 +2501,7 @@ loc_400C4:
     /* 000400E0: */    lfs f3,0x28(r31)
     /* 000400E4: */    stw r3,0x2C(r1)
     /* 000400E8: */    fsubs f4,f1,f3
-    /* 000400EC: */    lfd f2,0xA8(r31)
+    /* 000400EC: */    lfd f2,Data8F8_0xA8(r31)
     /* 000400F0: */    stw r0,0x28(r1)
     /* 000400F4: */    lfd f0,0x28(r1)
     /* 000400F8: */    fsel f3,f4,f1,f3

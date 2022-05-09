@@ -1,3 +1,6 @@
+.set testAddedMembers, 0
+.set addedMembers, 120
+
 loc_0:
         .4byte 0x00010203
         .4byte 0x03040506
@@ -721,27 +724,71 @@ loc_930:
         .4byte 0x1B071C01
         .4byte 0x1D021E04
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17B6C")]
-        .4byte 0x02024300
+        .2byte 0x0002
+        .2byte 0x0002
+        .byte 0x43
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17B80")]
-        .4byte 0x030D4300
+        .2byte 0x0003
+        .2byte 0x000D
+        .byte 0x43
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17B94")]
-        .4byte 0x35354E00
+        .2byte 0x0035 + testAddedMembers
+        .2byte 0x0035 + testAddedMembers
+        .byte 0x4E
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17BA8")]
-        .4byte 0x88884100
+        .2byte 0x0088 + 3*testAddedMembers
+        .2byte 0x0088 + 3*testAddedMembers
+        .byte 0x41
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17BBC")]
-        .4byte 0x01014200
+        .2byte 0x0001
+        .2byte 0x0001
+        .byte 0x42
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17BD4")]
-        .4byte 0x0D354D00
+        .2byte 0x000D
+        .2byte 0x0035 + testAddedMembers
+        .byte 0x4D
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17BEC")]
-        .4byte 0x00004000
+        .2byte 0x0000
+        .2byte 0x0000
+        .byte 0x40
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17C04")]
-        .4byte 0x36364F00
+        .2byte 0x0036 + testAddedMembers
+        .2byte 0x0036 + testAddedMembers
+        .byte 0x4F
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17C1C")]
-        .4byte 0x37374F00
+        .2byte 0x0037 + testAddedMembers
+        .2byte 0x0037 + testAddedMembers      
+        .byte 0x4F
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17C34")]
-        .4byte 0x38605000
+        .2byte 0x0038 + testAddedMembers
+        .2byte 0x0060 + 2*testAddedMembers
+        .byte 0x50
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17C34")]
-        .4byte 0x60885000
+        .2byte 0x0060 + 2*testAddedMembers
+        .2byte 0x0088 + 3*testAddedMembers
+        .byte 0x50
+        .byte 0x00
+        .2byte 0x0000
         .4byte 0x00000101
         .4byte 0x0101020B
         .4byte 0x020C0352
