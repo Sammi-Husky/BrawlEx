@@ -1,7 +1,7 @@
 loc_NumAddedTeamMembers:
-        .byte 0x1
+        .byte 0x7 #0x1
 loc_NumOverrideTeamMembers:
-        .byte 0x24  
+        .byte 0x2A #0x24  
 loc_OverrideTeamMemberIds:
         .byte 0x00      # Mario
         .byte 0x01      # Donkey Kong
@@ -39,6 +39,12 @@ loc_OverrideTeamMemberIds:
         .byte 0x26      # Snake
         .byte 0x27      # Sonic
 loc_AddedTeamMemberIds:
+        .byte 0x32      # Ridley
+        .byte 0x32      # Ridley
+        .byte 0x32      # Ridley
+        .byte 0x32      # Ridley
+        .byte 0x32      # Ridley
+        .byte 0x32      # Ridley
         .byte 0x32      # Ridley
 
 

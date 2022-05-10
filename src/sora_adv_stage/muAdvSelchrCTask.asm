@@ -126,7 +126,7 @@ muAdvSelchrCTask____ct:
     /* 0003DF7C: */    stw r6,muAdvSelchrCTask_0xC5C(r30)
     /* 0003DF80: */    stb r0,0x2C(r30)
     /* 0003DF84: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    /* 0003DF88: */    li r0,0x11
+    /* 0003DF88: */    li r0,0x11 + 3*testAddedMembers/8 + 1
     /* 0003DF8C: */    mr r3,r30
     /* 0003DF90: */    stw r31,0x700(r30)
     /* 0003DF94: */    li r4,0x0
@@ -362,7 +362,7 @@ loc_3E2DC:
 loc_3E300:
     /* 0003E300: */    addi r30,r30,0x1
     /* 0003E304: */    addi r31,r31,0x4
-    /* 0003E308: */    cmpwi r30,0x89
+    /* 0003E308: */    cmpwi r30,0x89 + 3*testAddedMembers # 3*addedMembers
     /* 0003E30C: */    blt+ loc_3E2DC
     /* 0003E310: */    lwz r3,muAdvSelchrCTask_0x964(r28)
     /* 0003E314: */    cmpwi r3,0x0
