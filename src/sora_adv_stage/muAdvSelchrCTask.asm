@@ -3881,7 +3881,7 @@ loc_413D8:
 muAdvSelchrCTask__updateRushMembers:
     /* 00041440: */    lwz r0,0x8(r1)
     /* 00041444: */    addi r5,r1,0x10
-    /* 00041448: */    lwz r3,0x964(r28)
+    /* 00041448: */    lwz r3,muAdvSelchrCTask_0x964(r28)
     /* 0004144C: */    li r4,0x0
     /* 00041450: */    add r6,r31,r0
     /* 00041454: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printData")]
