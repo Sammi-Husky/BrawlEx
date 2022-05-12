@@ -617,20 +617,23 @@ loc_3E66C:
     /* 0003E6A0: */    addi r1,r1,0x30
     /* 0003E6A4: */    blr
 muAdvSelchrCTask__setMenuData:
-    /* 0003E6A8: */    stwu r1,-0x60(r1)
+    /* 0003E6A8: */    stwu r1,-0x64(r1)
     /* 0003E6AC: */    mflr r0
-    /* 0003E6B0: */    stw r0,0x64(r1)
-    /* 0003E6B4: */    addi r11,r1,0x60
-    /* 0003E6B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_15")]
+    /* 0003E6B0: */    stw r0,0x68(r1)
+    /* 0003E6B4: */    addi r11,r1,0x64
+    /* 0003E6B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_14")]
     /* 0003E6BC: */    lwz r0,0x0(r4)
     /* 0003E6C0: */    li r31,0x0
     /* 0003E6C4: */    stb r31,0xA(r1)
     /* 0003E6C8: */    mr r29,r3
-    /* 0003E6CC: */    cmpwi r0,0x0
+    /* 0003E6CC: */    # cmpwi r0,0x0
+    cmpwi cr7, r0,0x0                 
     /* 0003E6D0: */    mr r30,r4
     /* 0003E6D4: */    stb r31,0x9(r1)
     /* 0003E6D8: */    stb r31,0x8(r1)
-    /* 0003E6DC: */    beq- loc_3E9AC
+    /* 0003E6DC: */    # beq- loc_3E9AC
+    b __unresolved                                              [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_checkIfOverride")]
+loc_multipleTeams:
     /* 0003E6E0: */    lis r26,0x0                              [R_PPC_ADDR16_HA(0, 8, "loc_80493E60")]
     /* 0003E6E4: */    li r16,0x0
     /* 0003E6E8: */    addi r26,r26,0x0                         [R_PPC_ADDR16_LO(0, 8, "loc_80493E60")]
@@ -840,7 +843,7 @@ loc_3E970:
 loc_3E9A4:
     /* 0003E9A4: */    #stw r31,0x6F8(r29)
     mr r25, r19
-    b __unresolved                                             [R_PPC_REL24(40, 7, "muAdvSelchrCTask__setMenuData_SSEEX")]
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_addExTeamMembers")]
     /* 0003E9A8: */   # b loc_3EBCC
 loc_3E9AC:
     /* 0003E9AC: */    lis r28,0x0                              [R_PPC_ADDR16_HA(0, 8, "loc_80493E60")]
@@ -866,7 +869,8 @@ loc_3E9F0:
     /* 0003E9F0: */    rlwinm r0,r18,29,3,29
     /* 0003E9F4: */    rlwinm r4,r18,0,27,31
     /* 0003E9F8: */    add r3,r15,r0
-    /* 0003E9FC: */    lwz r0,0x4898(r3)
+    /* 0003E9FC: */    #lwz r0,0x4898(r3)
+    bl __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_overrideSave")]
     /* 0003EA00: */    slw r3,r26,r4
     /* 0003EA04: */    and. r0,r3,r0
     /* 0003EA08: */    beq- loc_3EA24
@@ -963,7 +967,8 @@ loc_3EB3C:
     /* 0003EB3C: */    rlwinm r0,r24,29,3,29
     /* 0003EB40: */    rlwinm r4,r24,0,27,31
     /* 0003EB44: */    add r3,r22,r0
-    /* 0003EB48: */    lwz r0,0x4898(r3)
+    /* 0003EB48: */    #lwz r0,0x4898(r3)
+    bl __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_overrideSave")]
     /* 0003EB4C: */    slw r3,r30,r4
     /* 0003EB50: */    and. r0,r3,r0
     /* 0003EB54: */    beq- loc_3EB70
@@ -1003,7 +1008,7 @@ loc_3EBB8:
     /* 0003EBC0: */    stw r16,0xE4(r29)
     /* 0003EBC4: */    li r31,0x1
 loc_3EBC8:
-    b __unresolved                                             [R_PPC_REL24(40, 7, "muAdvSelchrCTask__setMenuData_SSEEX")]
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_addExTeamMembers")]
 
     /* 0003EBC8: */   # stw r31,0x6F8(r29)
 loc_3EBCC:
@@ -1037,11 +1042,11 @@ loc_3EC0C:
     /* 0003EC28: */    stw r0,0xE4(r29)
     /* 0003EC2C: */    stw r0,0x6F8(r29)
 loc_3EC30:
-    /* 0003EC30: */    addi r11,r1,0x60
-    /* 0003EC34: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_15")]
-    /* 0003EC38: */    lwz r0,0x64(r1)
+    /* 0003EC30: */    addi r11,r1,0x64
+    /* 0003EC34: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_14")]
+    /* 0003EC38: */    lwz r0,0x68(r1)
     /* 0003EC3C: */    mtlr r0
-    /* 0003EC40: */    addi r1,r1,0x60
+    /* 0003EC40: */    addi r1,r1,0x64
     /* 0003EC44: */    blr
 muAdvSelchrCTask__normalizeCharKind:
     /* 0003EC48: */    subi r0,r3,0x1B

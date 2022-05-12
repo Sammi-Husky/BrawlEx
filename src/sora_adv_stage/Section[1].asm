@@ -1,4 +1,4 @@
-.set testAddedMembers, 10
+.set testAddedMembers, 120
 .set addedMembers, 120
 
 .set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4
