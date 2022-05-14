@@ -19,14 +19,16 @@ loc_teamMemberOverride:
 loc_oneTeamNoOverride:
     b __unresolved                    [R_PPC_REL24(40, 1, "loc_3E9AC")]
 
+
 loc_muAdvSelchrCTask__setMenuData_overrideSave:
     lwz r0,0x4898(r3)       # Original operation, get save data
     cmpwi r14, 0x1
     bne- loc_noSaveDataOverride
-    lis r0, 0xBFF9          # Override with completed save data
+    lis r0, 0xBFF9          # Override with completed character save data
     ori r0, r0, 0xFFFF      # 
 loc_noSaveDataOverride:
     blr
+
 
 loc_muAdvSelchrCTask__setMenuData_addExTeamMembers:
     stw r31,0x6F8(r29)
@@ -38,20 +40,28 @@ loc_muAdvSelchrCTask__setMenuData_addExTeamMembers:
     addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberIds")]
     
     cmpwi r14, 0x1         # Check if override
-    bne- loc_skipAddSonic 
+    bne- loc_notOverride 
     addi r5, r5, 0x1     
     subi r4, r4, 0x1     # Add Sonic since for some reason not included when overriding save
-loc_skipAddSonic:
+    b loc_addFightersToTeamMenu
+loc_notOverride:
+    lis r12, 0x9018         # \
+    lwz r12, 0x1330(r12)    # | Check if Great Maze has been completed
+    lwz r12, 0x29C(r12)     # |
+    cmpwi r12, 0x0          # /
+    ble loc_skipAddFightersToTeamMenu
+loc_addFightersToTeamMenu:
     add r6, r5, r3       # Add number of additional team members to get total team members
-loc_loopAddFightersToTeamMenu:
     stw r6, 0xe4(r29)      # Store team member count
     addi r7, r3, 0x44      # Add to array offset
     add r3, r7, r29
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] # memcpy rel css data section to team member 1 section
+loc_skipAddFightersToTeamMenu:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_3EBCC")]
 
 # TODO: Fix trophies
-# TODO: Have case to add only if SSE has been completed (set memory breakpoint in range of advSaveData right before Tabuu is beaten)
 # TODO: Force setMenuData to pop up to select fighters? (will probs get overidden by selection)
 
 # TODO: Investigate if any offsets were missed, (visual bug with the Select number not going down as Fighters are selected)
+# TODO: Fix Great Maze sometimes resetting to Mario when selecting save also Tabuu fight?
+# TODO: Random selection?
