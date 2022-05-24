@@ -47,9 +47,9 @@ loc_muAdvSelchrCTask__setMenuData_addExTeamMembers:
 loc_notOverride:
     lis r12, 0x9018         # \
     lwz r12, 0x1330(r12)    # | Check if Great Maze has been completed
-    lwz r12, 0x29C(r12)     # |
+    lwz r12, 0x260(r12)     # |
     cmpwi r12, 0x0          # /
-    ble loc_skipAddFightersToTeamMenu
+    blt loc_skipAddFightersToTeamMenu
 loc_addFightersToTeamMenu:
     add r6, r5, r3       # Add number of additional team members to get total team members
     stw r6, 0xe4(r29)      # Store team member count
