@@ -65,3 +65,19 @@ loc_skipAddFightersToTeamMenu:
 # TODO: Investigate if any offsets were missed, (visual bug with the Select number not going down as Fighters are selected)
 # TODO: Fix Great Maze sometimes resetting to Mario when selecting save also Tabuu fight?
 # TODO: Random selection?
+
+loc_stAdventure2__changeStep_addSequenceIndex:
+    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
+    li r6, 29                   # \
+    rlwinm r0, r6, 2, 0, 29     # | gfSceneManager->sequenceList[29] (get sqAdventure)
+    add r5, r3, r0              # |
+    lwz r5, 0x1A8(r5)           # /
+    lwz r3, 0x10(r5)            # sqAdventure->sequenceIndex
+    lbz r0, 0x7(r27)            # Get usused flag to use to add/subtract to current sequenceIndex
+    extsb r0, r0                # \ 
+    slwi r0, r0, 1              # | Add to sequence index (sequenceIndex + addedSequenceIndex*2)
+    add r3, r3, r0              # / 
+    stw r3, 0x10(r5)            # Store new sequenceIndex
+
+    lwz r3,0x524(r31)           # Original operation (stage->advSaveData)
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_addedSequenceIndex")]
