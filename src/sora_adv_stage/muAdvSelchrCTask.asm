@@ -762,7 +762,8 @@ loc_3E890:
     /* 0003E890: */    stw r17,0x40(r21)
     /* 0003E894: */    li r15,0x0
 loc_3E898:
-    /* 0003E898: */    rlwinm r0,r15,2,0,29
+    /* 0003E898: */    # rlwinm r0,r15,2,0,29       
+    mr r0, r15                                      # SSEEX: no need to bit shift since each id is one byte long
     /* 0003E89C: */    li r16,0x0
     /* 0003E8A0: */    add r19,r21,r0
 loc_3E8A4:
