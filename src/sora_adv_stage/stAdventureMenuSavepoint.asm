@@ -1756,13 +1756,14 @@ loc_18D7C:
     /* 00018D7C: */    stw r0,0x14(r1)
 loc_18D80:
     /* 00018D80: */    lbz r3,0x606(r21)
+    lbz r24, 0x2B5(r21)                                 # SSEEX: Store current advSaveData->nextRespawnFighterIndex
     /* 00018D84: */    lbz r18,0x2B4(r21)
     /* 00018D88: */    rlwinm. r0,r3,25,31,31
     /* 00018D8C: */    beq- loc_18DAC
     /* 00018D90: */    rlwinm. r0,r3,27,31,31
     /* 00018D94: */    beq- loc_18DAC
-    /* 00018D98: */    lbz r3,0x2B5(r21)
-    /* 00018D9C: */    subic. r3,r3,0x1
+    /* 00018D98: */    # lbz r3,0x2B5(r21)              # Redundant
+    /* 00018D9C: */    subic. r3,r24,0x1 # subic. r3,r3,0x1
     /* 00018DA0: */    bge- loc_18DA8
     /* 00018DA4: */    subi r3,r18,0x1
 loc_18DA8:
@@ -1830,7 +1831,7 @@ loc_18E50:
     /* 00018E74: */    li r17,0x0
     /* 00018E78: */    li r23,0x23
     /* 00018E7C: */    lis r27,0x0                              [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    /* 00018E80: */    li r24,0x23
+    /* 00018E80: */    # li r24,0x23        # Free up r24 since r23 and r24 hold the exact same value
     /* 00018E84: */    li r28,0x0
     /* 00018E88: */    lis r29,0x0                              [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
     /* 00018E8C: */    li r31,0x2
@@ -1864,7 +1865,7 @@ loc_18EEC:
 loc_18EF4:
     /* 00018EF4: */    lbzx r0,r26,r0
 loc_18EF8:
-    /* 00018EF8: */    cmpw r24,r0
+    /* 00018EF8: */    cmpw r23,r0 #cmpw r24,r0
     /* 00018EFC: */    # bne- loc_18F24
     b loc_18F24                             # SSEEX: Skip check so that Ex characters don't get skipped
     /* 00018F00: */    lbz r5,0x1(r3)
@@ -2192,6 +2193,7 @@ loc_19314:
     /* 00019380: */    li r5,0x0
     /* 00019384: */    bl __unresolved                          [R_PPC_REL24(0, 4, "adKeepManager__setNanaDeadFlag")]
 loc_19388:
+    stb r24,0x2B5(r21)                                   # SSEEX: Restore original nextRespawnFighterIndex
     /* 00019388: */    addi r18,r18,0x1
     /* 0001938C: */    cmpwi r18,0x2
     /* 00019390: */    blt+ loc_19314
@@ -2437,3 +2439,4 @@ stadventuremenusavepointcpp____sinit_:
     /* 0001973C: */    blr
 
 ## TODO: Fix stocks being messed up for Ex characters upon entering savepoint
+## Note: Can remove some code in stockReset if code space ever becomes an issue
