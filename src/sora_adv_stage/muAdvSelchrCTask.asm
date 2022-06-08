@@ -3219,12 +3219,12 @@ muAdvSelchrCTask__selCharCurCursorPos:
     /* 00040AA8: */    add r3,r3,r0
     /* 00040AAC: */    blr
 muAdvSelchrCTask__selCharMain:
-    /* 00040AB0: */    stwu r1,-0xD0(r1)
+    /* 00040AB0: */    stwu r1,-0xD4(r1)
     /* 00040AB4: */    mflr r0
-    /* 00040AB8: */    stw r0,0xD4(r1)
-    /* 00040ABC: */    addi r11,r1,0xC8
-    /* 00040AC0: */    stfd f31,0xC8(r1)
-    /* 00040AC4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_16")]
+    /* 00040AB8: */    stw r0,0xD8(r1)
+    /* 00040ABC: */    addi r11,r1,0xCC
+    /* 00040AC0: */    stfd f31,0xCC(r1)
+    /* 00040AC4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_15")]
     /* 00040AC8: */    mr r18,r3
     /* 00040ACC: */    mr r19,r4
     /* 00040AD0: */    bl muAdvSelchrCTask__getTeamCurPos
@@ -3247,37 +3247,41 @@ muAdvSelchrCTask__selCharMain:
     /* 00040B14: */    add r5,r18,r29
     /* 00040B18: */    addi r26,r5,muAdvSelchrCTask_0x970
     /* 00040B1C: */    bl muAdvSelchrCTask__getCharCursorPos
-    /* 00040B20: */    rlwinm r0,r19,2,0,29
     /* 00040B24: */    mr r28,r3
+    /* 00040B34: */    mr r25,r28
+    mr r3,r18              
+    mr r4,r27
+    b __unresolved                                              [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__selCharMain_randomSelect")]
+loc_randomSelectFinished:
+    /* 00040B20: */    rlwinm r0,r19,2,0,29
     /* 00040B28: */    add r31,r18,r0
     /* 00040B2C: */    lwz r4,0x148(r26)
     /* 00040B30: */    lwz r0,muAdvSelchrCTask_0xC10(r31)
-    /* 00040B34: */    mr r25,r28
     /* 00040B38: */    cmpw r4,r0
     /* 00040B3C: */    bge- loc_40DA0
     /* 00040B40: */    lis r17,-0x6DB7
-    /* 00040B44: */    mr r4,r27
+    /* 00040B44: */    # mr r4,r27
     /* 00040B48: */    addi r0,r17,0x2493
-    /* 00040B4C: */    mulhw r0,r0,r3
-    /* 00040B50: */    add r0,r0,r3
+    /* 00040B4C: */    mulhw r0,r0,r28 # mulhw r0,r0,r3
+    /* 00040B50: */    add r0,r0,r28 # add r0,r0,r3
     /* 00040B54: */    srawi r5,r0,2
     /* 00040B58: */    rlwinm r6,r5,1,31,31
     /* 00040B5C: */    srawi r0,r0,2
     /* 00040B60: */    add r5,r5,r6
     /* 00040B64: */    mulli r6,r5,0x7
     /* 00040B68: */    rlwinm r5,r0,1,31,31
-    /* 00040B6C: */    sub r24,r3,r6
+    /* 00040B6C: */    sub r24,r28,r6 # sub r24,r3,r6
     /* 00040B70: */    add r23,r0,r5
-    /* 00040B74: */    mr r3,r18
-    /* 00040B78: */    bl muAdvSelchrCTask__getNumTeamMember
+    /* 00040B74: */    # mr r3,r18
+    /* 00040B78: */    # bl muAdvSelchrCTask__getNumTeamMember
     /* 00040B7C: */    addi r0,r17,0x2493
-    /* 00040B80: */    mulhw r0,r0,r3
-    /* 00040B84: */    add r0,r0,r3
+    /* 00040B80: */    mulhw r0,r0,r15
+    /* 00040B84: */    add r0,r0,r15
     /* 00040B88: */    srawi r0,r0,2
     /* 00040B8C: */    rlwinm r4,r0,1,31,31
     /* 00040B90: */    add r0,r0,r4
     /* 00040B94: */    mulli r0,r0,0x7
-    /* 00040B98: */    sub. r22,r3,r0
+    /* 00040B98: */    sub. r22,r15,r0
     /* 00040B9C: */    bne- loc_40BA4
     /* 00040BA0: */    li r22,0x7
 loc_40BA4:
@@ -3744,12 +3748,12 @@ loc_41204:
 loc_41230:
     /* 00041230: */    li r3,0x1
 loc_41234:
-    /* 00041234: */    addi r11,r1,0xC8
-    /* 00041238: */    lfd f31,0xC8(r1)
-    /* 0004123C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_16")]
-    /* 00041240: */    lwz r0,0xD4(r1)
+    /* 00041234: */    addi r11,r1,0xCC
+    /* 00041238: */    lfd f31,0xCC(r1)
+    /* 0004123C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_15")]
+    /* 00041240: */    lwz r0,0xD8(r1)
     /* 00041244: */    mtlr r0
-    /* 00041248: */    addi r1,r1,0xD0
+    /* 00041248: */    addi r1,r1,0xD4
     /* 0004124C: */    blr
 muAdvSelchrCTask__getDirButtonRepeat:
     /* 00041250: */    mulli r0,r4,0x150

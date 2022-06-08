@@ -11,7 +11,7 @@ loc_checkForOverrideInput:          # |
     addi r3, r3, 0x40               # |
     addi r7, r7, 0x1                # |
     cmpwi r7, 0x8                   # |
-    ble+ loc_checkForOverrideInput   # /
+    ble+ loc_checkForOverrideInput  # /
     beq- cr7, loc_oneTeamNoOverride
     b __unresolved                   [R_PPC_REL24(40, 1, "loc_multipleTeams")]         # Original branch operation
 loc_teamMemberOverride:
@@ -59,12 +59,36 @@ loc_addFightersToTeamMenu:
 loc_skipAddFightersToTeamMenu:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_3EBCC")]
 
+
+
+loc_muAdvSelchrCTask__selCharMain_randomSelect:
+    bl __unresolved                          [R_PPC_REL24(40, 1, "muAdvSelchrCTask__getNumTeamMember")]
+    mr r15, r3              # Store numTeamMember
+    lis r8, 0x805B         # \         
+    ori r8, r8, 0xACC0     # / Get global gfPadSystem   
+    li r7, 0x0                      # \
+    li r9, 0x46                     # |
+loc_checkForRandomInput:            # |
+    lhzx r5, r9, r8                 # | 
+    andi. r5, r5, 0x0020            # | Check for R input in each gfPadStatus (TODO: maybe combine with checkIfOverride in if need to optimize codespace?)
+    bne- loc_randomSelect           # |
+    addi r9, r9, 0x40               # |
+    addi r7, r7, 0x1                # |
+    cmpwi r7, 0x8                   # |
+    ble+ loc_checkForRandomInput    # /
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_randomSelectFinished")]
+loc_randomSelect:
+    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
+    mr r25, r3                      # New charCursorPos
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_randomSelectFinished")]
+
+
 # TODO: Fix trophies
 # TODO: Force setMenuData to pop up to select fighters? (will probs get overidden by selection)
 
-# TODO: Investigate if any offsets were missed, (visual bug with the Select number not going down as Fighters are selected)
-# TODO: Fix Great Maze sometimes resetting to Mario when selecting save also Tabuu fight?
-# TODO: Random selection?
+# TODO: Fix Great Maze savepoint stocks for Ex fighters
+# TODO: Make number of chars per row adjustable
+# TODO: Investigate C-Stick alt characters
 
 loc_stAdventure2__changeStep_addSequenceIndex:
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
