@@ -622,17 +622,38 @@ muAdvSelchrCTask__setMenuData:
     /* 0003E6B0: */    stw r0,0x68(r1)
     /* 0003E6B4: */    addi r11,r1,0x64
     /* 0003E6B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_14")]
-    /* 0003E6BC: */    lwz r0,0x0(r4)
     /* 0003E6C0: */    li r31,0x0
     /* 0003E6C4: */    stb r31,0xA(r1)
-    /* 0003E6C8: */    mr r29,r3
-    /* 0003E6CC: */    # cmpwi r0,0x0
-    cmpwi cr7, r0,0x0                 
-    /* 0003E6D0: */    mr r30,r4
     /* 0003E6D4: */    stb r31,0x9(r1)
     /* 0003E6D8: */    stb r31,0x8(r1)
-    /* 0003E6DC: */    # beq- loc_3E9AC
-    b __unresolved                                              [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_checkIfOverride")]
+    /* 0003E6C8: */    mr r29,r3
+    /* 0003E6D0: */    mr r30,r4
+
+    ## SSEEX: Check for input to override and have all characters available
+ loc_checkIfOverride:
+    li r14, 0x0            # Default setting (no override)
+    lis r8, 0x805B         # \         
+    ori r8, r8, 0xACC0     # / Get global gfPadSystem       
+    li r7, 0x0                      # \
+    li r3, 0x46                     # |
+loc_checkForOverrideInput:          # |
+    lhzx r5, r3, r8                 # | 
+    andi. r5, r5, 0x0040            # | Check for L input in each gfPadStatus
+    bne- loc_teamMemberOverride     # |
+    addi r3, r3, 0x40               # |
+    addi r7, r7, 0x1                # |
+    cmpwi r7, 0x8                   # |
+    ble+ loc_checkForOverrideInput  # /
+    b loc_overrideCheckFinished        
+loc_teamMemberOverride:
+    li r14, 0x1                 # Set override
+    b loc_singleTeam
+loc_overrideCheckFinished:
+
+    /* 0003E6BC: */    lwz r0,0x0(r30)
+    /* 0003E6CC: */    cmpwi r0,0x0
+    /* 0003E6DC: */    beq- loc_singleTeam
+
 loc_multipleTeams:
     /* 0003E6E0: */    lis r26,0x0                              [R_PPC_ADDR16_HA(0, 8, "loc_80493E60")]
     /* 0003E6E4: */    li r16,0x0
@@ -843,10 +864,10 @@ loc_3E970:
     /* 0003E9A0: */    stw r15,0xE4(r3)
 loc_3E9A4:
     /* 0003E9A4: */    #stw r31,0x6F8(r29)
-    mr r25, r19
-    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_addExTeamMembers")]
+    #mr r25, r19
+    b loc_addExTeamMembers
     /* 0003E9A8: */   # b loc_3EBCC
-loc_3E9AC:
+loc_singleTeam:
     /* 0003E9AC: */    lis r28,0x0                              [R_PPC_ADDR16_HA(0, 8, "loc_80493E60")]
     /* 0003E9B0: */    li r17,0x0
     /* 0003E9B4: */    addi r28,r28,0x0                         [R_PPC_ADDR16_LO(0, 8, "loc_80493E60")]
@@ -870,8 +891,15 @@ loc_3E9F0:
     /* 0003E9F0: */    rlwinm r0,r18,29,3,29
     /* 0003E9F4: */    rlwinm r4,r18,0,27,31
     /* 0003E9F8: */    add r3,r15,r0
-    /* 0003E9FC: */    #lwz r0,0x4898(r3)
-    bl __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_overrideSave")]
+    /* 0003E9FC: */    lwz r0,0x4898(r3)
+
+    ## SSEEX: Override character save file data
+    cmpwi r14, 0x1
+    bne- loc_noSaveDataOverride1
+    lis r0, 0xBFF9          # Override with completed character save data
+    ori r0, r0, 0xFFFF      # 
+loc_noSaveDataOverride1:
+
     /* 0003EA00: */    slw r3,r26,r4
     /* 0003EA04: */    and. r0,r3,r0
     /* 0003EA08: */    beq- loc_3EA24
@@ -968,8 +996,15 @@ loc_3EB3C:
     /* 0003EB3C: */    rlwinm r0,r24,29,3,29
     /* 0003EB40: */    rlwinm r4,r24,0,27,31
     /* 0003EB44: */    add r3,r22,r0
-    /* 0003EB48: */    #lwz r0,0x4898(r3)
-    bl __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_overrideSave")]
+    /* 0003EB48: */    lwz r0,0x4898(r3)
+
+    ## SSEEX: Override character save file data
+    cmpwi r14, 0x1
+    bne- loc_noSaveDataOverride2
+    lis r0, 0xBFF9          # Override with completed character save data
+    ori r0, r0, 0xFFFF      # 
+loc_noSaveDataOverride2:
+
     /* 0003EB4C: */    slw r3,r30,r4
     /* 0003EB50: */    and. r0,r3,r0
     /* 0003EB54: */    beq- loc_3EB70
@@ -1009,10 +1044,39 @@ loc_3EBB8:
     /* 0003EBC0: */    stw r16,0xE4(r29)
     /* 0003EBC4: */    li r31,0x1
 loc_3EBC8:
-    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_addExTeamMembers")]
-
+    #b loc_muAdvSelchrCTask__setMenuData_addExTeamMembers
     /* 0003EBC8: */   # stw r31,0x6F8(r29)
-loc_3EBCC:
+
+    ## SSEEX: Add Ex team members
+loc_addExTeamMembers:
+    stw r31,0x6F8(r29)     # Original operation
+    lis r12,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_NumAddedTeamMembers")]
+    lbz r5,0x0(r12)        [R_PPC_ADDR16_LO(40, 8, "loc_NumAddedTeamMembers")] # Get Number of additional team members 
+    
+    lwz r3, 0xe4(r29)      # Get current team members
+    lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberIds")]
+    addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberIds")]
+    
+    cmpwi r14, 0x1         # Check if override
+    bne- loc_notOverride 
+    addi r5, r5, 0x1     
+    subi r4, r4, 0x1     # Add Sonic since for some reason not included when overriding save
+    b loc_addFightersToTeamMenu
+loc_notOverride:
+    lis r12, 0x9018         # \
+    lwz r12, 0x1330(r12)    # | Check if Great Maze has been completed (GameGlobal-advSaveData->greatMaze1ClearDifficulty)
+    lwz r12, 0x260(r12)     # |
+    cmpwi r12, 0x0          # /
+    blt loc_skipAddFightersToTeamMenu
+loc_addFightersToTeamMenu:
+    add r6, r5, r3       # Add number of additional team members to get total team members
+    stw r6, 0xe4(r29)      # Store team member count
+    addi r7, r3, 0x44      # Add to array offset
+    add r3, r7, r29
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] # memcpy rel css data section to team member 1 section
+loc_skipAddFightersToTeamMenu:
+
+#loc_3EBCC:
     /* 0003EBCC: */    lbz r0,muAdvSelchrCTask_0xC2D(r29)
     /* 0003EBD0: */    cmplwi r0,0x2
     /* 0003EBD4: */    bne- loc_3EBE4
@@ -2892,67 +2956,7 @@ loc_4010C:
     nop
     nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-
-    # +304
+    # +250
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -3693,11 +3697,29 @@ muAdvSelchrCTask__selCharMain:
     /* 00040B1C: */    bl muAdvSelchrCTask__getCharCursorPos
     /* 00040B24: */    mr r28,r3
     /* 00040B34: */    mr r25,r28
+
+    ## SSEX: Input to move cursor pos to a random fighter on SSE CSS 
     mr r3,r18              
     mr r4,r27
     bl __unresolved                          [R_PPC_REL24(40, 1, "muAdvSelchrCTask__getNumTeamMember")]
     mr r15, r3              # Store numTeamMember
-    b __unresolved                                              [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__selCharMain_randomSelect")]
+    lis r8, 0x805B         # \         
+    ori r8, r8, 0xACC0     # / Get global gfPadSystem   
+    li r7, 0x0                      # \
+    li r9, 0x46                     # |
+loc_checkForRandomInput:            # |
+    lhzx r5, r9, r8                 # | 
+    andi. r5, r5, 0x0020            # | Check for R input in each gfPadStatus (TODO: maybe combine with checkIfOverride in if need to optimize codespace?)
+    bne- loc_randomSelect           # |
+    addi r9, r9, 0x40               # |
+    addi r7, r7, 0x1                # |
+    cmpwi r7, 0x8                   # |
+    ble+ loc_checkForRandomInput    # /
+    b loc_randomSelectFinished 
+loc_randomSelect:
+    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
+    mr r25, r3                      # New charCursorPos
+
 loc_randomSelectFinished:
     /* 00040B20: */    rlwinm r0,r19,2,0,29
     /* 00040B28: */    add r31,r18,r0
@@ -4491,7 +4513,7 @@ loc_415CC:
 loc_415E8:
     /* 000415E8: */    lwz r0,muAdvSelchrCTask_0xA18(r30)
     /* 000415EC: */    # rlwinm r0,r0,2,0,29
-    nop                                                 # 
+    #nop                                                 # 
     /* 000415F0: */    add r3,r26,r0
     /* 000415F4: */    # lwz r3,0x44(r3)
     lbz r3,0x44(r3)                                     # SSEEX: Load team member as byte instead of word
@@ -4552,7 +4574,7 @@ loc_416B4:
     /* 000416B4: */    lwz r0,muAdvSelchrCTask_0xB68(r28)
 loc_416B8:
     /* 000416B8: */    # rlwinm r0,r0,2,0,29
-    nop                                                 # 
+    #nop                                                 # 
     /* 000416BC: */    add r3,r3,r0
     /* 000416C0: */    # lwz r0,0x44(r3)
     lbz r0,0x44(r3)                                     # SSEEX: Load team member as byte instead of word
@@ -4599,7 +4621,7 @@ loc_41740:
     /* 00041748: */    addi r26,r3,0x44
     /* 0004174C: */    # rlwinm r0,r0,2,0,29
     /* 00041750: */    # lwzx r0,r26,r0
-    nop                                                         #
+    #nop                                                         #
     lbzx r0,r26,r0                                              # SSEEX
     /* 00041754: */    cmpwi r0,0x1B
     /* 00041758: */    bne- loc_41764
