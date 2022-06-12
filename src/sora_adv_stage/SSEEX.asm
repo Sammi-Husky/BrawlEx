@@ -62,8 +62,6 @@ loc_skipAddFightersToTeamMenu:
 
 
 loc_muAdvSelchrCTask__selCharMain_randomSelect:
-    bl __unresolved                          [R_PPC_REL24(40, 1, "muAdvSelchrCTask__getNumTeamMember")]
-    mr r15, r3              # Store numTeamMember
     lis r8, 0x805B         # \         
     ori r8, r8, 0xACC0     # / Get global gfPadSystem   
     li r7, 0x0                      # \
@@ -89,6 +87,9 @@ loc_randomSelect:
 # TODO: Fix Great Maze savepoint stocks for Ex fighters
 # TODO: Make number of chars per row adjustable
 # TODO: Investigate C-Stick alt characters
+# TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
+## e.g. 047001 40   047001 36   FFFFFF 35 (with FFFFFF is whether Great Maze has been unlocked)
+## Then after write to bit section of module if level id corresponds and flip bit on based on character id and then save part of section to a file on save
 
 loc_stAdventure2__changeStep_addSequenceIndex:
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]

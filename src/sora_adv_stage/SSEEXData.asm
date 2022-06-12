@@ -1,5 +1,5 @@
 loc_NumAddedTeamMembers:
-        .byte 0x7 #0x1
+        .byte 0x5 #0x1
 #loc_NumOverrideTeamMembers:
 #        .byte 0x2A #0x24  
 #loc_OverrideTeamMemberIds:
@@ -39,11 +39,11 @@ loc_NumAddedTeamMembers:
 #        .byte 0x26      # Snake
         .byte 0x27      # Sonic
 loc_AddedTeamMemberIds:
+        .byte 0x2E      # Mewtwo
+        .byte 0x2D      # Roy
+        .byte 0x2F      # Knuckles
         .byte 0x32      # Ridley
-        .byte 0x32      # Ridley
-        .byte 0x32      # Ridley
-        .byte 0x32      # Ridley
-        .byte 0x32      # Ridley
+        .byte 0x40      # Dark Samus
         .byte 0x32      # Ridley
         .byte 0x32      # Ridley
         .byte 0x00      # 42
@@ -164,3 +164,5 @@ loc_AddedTeamMemberIds:
         .byte 0x00      # 157
         .byte 0x00      # 158
         .byte 0x00      # 159
+loc_NumberOfMembersPerRow:
+        .byte 0x7

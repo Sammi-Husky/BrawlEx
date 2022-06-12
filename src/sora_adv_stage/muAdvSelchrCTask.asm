@@ -1368,6 +1368,7 @@ muAdvSelchrCTask__getFaceObj:
     /* 0003F074: */    lwz r3,0x710(r3)
     /* 0003F078: */    blr
 muAdvSelchrCTask__prepareTeamPanel:
+    ## SSEEX: Support variable number of team members per row
     /* 0003F07C: */    stwu r1,-0x60(r1)
     /* 0003F080: */    mflr r0
     /* 0003F084: */    stw r0,0x64(r1)
@@ -1393,32 +1394,36 @@ loc_3F0C8:
     /* 0003F0CC: */    cmpwi r4,0x0
     /* 0003F0D0: */    bne+ loc_3F0A8
     /* 0003F0D4: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_9A0")]
-    /* 0003F0D8: */    lis r4,-0x6DB7
+    /* 0003F0D8: */    #lis r4,-0x6DB7
     /* 0003F0DC: */    lfd f31,0x0(r3)                          [R_PPC_ADDR16_LO(40, 4, "loc_9A0")]
     /* 0003F0E0: */    mr r28,r23
     /* 0003F0E4: */    mr r27,r23
-    /* 0003F0E8: */    addi r31,r4,0x2493
+    /* 0003F0E8: */    #addi r31,r4,0x2493
     /* 0003F0EC: */    li r26,0x0
     /* 0003F0F0: */    lis r21,0x4330
     /* 0003F0F4: */    lis r22,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_17C50")]
     /* 0003F0F8: */    b loc_3F194
 loc_3F0FC:
-    /* 0003F0FC: */    lwz r3,0xE4(r27)
+    /* 0003F0FC: */    #lwz r3,0xE4(r27)
     /* 0003F100: */    stw r21,0x10(r1)
-    /* 0003F104: */    addi r0,r3,0x6
+    /* 0003F104: */    #addi r0,r3,0x6
     /* 0003F108: */    lwz r29,0x71C(r28)
-    /* 0003F10C: */    mulhw r4,r31,r0
+    /* 0003F10C: */    #mulhw r4,r31,r0
     /* 0003F110: */    lwz r30,muAdvSelchrCTask_0x93C(r28)
-    /* 0003F114: */    mr r3,r29
-    /* 0003F118: */    add r0,r4,r0
-    /* 0003F11C: */    srawi r0,r0,2
-    /* 0003F120: */    rlwinm r4,r0,1,31,31
-    /* 0003F124: */    add r20,r0,r4
+    /* 0003F118: */    #add r0,r4,r0
+    /* 0003F11C: */    #srawi r0,r0,2
+    /* 0003F120: */    #rlwinm r4,r0,1,31,31
+    /* 0003F124: */    #add r20,r0,r4
+    mr r3, r23
+    mr r4, r26
+    bl muAdvSelchrCTask__getNumTeamLine
+    mr r20, r3
     /* 0003F128: */    subi r0,r20,0x1
     /* 0003F12C: */    xoris r0,r0,0x8000
     /* 0003F130: */    stw r0,0x14(r1)
     /* 0003F134: */    lfd f0,0x10(r1)
     /* 0003F138: */    fsubs f1,f0,f31
+    /* 0003F114: */    mr r3,r29
     /* 0003F13C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameNode")]
     /* 0003F140: */    lwz r0,0x40(r27)
     /* 0003F144: */    mr r3,r29
@@ -1802,18 +1807,37 @@ muAdvSelchrCTask__getTeamCurPos:
     /* 0003F6A4: */    lwz r3,muAdvSelchrCTask_0xC1C(r3)
     /* 0003F6A8: */    blr
 muAdvSelchrCTask__getNumTeamLine:
-    /* 0003F6AC: */    mulli r0,r4,0xAC
-    /* 0003F6B0: */    lis r4,-0x6DB7
-    /* 0003F6B4: */    addi r4,r4,0x2493
-    /* 0003F6B8: */    add r3,r3,r0
-    /* 0003F6BC: */    lwz r3,0xE4(r3)
-    /* 0003F6C0: */    addi r0,r3,0x6
-    /* 0003F6C4: */    mulhw r3,r4,r0
-    /* 0003F6C8: */    add r0,r3,r0
-    /* 0003F6CC: */    srawi r0,r0,2
-    /* 0003F6D0: */    rlwinm r3,r0,1,31,31
-    /* 0003F6D4: */    add r3,r0,r3
-    /* 0003F6D8: */    blr
+    ## SSEEX: Support for variable number of team members per row
+    /* 0003F6AC: */    # mulli r0,r4,0xAC
+    /* 0003F6B0: */    # lis r4,-0x6DB7
+    /* 0003F6B4: */    # addi r4,r4,0x2493
+    /* 0003F6B8: */    # add r3,r3,r0
+    /* 0003F6BC: */    # lwz r3,0xE4(r3)
+    /* 0003F6C0: */    # addi r0,r3,0x6
+    /* 0003F6C4: */    # mulhw r3,r4,r0
+    /* 0003F6C8: */    # add r0,r3,r0
+    /* 0003F6CC: */    # srawi r0,r0,2
+    /* 0003F6D0: */    # rlwinm r3,r0,1,31,31
+    /* 0003F6D4: */    # add r3,r0,r3
+    /* 0003F6D8: */    # blr
+
+    #int iVar1 = (&menuTask->team1MemberCount)[teamIndex * 0x2B] + (NUM_CHAR_PER_ROW - 1);
+    #iVar2 = (iVar1 / NUM_CHAR_PER_ROW) + (iVar1 >> 0x1f);
+    #return iVar2 - (iVar2 >> 0x1f), iVar2, iVar1;
+
+    mulli r4, r4, 0xAC
+    lis r9, 0x0                                                 [R_PPC_ADDR16_HA(40, 8, "loc_NumberOfMembersPerRow")]                    
+    lbz r9, 0x0(r9)                                             [R_PPC_ADDR16_LO(40, 8, "loc_NumberOfMembersPerRow")]
+    add r3, r3, r4
+    lwz r5, 0xE4(r3)
+    subi r8, r9, 0x1
+    add r10, r5, r8
+    divw r9, r10, r9
+    srawi r10, r10, 31
+    add r4, r9, r10
+    srwi r3, r4, 31
+    add r3, r3, r4
+    blr
 muAdvSelchrCTask__processDefault:
     /* 0003F6DC: */    stwu r1,-0xE0(r1)
     /* 0003F6E0: */    mflr r0
@@ -2196,7 +2220,59 @@ loc_3FC30:
     /* 0003FC3C: */    mtlr r0
     /* 0003FC40: */    addi r1,r1,0xE0
     /* 0003FC44: */    blr
+
+muAdvSelchrCTask__calcTeamListScrollYPos_helper:
+#int calcTeamListScrollYPos_helper(muAdvSelchrCTask* menuTask, int iVar4, unsigned int uVar16) {
+#     int iVar3 = 0;
+#     do {
+#         iVar4 = iVar4 + 8;
+#         for (int i = 0; i < 8; i++) {
+#             iVar3 += getNumTeamLine(menuTask, i);
+#         }
+#         menuTask = (muAdvSelchrCTask*)&menuTask->field_0x560;
+#         uVar16 = uVar16 - 1;
+#     } while (uVar16 != 0);
+#     IVAR4 = iVar4;
+#     return iVar3, iVar4;
+# }
+
+# args: r3 - muAdvSelchrCTask*, r4 - numLoops
+# returns r3 - result, r4 - iVar4 multiplier counter thing
+    stwu r1,-0x20(r1)
+    mflr r0
+    stw r0,0x24(r1)
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
+    mr r30,3
+    mr r27,4
+    mr r31,5
+    mr r26,5
+    li r28,0
+loc_calcYScrollHelperLoop:
+    li r29,0
+loc_loopThroughAllTeams:
+    mr r4,r29
+    mr r3,r30
+    addi r29,r29,1
+    bl muAdvSelchrCTask__getNumTeamLine
+    cmpwi r29,8
+    add r28,r28,r3
+    bne+ loc_loopThroughAllTeams
+    addic. r26,r26,-1
+    addi r30,r30,0x560
+    bne+ loc_calcYScrollHelperLoop
+    slwi r31,r31,3
+    add r4,r31,r27
+    mr r3,r28
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
+    lwz r0,0x24(r1)
+    mtlr r0
+    addi r1,r1,0x20
+    blr
+
 muAdvSelchrCTask__calcTeamListScrollYPos:
+    ## SSEEX: Big refactor to just reuse functions for identical code (and to support variable number of team members per row)
     /* 0003FC48: */    stwu r1,-0x60(r1)
     /* 0003FC4C: */    mflr r0
     /* 0003FC50: */    stw r0,0x64(r1)
@@ -2219,9 +2295,9 @@ muAdvSelchrCTask__calcTeamListScrollYPos:
     /* 0003FC94: */    addi r5,r5,0x0                           [R_PPC_ADDR16_LO(40, 5, "loc_17C60")]
     /* 0003FC98: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__getPos1")]
     /* 0003FC9C: */    lwz r7,0x6F8(r28)
-    /* 0003FCA0: */    li r3,0x0
+    /* 0003FCA0: */    li r23,0x0 #li r3,0x0
     /* 0003FCA4: */    lfs f1,0xC(r1)
-    /* 0003FCA8: */    li r4,0x0
+    /* 0003FCA8: */    li r25,0x0 #li r4,0x0
     /* 0003FCAC: */    lfs f0,0x18(r1)
     /* 0003FCB0: */    cmpwi cr1,r7,0x0
     /* 0003FCB4: */    fsubs f5,f1,f0
@@ -2239,107 +2315,115 @@ muAdvSelchrCTask__calcTeamListScrollYPos:
 loc_3FCE4:
     /* 0003FCE4: */    cmpwi r6,0x0
     /* 0003FCE8: */    beq- loc_3FE18
-    /* 0003FCEC: */    addi r6,r8,0x7
-    /* 0003FCF0: */    lis r7,-0x6DB7
-    /* 0003FCF4: */    rlwinm r6,r6,29,3,31
-    /* 0003FCF8: */    mr r5,r28
-    /* 0003FCFC: */    addi r0,r7,0x2493
-    /* 0003FD00: */    mtctr r6
+    /* 0003FCEC: */    addi r4,r8,0x7 #addi r6,r8,0x7
+    /* 0003FCF0: */    #lis r7,-0x6DB7
+    /* 0003FCF4: */    rlwinm r4,r4,29,3,31 #rlwinm r6,r6,29,3,31
+    /* 0003FCF8: */    mr r3,r28 #mr r5,r28
+    /* 0003FCFC: */    #addi r0,r7,0x2493
+    /* 0003FD00: */    #mtctr r6
     /* 0003FD04: */    cmpwi r8,0x0
     /* 0003FD08: */    ble- loc_3FE18
+    bl muAdvSelchrCTask__calcTeamListScrollYPos_helper
+    mr r23, r3
+    mr r25, r4
 loc_3FD0C:
-    /* 0003FD0C: */    lwz r6,0xE4(r5)
-    /* 0003FD10: */    addi r4,r4,0x8
-    /* 0003FD14: */    lwz r7,0x190(r5)
-    /* 0003FD18: */    addi r25,r6,0x6
-    /* 0003FD1C: */    lwz r6,0x23C(r5)
-    /* 0003FD20: */    addi r23,r7,0x6
-    /* 0003FD24: */    lwz r7,0x2E8(r5)
-    /* 0003FD28: */    addi r11,r6,0x6
-    /* 0003FD2C: */    lwz r8,0x440(r5)
-    /* 0003FD30: */    mulhw r26,r0,r25
-    /* 0003FD34: */    addi r12,r7,0x6
-    /* 0003FD38: */    lwz r7,0x4EC(r5)
-    /* 0003FD3C: */    addi r10,r8,0x6
-    /* 0003FD40: */    lwz r6,0x394(r5)
-    /* 0003FD44: */    addi r8,r7,0x6
-    /* 0003FD48: */    mulhw r24,r0,r23
-    /* 0003FD4C: */    add r25,r26,r25
-    /* 0003FD50: */    addi r9,r6,0x6
-    /* 0003FD54: */    lwz r6,0x598(r5)
-    /* 0003FD58: */    srawi r26,r25,2
-    /* 0003FD5C: */    addi r6,r6,0x6
-    /* 0003FD60: */    add r23,r24,r23
-    /* 0003FD64: */    rlwinm r24,r26,1,31,31
-    /* 0003FD68: */    mulhw r22,r0,r11
-    /* 0003FD6C: */    addi r5,r5,0x560
-    /* 0003FD70: */    add r27,r26,r24
-    /* 0003FD74: */    srawi r25,r23,2
-    /* 0003FD78: */    add r3,r3,r27
-    /* 0003FD7C: */    rlwinm r26,r25,1,31,31
-    /* 0003FD80: */    add r22,r22,r11
-    /* 0003FD84: */    add r25,r25,r26
-    /* 0003FD88: */    mulhw r7,r0,r12
-    /* 0003FD8C: */    srawi r22,r22,2
-    /* 0003FD90: */    add r3,r3,r25
-    /* 0003FD94: */    rlwinm r24,r22,1,31,31
-    /* 0003FD98: */    mulhw r11,r0,r9
-    /* 0003FD9C: */    add r24,r22,r24
-    /* 0003FDA0: */    add r7,r7,r12
-    /* 0003FDA4: */    add r3,r3,r24
-    /* 0003FDA8: */    srawi r23,r7,2
-    /* 0003FDAC: */    add r9,r11,r9
-    /* 0003FDB0: */    srawi r12,r9,2
-    /* 0003FDB4: */    rlwinm r11,r23,1,31,31
-    /* 0003FDB8: */    mulhw r7,r0,r10
-    /* 0003FDBC: */    rlwinm r22,r12,1,31,31
-    /* 0003FDC0: */    add r23,r23,r11
-    /* 0003FDC4: */    add r12,r12,r22
-    /* 0003FDC8: */    add r3,r3,r23
-    /* 0003FDCC: */    mulhw r9,r0,r8
-    /* 0003FDD0: */    add r7,r7,r10
-    /* 0003FDD4: */    add r3,r3,r12
-    /* 0003FDD8: */    srawi r10,r7,2
-    /* 0003FDDC: */    mulhw r7,r0,r6
-    /* 0003FDE0: */    rlwinm r11,r10,1,31,31
-    /* 0003FDE4: */    add r8,r9,r8
-    /* 0003FDE8: */    add r10,r10,r11
-    /* 0003FDEC: */    srawi r8,r8,2
-    /* 0003FDF0: */    add r3,r3,r10
-    /* 0003FDF4: */    add r6,r7,r6
-    /* 0003FDF8: */    rlwinm r9,r8,1,31,31
-    /* 0003FDFC: */    srawi r6,r6,2
-    /* 0003FE00: */    rlwinm r7,r6,1,31,31
-    /* 0003FE04: */    add r8,r8,r9
-    /* 0003FE08: */    add r3,r3,r8
-    /* 0003FE0C: */    add r6,r6,r7
-    /* 0003FE10: */    add r3,r3,r6
-    /* 0003FE14: */    bdnz+ loc_3FD0C
+    /* 0003FD0C: */    #lwz r6,0xE4(r5)
+    /* 0003FD10: */    #addi r4,r4,0x8
+    /* 0003FD14: */    #lwz r7,0x190(r5)
+    /* 0003FD18: */    #addi r25,r6,0x6
+    /* 0003FD1C: */    #lwz r6,0x23C(r5)
+    /* 0003FD20: */    #addi r23,r7,0x6
+    /* 0003FD24: */    #lwz r7,0x2E8(r5)
+    /* 0003FD28: */    #addi r11,r6,0x6
+    /* 0003FD2C: */    #lwz r8,0x440(r5)
+    /* 0003FD30: */    #mulhw r26,r0,r25
+    /* 0003FD34: */    #addi r12,r7,0x6
+    /* 0003FD38: */    #lwz r7,0x4EC(r5)
+    /* 0003FD3C: */    #addi r10,r8,0x6
+    /* 0003FD40: */    #lwz r6,0x394(r5)
+    /* 0003FD44: */    #addi r8,r7,0x6
+    /* 0003FD48: */    #mulhw r24,r0,r23
+    /* 0003FD4C: */    #add r25,r26,r25
+    /* 0003FD50: */    #addi r9,r6,0x6
+    /* 0003FD54: */    #lwz r6,0x598(r5)
+    /* 0003FD58: */    #srawi r26,r25,2
+    /* 0003FD5C: */    #addi r6,r6,0x6
+    /* 0003FD60: */    #add r23,r24,r23
+    /* 0003FD64: */    #rlwinm r24,r26,1,31,31
+    /* 0003FD68: */    #mulhw r22,r0,r11
+    /* 0003FD6C: */    #addi r5,r5,0x560
+    /* 0003FD70: */    #add r27,r26,r24
+    /* 0003FD74: */    #srawi r25,r23,2
+    /* 0003FD78: */    #add r3,r3,r27
+    /* 0003FD7C: */    #rlwinm r26,r25,1,31,31
+    /* 0003FD80: */    #add r22,r22,r11
+    /* 0003FD84: */    #add r25,r25,r26
+    /* 0003FD88: */    #mulhw r7,r0,r12
+    /* 0003FD8C: */    #srawi r22,r22,2
+    /* 0003FD90: */    #add r3,r3,r25
+    /* 0003FD94: */    #rlwinm r24,r22,1,31,31
+    /* 0003FD98: */    #mulhw r11,r0,r9
+    /* 0003FD9C: */    #add r24,r22,r24
+    /* 0003FDA0: */    #add r7,r7,r12
+    /* 0003FDA4: */    #add r3,r3,r24
+    /* 0003FDA8: */    #srawi r23,r7,2
+    /* 0003FDAC: */    #add r9,r11,r9
+    /* 0003FDB0: */    #srawi r12,r9,2
+    /* 0003FDB4: */    #rlwinm r11,r23,1,31,31
+    /* 0003FDB8: */    #mulhw r7,r0,r10
+    /* 0003FDBC: */    #rlwinm r22,r12,1,31,31
+    /* 0003FDC0: */    #add r23,r23,r11
+    /* 0003FDC4: */    #add r12,r12,r22
+    /* 0003FDC8: */    #add r3,r3,r23
+    /* 0003FDCC: */    #mulhw r9,r0,r8
+    /* 0003FDD0: */    #add r7,r7,r10
+    /* 0003FDD4: */    #add r3,r3,r12
+    /* 0003FDD8: */    #srawi r10,r7,2
+    /* 0003FDDC: */    #mulhw r7,r0,r6
+    /* 0003FDE0: */    #rlwinm r11,r10,1,31,31
+    /* 0003FDE4: */    #add r8,r9,r8
+    /* 0003FDE8: */    #add r10,r10,r11
+    /* 0003FDEC: */    #srawi r8,r8,2
+    /* 0003FDF0: */    #add r3,r3,r10
+    /* 0003FDF4: */    #add r6,r7,r6
+    /* 0003FDF8: */    #rlwinm r9,r8,1,31,31
+    /* 0003FDFC: */    #srawi r6,r6,2
+    /* 0003FE00: */    #rlwinm r7,r6,1,31,31
+    /* 0003FE04: */    #add r8,r8,r9
+    /* 0003FE08: */    #add r3,r3,r8
+    /* 0003FE0C: */    #add r6,r6,r7
+    /* 0003FE10: */    #add r3,r3,r6
+    /* 0003FE14: */    #bdnz+ loc_3FD0C
 loc_3FE18:
-    /* 0003FE18: */    mulli r6,r4,0xAC
+    /* 0003FE18: */    #mulli r6,r4,0xAC
     /* 0003FE1C: */    lwz r7,0x6F8(r28)
-    /* 0003FE20: */    lis r5,-0x6DB7
-    /* 0003FE24: */    sub r0,r7,r4
-    /* 0003FE28: */    add r6,r28,r6
-    /* 0003FE2C: */    addi r5,r5,0x2493
-    /* 0003FE30: */    mtctr r0
-    /* 0003FE34: */    cmpw r4,r7
+    /* 0003FE20: */    #lis r5,-0x6DB7
+    /* 0003FE24: */    sub r26,r7,r25 #sub r0,r7,r4
+    /* 0003FE28: */    #add r6,r28,r6
+    /* 0003FE2C: */    #addi r5,r5,0x2493
+    /* 0003FE30: */    #mtctr r0
+    /* 0003FE34: */    cmpw r25,r7 #cmpw r4,r7
     /* 0003FE38: */    bge- loc_3FE64
 loc_3FE3C:
-    /* 0003FE3C: */    lwz r4,0xE4(r6)
-    /* 0003FE40: */    addi r6,r6,0xAC
-    /* 0003FE44: */    addi r0,r4,0x6
-    /* 0003FE48: */    mulhw r4,r5,r0
-    /* 0003FE4C: */    add r0,r4,r0
-    /* 0003FE50: */    srawi r0,r0,2
-    /* 0003FE54: */    rlwinm r4,r0,1,31,31
-    /* 0003FE58: */    add r0,r0,r4
-    /* 0003FE5C: */    add r3,r3,r0
-    /* 0003FE60: */    bdnz+ loc_3FE3C
+    mr r3, r28
+    mr r4, r25 
+    bl muAdvSelchrCTask__getNumTeamLine
+    /* 0003FE3C: */    #lwz r4,0xE4(r6)
+    /* 0003FE40: */    #addi r6,r6,0xAC
+    addi r25, r25, 0x1
+    addic. r26, r26, -1
+    /* 0003FE44: */    #addi r0,r4,0x6
+    /* 0003FE48: */    #mulhw r4,r5,r0
+    /* 0003FE4C: */    #add r0,r4,r0
+    /* 0003FE50: */    #srawi r0,r0,2
+    /* 0003FE54: */    #rlwinm r4,r0,1,31,31
+    /* 0003FE58: */    #add r0,r0,r4
+    /* 0003FE5C: */    add r23, r23, r3 #add r3,r3,r0
+    /* 0003FE60: */    bne+ loc_3FE3C #bdnz+ loc_3FE3C
 loc_3FE64:
     /* 0003FE64: */    cmpwi cr1,r29,0x0
-    /* 0003FE68: */    li r5,0x0
-    /* 0003FE6C: */    li r4,0x0
+    /* 0003FE68: */    li r24, 0x0 #li r5,0x0
+    /* 0003FE6C: */    li r25, 0x0 #li r4,0x0
     /* 0003FE70: */    ble- cr1,loc_40018
     /* 0003FE74: */    cmpwi r29,0x8
     /* 0003FE78: */    subi r9,r29,0x8
@@ -2354,130 +2438,141 @@ loc_3FE64:
 loc_3FE9C:
     /* 0003FE9C: */    cmpwi r7,0x0
     /* 0003FEA0: */    beq- loc_3FFD0
-    /* 0003FEA4: */    addi r7,r9,0x7
-    /* 0003FEA8: */    lis r8,-0x6DB7
-    /* 0003FEAC: */    rlwinm r7,r7,29,3,31
-    /* 0003FEB0: */    mr r6,r28
-    /* 0003FEB4: */    addi r0,r8,0x2493
-    /* 0003FEB8: */    mtctr r7
+    /* 0003FEA4: */    addi r4,r9,0x7 #addi r7,r9,0x7
+    /* 0003FEA8: */    #lis r8,-0x6DB7
+    /* 0003FEAC: */    rlwinm r4,r4,29,3,31 #rlwinm r7,r7,29,3,31
+    /* 0003FEB0: */    mr r3,r28 #mr r6,r28
+    /* 0003FEB4: */    #addi r0,r8,0x2493
+    /* 0003FEB8: */    #mtctr r7
     /* 0003FEBC: */    cmpwi r9,0x0
     /* 0003FEC0: */    ble- loc_3FFD0
+    bl muAdvSelchrCTask__calcTeamListScrollYPos_helper
+    mr r24, r3
+    mr r25, r4
 loc_3FEC4:
-    /* 0003FEC4: */    lwz r7,0xE4(r6)
-    /* 0003FEC8: */    addi r4,r4,0x8
-    /* 0003FECC: */    lwz r8,0x190(r6)
-    /* 0003FED0: */    addi r22,r7,0x6
-    /* 0003FED4: */    lwz r7,0x23C(r6)
-    /* 0003FED8: */    addi r26,r8,0x6
-    /* 0003FEDC: */    lwz r8,0x2E8(r6)
-    /* 0003FEE0: */    addi r12,r7,0x6
-    /* 0003FEE4: */    lwz r9,0x440(r6)
-    /* 0003FEE8: */    mulhw r27,r0,r22
-    /* 0003FEEC: */    addi r25,r8,0x6
-    /* 0003FEF0: */    lwz r8,0x4EC(r6)
-    /* 0003FEF4: */    addi r11,r9,0x6
-    /* 0003FEF8: */    lwz r7,0x394(r6)
-    /* 0003FEFC: */    addi r9,r8,0x6
-    /* 0003FF00: */    mulhw r23,r0,r26
-    /* 0003FF04: */    add r22,r27,r22
-    /* 0003FF08: */    addi r10,r7,0x6
-    /* 0003FF0C: */    lwz r7,0x598(r6)
-    /* 0003FF10: */    srawi r22,r22,2
-    /* 0003FF14: */    addi r7,r7,0x6
-    /* 0003FF18: */    add r26,r23,r26
-    /* 0003FF1C: */    rlwinm r23,r22,1,31,31
-    /* 0003FF20: */    mulhw r8,r0,r25
-    /* 0003FF24: */    addi r6,r6,0x560
-    /* 0003FF28: */    add r22,r22,r23
-    /* 0003FF2C: */    srawi r27,r26,2
-    /* 0003FF30: */    add r5,r5,r22
-    /* 0003FF34: */    rlwinm r23,r27,1,31,31
-    /* 0003FF38: */    mulhw r24,r0,r12
-    /* 0003FF3C: */    add r22,r27,r23
-    /* 0003FF40: */    add r8,r8,r25
-    /* 0003FF44: */    add r5,r5,r22
-    /* 0003FF48: */    add r26,r24,r12
-    /* 0003FF4C: */    srawi r26,r26,2
-    /* 0003FF50: */    mulhw r12,r0,r10
-    /* 0003FF54: */    srawi r25,r8,2
-    /* 0003FF58: */    rlwinm r24,r26,1,31,31
-    /* 0003FF5C: */    add r22,r26,r24
-    /* 0003FF60: */    add r10,r12,r10
-    /* 0003FF64: */    add r5,r5,r22
-    /* 0003FF68: */    srawi r27,r10,2
-    /* 0003FF6C: */    rlwinm r12,r25,1,31,31
-    /* 0003FF70: */    mulhw r8,r0,r11
-    /* 0003FF74: */    add r22,r25,r12
-    /* 0003FF78: */    rlwinm r26,r27,1,31,31
-    /* 0003FF7C: */    add r5,r5,r22
-    /* 0003FF80: */    add r22,r27,r26
-    /* 0003FF84: */    mulhw r10,r0,r9
-    /* 0003FF88: */    add r8,r8,r11
-    /* 0003FF8C: */    add r5,r5,r22
-    /* 0003FF90: */    srawi r11,r8,2
-    /* 0003FF94: */    mulhw r8,r0,r7
-    /* 0003FF98: */    rlwinm r12,r11,1,31,31
-    /* 0003FF9C: */    add r9,r10,r9
-    /* 0003FFA0: */    add r11,r11,r12
-    /* 0003FFA4: */    srawi r9,r9,2
-    /* 0003FFA8: */    add r5,r5,r11
-    /* 0003FFAC: */    add r7,r8,r7
-    /* 0003FFB0: */    rlwinm r10,r9,1,31,31
-    /* 0003FFB4: */    srawi r7,r7,2
-    /* 0003FFB8: */    rlwinm r8,r7,1,31,31
-    /* 0003FFBC: */    add r9,r9,r10
-    /* 0003FFC0: */    add r5,r5,r9
-    /* 0003FFC4: */    add r7,r7,r8
-    /* 0003FFC8: */    add r5,r5,r7
-    /* 0003FFCC: */    bdnz+ loc_3FEC4
+    /* 0003FEC4: */    #lwz r7,0xE4(r6)
+    /* 0003FEC8: */    #addi r4,r4,0x8
+    /* 0003FECC: */    #lwz r8,0x190(r6)
+    /* 0003FED0: */    #addi r22,r7,0x6
+    /* 0003FED4: */    #lwz r7,0x23C(r6)
+    /* 0003FED8: */    #addi r26,r8,0x6
+    /* 0003FEDC: */    #lwz r8,0x2E8(r6)
+    /* 0003FEE0: */    #addi r12,r7,0x6
+    /* 0003FEE4: */    #lwz r9,0x440(r6)
+    /* 0003FEE8: */    #mulhw r27,r0,r22
+    /* 0003FEEC: */    #addi r25,r8,0x6
+    /* 0003FEF0: */    #lwz r8,0x4EC(r6)
+    /* 0003FEF4: */    #addi r11,r9,0x6
+    /* 0003FEF8: */    #lwz r7,0x394(r6)
+    /* 0003FEFC: */    #addi r9,r8,0x6
+    /* 0003FF00: */    #mulhw r23,r0,r26
+    /* 0003FF04: */    #add r22,r27,r22
+    /* 0003FF08: */    #addi r10,r7,0x6
+    /* 0003FF0C: */    #lwz r7,0x598(r6)
+    /* 0003FF10: */    #srawi r22,r22,2
+    /* 0003FF14: */    #addi r7,r7,0x6
+    /* 0003FF18: */    #add r26,r23,r26
+    /* 0003FF1C: */    #rlwinm r23,r22,1,31,31
+    /* 0003FF20: */    #mulhw r8,r0,r25
+    /* 0003FF24: */    #addi r6,r6,0x560
+    /* 0003FF28: */    #add r22,r22,r23
+    /* 0003FF2C: */    #srawi r27,r26,2
+    /* 0003FF30: */    #add r5,r5,r22
+    /* 0003FF34: */    #rlwinm r23,r27,1,31,31
+    /* 0003FF38: */    #mulhw r24,r0,r12
+    /* 0003FF3C: */    #add r22,r27,r23
+    /* 0003FF40: */    #add r8,r8,r25
+    /* 0003FF44: */    #add r5,r5,r22
+    /* 0003FF48: */    #add r26,r24,r12
+    /* 0003FF4C: */    #srawi r26,r26,2
+    /* 0003FF50: */    #mulhw r12,r0,r10
+    /* 0003FF54: */    #srawi r25,r8,2
+    /* 0003FF58: */    #rlwinm r24,r26,1,31,31
+    /* 0003FF5C: */    #add r22,r26,r24
+    /* 0003FF60: */    #add r10,r12,r10
+    /* 0003FF64: */    #add r5,r5,r22
+    /* 0003FF68: */    #srawi r27,r10,2
+    /* 0003FF6C: */    #rlwinm r12,r25,1,31,31
+    /* 0003FF70: */    #mulhw r8,r0,r11
+    /* 0003FF74: */    #add r22,r25,r12
+    /* 0003FF78: */    #rlwinm r26,r27,1,31,31
+    /* 0003FF7C: */    #add r5,r5,r22
+    /* 0003FF80: */    #add r22,r27,r26
+    /* 0003FF84: */    #mulhw r10,r0,r9
+    /* 0003FF88: */    #add r8,r8,r11
+    /* 0003FF8C: */    #add r5,r5,r22
+    /* 0003FF90: */    #srawi r11,r8,2
+    /* 0003FF94: */    #mulhw r8,r0,r7
+    /* 0003FF98: */    #rlwinm r12,r11,1,31,31
+    /* 0003FF9C: */    #add r9,r10,r9
+    /* 0003FFA0: */    #add r11,r11,r12
+    /* 0003FFA4: */    #srawi r9,r9,2
+    /* 0003FFA8: */    #add r5,r5,r11
+    /* 0003FFAC: */    #add r7,r8,r7
+    /* 0003FFB0: */    #rlwinm r10,r9,1,31,31
+    /* 0003FFB4: */    #srawi r7,r7,2
+    /* 0003FFB8: */    #rlwinm r8,r7,1,31,31
+    /* 0003FFBC: */    #add r9,r9,r10
+    /* 0003FFC0: */    #add r5,r5,r9
+    /* 0003FFC4: */    #add r7,r7,r8
+    /* 0003FFC8: */    #add r5,r5,r7
+    /* 0003FFCC: */    #bdnz+ loc_3FEC4
 loc_3FFD0:
-    /* 0003FFD0: */    mulli r7,r4,0xAC
-    /* 0003FFD4: */    lis r6,-0x6DB7
-    /* 0003FFD8: */    sub r0,r29,r4
-    /* 0003FFDC: */    addi r6,r6,0x2493
-    /* 0003FFE0: */    add r7,r28,r7
-    /* 0003FFE4: */    mtctr r0
-    /* 0003FFE8: */    cmpw r4,r29
+    /* 0003FFD0: */    #mulli r7,r4,0xAC
+    /* 0003FFD4: */    #lis r6,-0x6DB7
+    /* 0003FFD8: */    sub r26,r29,r25 #sub r0,r29,r4
+    /* 0003FFDC: */    #addi r6,r6,0x2493
+    /* 0003FFE0: */    #add r7,r28,r7
+    /* 0003FFE4: */    #mtctr r0
+    /* 0003FFE8: */    cmpw r25,r29 #cmpw r4,r29
     /* 0003FFEC: */    bge- loc_40018
 loc_3FFF0:
-    /* 0003FFF0: */    lwz r4,0xE4(r7)
-    /* 0003FFF4: */    addi r7,r7,0xAC
-    /* 0003FFF8: */    addi r0,r4,0x6
-    /* 0003FFFC: */    mulhw r4,r6,r0
-    /* 00040000: */    add r0,r4,r0
-    /* 00040004: */    srawi r0,r0,2
-    /* 00040008: */    rlwinm r4,r0,1,31,31
-    /* 0004000C: */    add r0,r0,r4
-    /* 00040010: */    add r5,r5,r0
-    /* 00040014: */    bdnz+ loc_3FFF0
+    mr r3, r28
+    mr r4, r25 
+    bl muAdvSelchrCTask__getNumTeamLine
+    /* 0003FFF0: */    #lwz r4,0xE4(r7)
+    /* 0003FFF4: */    #addi r7,r7,0xAC
+    addi r25, r25, 0x1
+    addic. r26, r26, -1
+    /* 0003FFF8: */    #addi r0,r4,0x6
+    /* 0003FFFC: */    #mulhw r4,r6,r0
+    /* 00040000: */    #add r0,r4,r0
+    /* 00040004: */    #srawi r0,r0,2
+    /* 00040008: */    #rlwinm r4,r0,1,31,31
+    /* 0004000C: */    #add r0,r0,r4
+    /* 00040010: */    add r24, r24, r3 #add r5,r5,r0
+    /* 00040014: */    bne+ loc_3FFF0 #bdnz+ loc_3FFF0
 loc_40018:
-    /* 00040018: */    mulli r7,r29,0xAC
-    /* 0004001C: */    xoris r4,r5,0x8000
+    mr r3, r28
+    mr r4, r25 
+    bl muAdvSelchrCTask__getNumTeamLine
+    /* 00040018: */    #mulli r7,r29,0xAC
+    /* 0004001C: */    xoris r4,r24,0x8000 #xoris r4,r5,0x8000
     /* 00040020: */    lis r0,0x4330
     /* 00040024: */    lfs f3,0x2C(r31)
     /* 00040028: */    stw r4,0x24(r1)
     /* 0004002C: */    lis r6,-0x6DB7
-    /* 00040030: */    add r5,r28,r7
+    /* 00040030: */    #add r5,r28,r7
     /* 00040034: */    stw r0,0x20(r1)
-    /* 00040038: */    lwz r4,0xE4(r5)
+    /* 00040038: */    #lwz r4,0xE4(r5)
     /* 0004003C: */    addi r5,r6,0x2493
     /* 00040040: */    stw r0,0x28(r1)
     /* 00040044: */    fmuls f1,f3,f5
-    /* 00040048: */    addi r0,r4,0x6
+    /* 00040048: */    #addi r0,r4,0x6
     /* 0004004C: */    lfd f4,Data8F8_0xA8(r31)
-    /* 00040050: */    mulhw r4,r5,r0
+    /* 00040050: */    #mulhw r4,r5,r0
     /* 00040054: */    lfd f2,0x20(r1)
     /* 00040058: */    lfs f0,Data8F8_0xD0(r31)
     /* 0004005C: */    fsubs f2,f2,f4
-    /* 00040060: */    add r0,r4,r0
+    /* 00040060: */    #add r0,r4,r0
     /* 00040064: */    fmuls f2,f5,f2
-    /* 00040068: */    srawi r0,r0,2
-    /* 0004006C: */    rlwinm r4,r0,1,31,31
-    /* 00040070: */    add r4,r0,r4
+    /* 00040068: */    #srawi r0,r0,2
+    /* 0004006C: */    #rlwinm r4,r0,1,31,31
+    /* 00040070: */    #add r4,r0,r4
     /* 00040074: */    fsubs f1,f2,f1
-    /* 00040078: */    subi r0,r4,0x1
+    /* 00040078: */    subi r0,r3,0x1 #subi r0,r4,0x1
     /* 0004007C: */    xoris r0,r0,0x8000
-    /* 00040080: */    cmpwi r4,0x3
+    /* 00040080: */    cmpwi r3,0x3 #cmpwi r4,0x3
     /* 00040084: */    stw r0,0x2C(r1)
     /* 00040088: */    lfd f2,0x28(r1)
     /* 0004008C: */    fsubs f2,f2,f4
@@ -2487,21 +2582,21 @@ loc_40018:
     /* 0004009C: */    bne- loc_400A4
     /* 000400A0: */    fsubs f1,f1,f3
 loc_400A4:
-    /* 000400A4: */    cmpwi r4,0x4
+    /* 000400A4: */    cmpwi r3,0x4 #cmpwi r4,0x4
     /* 000400A8: */    bne- loc_400B4
     /* 000400AC: */    lfs f0,Data8F8_0xD4(r31)
     /* 000400B0: */    fsubs f1,f1,f0
 loc_400B4:
-    /* 000400B4: */    cmpwi r4,0x5
+    /* 000400B4: */    cmpwi r3,0x5 #cmpwi r4,0x5
     /* 000400B8: */    bne- loc_400C4
     /* 000400BC: */    lfs f0,Data8F8_0xD8(r31)
     /* 000400C0: */    fsubs f1,f1,f0
 loc_400C4:
     /* 000400C4: */    cmpwi r30,0x0
     /* 000400C8: */    beq- loc_4010C
-    /* 000400CC: */    cmpwi r3,0x5
+    /* 000400CC: */    cmpwi r23,0x5 #cmpwi r3,0x5
     /* 000400D0: */    ble- loc_4010C
-    /* 000400D4: */    subi r3,r3,0x5
+    /* 000400D4: */    subi r3,r23,0x5 #subi r3,r3,0x5
     /* 000400D8: */    lis r0,0x4330
     /* 000400DC: */    xoris r3,r3,0x8000
     /* 000400E0: */    lfs f3,0x28(r31)
@@ -2522,6 +2617,342 @@ loc_4010C:
     /* 00040118: */    mtlr r0
     /* 0004011C: */    addi r1,r1,0x60
     /* 00040120: */    blr
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+
+    # +304
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -3017,55 +3448,64 @@ gfPadStatus__bitcheckEdgeOn:
     /* 000407F8: */    rlwinm r3,r0,1,31,31
     /* 000407FC: */    blr
 muAdvSelchrCTask__findLocateCursorPosX:
+    ## SSEEX: Support variable number of team members per row
     /* 00040800: */    stwu r1,-0x40(r1)
     /* 00040804: */    mflr r0
     /* 00040808: */    stw r0,0x44(r1)
     /* 0004080C: */    addi r11,r1,0x40
     /* 00040810: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_21")]
-    /* 00040814: */    mulli r8,r5,0xAC
-    /* 00040818: */    lis r5,-0x6DB7
+    /* 00040814: */    #mulli r8,r5,0xAC
+    /* 00040818: */    #lis r5,-0x6DB7
     /* 0004081C: */    mr r25,r4
-    /* 00040820: */    addi r0,r5,0x2493
-    /* 00040824: */    add r30,r3,r8
+    /* 00040820: */    #addi r0,r5,0x2493
+    /* 00040824: */    #add r30,r3,r8
     /* 00040828: */    mr r24,r3
-    /* 0004082C: */    lwz r8,0xE4(r30)
-    /* 00040830: */    mulhw r0,r0,r8
-    /* 00040834: */    add r0,r0,r8
-    /* 00040838: */    srawi r4,r0,2
-    /* 0004083C: */    srawi r0,r0,2
-    /* 00040840: */    rlwinm r3,r0,1,31,31
-    /* 00040844: */    rlwinm r5,r4,1,31,31
-    /* 00040848: */    add r0,r0,r3
-    /* 0004084C: */    mulli r0,r0,0x7
-    /* 00040850: */    add r3,r4,r5
-    /* 00040854: */    sub r4,r8,r0
-    /* 00040858: */    cntlzw r0,r4
+    /* 0004082C: */    #lwz r8,0xE4(r30)
+    /* 00040830: */    #mulhw r0,r0,r8
+    /* 00040834: */    #add r0,r0,r8
+    /* 00040838: */    #srawi r4,r0,2
+    /* 0004083C: */    #srawi r0,r0,2
+    /* 00040840: */    #rlwinm r3,r0,1,31,31
+    /* 00040844: */    #rlwinm r5,r4,1,31,31
+    /* 00040848: */    #add r0,r0,r3
+    /* 0004084C: */    #mulli r0,r0,0x7
+    /* 00040850: */    #add r3,r4,r5
+    /* 00040854: */    #sub r4,r8,r0
+    mr r21, r6
+    mr r22, r7
+    mr r4, r5
+    bl muAdvSelchrCTask__getNumTeamLine
+    lis r12, 0x0                                                 [R_PPC_ADDR16_HA(40, 8, "loc_NumberOfMembersPerRow")]                    
+    lbz r12, 0x0(r12)                                             [R_PPC_ADDR16_LO(40, 8, "loc_NumberOfMembersPerRow")]
+    mullw r9, r12, r3 
+    subf r30, r9, r5
+    /* 00040858: */    cntlzw r0,r30 #cntlzw r0,r4
     /* 0004085C: */    rlwinm. r0,r0,27,5,31
     /* 00040860: */    beq- loc_40868
-    /* 00040864: */    li r4,0x7
+    /* 00040864: */    mr r4, r12 #li r4,0x7
 loc_40868:
     /* 00040868: */    cmpwi r0,0x0
     /* 0004086C: */    bne- loc_40874
     /* 00040870: */    addi r3,r3,0x1
 loc_40874:
     /* 00040874: */    subi r0,r3,0x1
-    /* 00040878: */    li r31,0x7
-    /* 0004087C: */    cmpw r6,r0
+    /* 00040878: */    mr r31, r12 #li r31,0x7
+    /* 0004087C: */    cmpw r21,r0 #cmpw r6,r0
     /* 00040880: */    blt- loc_40888
     /* 00040884: */    mr r31,r4
 loc_40888:
-    /* 00040888: */    rlwinm r0,r6,3,0,28
-    /* 0004088C: */    addi r26,r7,0x1
-    /* 00040890: */    sub r0,r0,r6
-    /* 00040894: */    subi r27,r7,0x1
+    /* 00040888: */    mullw r0, r21, r12 #rlwinm r0,r6,3,0,28
+    /* 0004088C: */    addi r26,r22,0x1 #addi r26,r7,0x1
+    /* 00040890: */    #sub r0,r0,r6
+    /* 00040894: */    subi r27,r22,0x1 #subi r27,r7,0x1
     /* 00040898: */    add r29,r26,r0
     /* 0004089C: */    add r28,r27,r0
     /* 000408A0: */    b loc_40A74
 loc_408A4:
     /* 000408A4: */    cmpw r26,r31
     /* 000408A8: */    bge- loc_40984
-    /* 000408AC: */    lwz r0,0xE4(r30)
-    /* 000408B0: */    cmpw r29,r0
+    /* 000408AC: */    #lwz r0,0xE4(r30)
+    /* 000408B0: */    cmpw r29,r30 #cmpw r29,r0
     /* 000408B4: */    bge- loc_40984
     /* 000408B8: */    addi r22,r24,muAdvSelchrCTask_0x970
     /* 000408BC: */    li r23,0x0
@@ -3131,8 +3571,8 @@ loc_40974:
 loc_40984:
     /* 00040984: */    cmpwi r27,0x0
     /* 00040988: */    blt- loc_40A64
-    /* 0004098C: */    lwz r0,0xE4(r30)
-    /* 00040990: */    cmpw r28,r0
+    /* 0004098C: */    #lwz r0,0xE4(r30)
+    /* 00040990: */    cmpw r28,r30 #cmpw r28,r0
     /* 00040994: */    bge- loc_40A64
     /* 00040998: */    addi r23,r24,muAdvSelchrCTask_0x970
     /* 0004099C: */    li r22,0x0
@@ -3214,17 +3654,21 @@ loc_40A88:
     /* 00040A98: */    addi r1,r1,0x40
     /* 00040A9C: */    blr
 muAdvSelchrCTask__selCharCurCursorPos:
-    /* 00040AA0: */    rlwinm r0,r4,3,0,28
-    /* 00040AA4: */    sub r0,r0,r4
+    ## SSEEX: Support for variable number of team members per row
+    /* 00040AA0: */    #nop #rlwinm r0,r4,3,0,28
+    /* 00040AA4: */    #mulli r0, r4, 0x7 #sub r0,r0,r4
+    lis r5,0x0                              [R_PPC_ADDR16_HA(40, 8, "loc_NumberOfMembersPerRow")]
+    lbz r0,0x0(r5)                          [R_PPC_ADDR16_LO(40, 8, "loc_NumberOfMembersPerRow")]
+    mullw r0, r4, r0
     /* 00040AA8: */    add r3,r3,r0
     /* 00040AAC: */    blr
 muAdvSelchrCTask__selCharMain:
-    /* 00040AB0: */    stwu r1,-0xD4(r1)
+    /* 00040AB0: */    stwu r1,-0xD8(r1)
     /* 00040AB4: */    mflr r0
-    /* 00040AB8: */    stw r0,0xD8(r1)
-    /* 00040ABC: */    addi r11,r1,0xCC
-    /* 00040AC0: */    stfd f31,0xCC(r1)
-    /* 00040AC4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_15")]
+    /* 00040AB8: */    stw r0,0xDC(r1)
+    /* 00040ABC: */    addi r11,r1,0xD0
+    /* 00040AC0: */    stfd f31,0xD0(r1)
+    /* 00040AC4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_14")]
     /* 00040AC8: */    mr r18,r3
     /* 00040ACC: */    mr r19,r4
     /* 00040AD0: */    bl muAdvSelchrCTask__getTeamCurPos
@@ -3251,6 +3695,8 @@ muAdvSelchrCTask__selCharMain:
     /* 00040B34: */    mr r25,r28
     mr r3,r18              
     mr r4,r27
+    bl __unresolved                          [R_PPC_REL24(40, 1, "muAdvSelchrCTask__getNumTeamMember")]
+    mr r15, r3              # Store numTeamMember
     b __unresolved                                              [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__selCharMain_randomSelect")]
 loc_randomSelectFinished:
     /* 00040B20: */    rlwinm r0,r19,2,0,29
@@ -3259,31 +3705,62 @@ loc_randomSelectFinished:
     /* 00040B30: */    lwz r0,muAdvSelchrCTask_0xC10(r31)
     /* 00040B38: */    cmpw r4,r0
     /* 00040B3C: */    bge- loc_40DA0
-    /* 00040B40: */    lis r17,-0x6DB7
     /* 00040B44: */    # mr r4,r27
-    /* 00040B48: */    addi r0,r17,0x2493
-    /* 00040B4C: */    mulhw r0,r0,r28 # mulhw r0,r0,r3
-    /* 00040B50: */    add r0,r0,r28 # add r0,r0,r3
-    /* 00040B54: */    srawi r5,r0,2
-    /* 00040B58: */    rlwinm r6,r5,1,31,31
-    /* 00040B5C: */    srawi r0,r0,2
-    /* 00040B60: */    add r5,r5,r6
-    /* 00040B64: */    mulli r6,r5,0x7
-    /* 00040B68: */    rlwinm r5,r0,1,31,31
-    /* 00040B6C: */    sub r24,r28,r6 # sub r24,r3,r6
-    /* 00040B70: */    add r23,r0,r5
+
+    /* 00040B40: */    # lis r17,-0x6DB7
+    /* 00040B48: */    # addi r0,r17,0x2493
+    /* 00040B4C: */    # mulhw r0,r0,r28 # mulhw r0,r0,r3
+    /* 00040B50: */    # add r0,r0,r28 # add r0,r0,r3
+    /* 00040B54: */    # srawi r5,r0,2
+    /* 00040B58: */    # rlwinm r6,r5,1,31,31
+    /* 00040B5C: */    # srawi r0,r0,2
+    /* 00040B60: */    # add r5,r5,r6
+    /* 00040B64: */    # mulli r6,r5,0x7
+    /* 00040B68: */    # rlwinm r5,r0,1,31,31
+    /* 00040B6C: */    # sub r24,r28,r6 # sub r24,r3,r6
+    /* 00040B70: */    # add r23,r0,r5
+
+    ## SSEEX: Support for variable number of team members per row
+
+    # IVAR11 = (charCursorPos / numCharPerRow) + (charCursorPos >> 0x1F);
+    # IVAR13 = charCursorPos + (IVAR11 - (IVAR11 >> 0x1f)) * -numCharPerRow;
+    # IVAR11 = IVAR11 - (IVAR11 >> 0x1f);    
+    lis r14,0x0                               [R_PPC_ADDR16_HA(40, 8, "loc_NumberOfMembersPerRow")]
+    lbz r14,0x0(r14)                          [R_PPC_ADDR16_LO(40, 8, "loc_NumberOfMembersPerRow")]
+    divw r10, r28, r14
+    srawi r9,r28,31
+    neg r8,r14
+    add r10,r10,r9
+    srwi r9,r10,31
+    add r23,r9,r10
+    mullw r10,r23,r8
+    add r24,r10,r28
+
+    # int iVar2 = (numTeamMember / numCharPerRow) + (numTeamMember >> 0x1F);
+    # iVar2 = numTeamMember + (iVar2 - (iVar2 >> 0x1f)) * -numCharPerRow;
+    divwu r4,r15,r14
+    srawi r9,r15,31
+    add r4,r4,r9
+    srwi r9,r4,31
+    add r9,r9,r4
+    mullw r9,r9,r8
+    add. r22,r9,r15
+    bne- loc_40BA4
+    mr r22, r14
+
     /* 00040B74: */    # mr r3,r18
     /* 00040B78: */    # bl muAdvSelchrCTask__getNumTeamMember
-    /* 00040B7C: */    addi r0,r17,0x2493
-    /* 00040B80: */    mulhw r0,r0,r15
-    /* 00040B84: */    add r0,r0,r15
-    /* 00040B88: */    srawi r0,r0,2
-    /* 00040B8C: */    rlwinm r4,r0,1,31,31
-    /* 00040B90: */    add r0,r0,r4
-    /* 00040B94: */    mulli r0,r0,0x7
-    /* 00040B98: */    sub. r22,r15,r0
-    /* 00040B9C: */    bne- loc_40BA4
-    /* 00040BA0: */    li r22,0x7
+
+    /* 00040B7C: */    # addi r0,r17,0x2493
+    /* 00040B80: */    # mulhw r0,r0,r15
+    /* 00040B84: */    # add r0,r0,r15
+    /* 00040B88: */    # srawi r0,r0,2
+    /* 00040B8C: */    # rlwinm r4,r0,1,31,31
+    /* 00040B90: */    # add r0,r0,r4
+    /* 00040B94: */    # mulli r0,r0,0x7
+    /* 00040B98: */    # sub. r22,r15,r0
+    /* 00040B9C: */    # bne- loc_40BA4
+    /* 00040BA0: */    # li r22,0x8
 loc_40BA4:
     /* 00040BA4: */    mr r3,r18
     /* 00040BA8: */    mr r4,r27
@@ -3292,7 +3769,7 @@ loc_40BA4:
     /* 00040BB4: */    mr r21,r3
     /* 00040BB8: */    beq- loc_40C14
     /* 00040BBC: */    subi r0,r3,0x1
-    /* 00040BC0: */    li r17,0x7
+    /* 00040BC0: */    mr r17, r14 # li r17,0x7
     /* 00040BC4: */    cmpw r23,r0
     /* 00040BC8: */    blt- loc_40BD0
     /* 00040BCC: */    mr r17,r22
@@ -3320,7 +3797,7 @@ loc_40C14:
     /* 00040C14: */    rlwinm. r0,r30,0,31,31
     /* 00040C18: */    beq- loc_40C70
     /* 00040C1C: */    subi r0,r21,0x1
-    /* 00040C20: */    li r17,0x7
+    /* 00040C20: */    mr r17, r14 # li r17,0x7
     /* 00040C24: */    cmpw r23,r0
     /* 00040C28: */    blt- loc_40C30
     /* 00040C2C: */    mr r17,r22
@@ -3748,12 +4225,12 @@ loc_41204:
 loc_41230:
     /* 00041230: */    li r3,0x1
 loc_41234:
-    /* 00041234: */    addi r11,r1,0xCC
-    /* 00041238: */    lfd f31,0xCC(r1)
-    /* 0004123C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_15")]
-    /* 00041240: */    lwz r0,0xD8(r1)
+    /* 00041234: */    addi r11,r1,0xD0
+    /* 00041238: */    lfd f31,0xD0(r1)
+    /* 0004123C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_14")]
+    /* 00041240: */    lwz r0,0xDC(r1)
     /* 00041244: */    mtlr r0
-    /* 00041248: */    addi r1,r1,0xD4
+    /* 00041248: */    addi r1,r1,0xD8
     /* 0004124C: */    blr
 muAdvSelchrCTask__getDirButtonRepeat:
     /* 00041250: */    mulli r0,r4,0x150
@@ -4404,6 +4881,7 @@ loc_41B28:
     /* 00041B38: */    addi r1,r1,0x10
     /* 00041B3C: */    blr
 muAdvSelchrCTask__mainStepSelectTeamInit:
+    ## SSEEX: Refactor to just reuse functions for identical code (and to support variable number of team members per row)
     /* 00041B40: */    stwu r1,-0x150(r1)
     /* 00041B44: */    mflr r0
     /* 00041B48: */    stw r0,0x154(r1)
@@ -4413,38 +4891,45 @@ muAdvSelchrCTask__mainStepSelectTeamInit:
     /* 00041B58: */    bl muAdvSelchrCTask__prepareTeamPanel
     /* 00041B5C: */    lwz r30,muAdvSelchrCTask_0x938(r28)
     /* 00041B60: */    lwz r29,muAdvSelchrCTask_0x7E4(r28)
+    /* 00041B6C: */    lwz r31,muAdvSelchrCTask_0xC1C(r28)
+
+    mr r3, r28
+    mr r4, r31
+    bl muAdvSelchrCTask__getNumTeamLine
+    /* 00041BC0: */    subi r0,r3,0x1 #subi r0,r4,0x1
+    /* 00041BC4: */    xoris r0,r0,0x8000
+    /* 00041BC8: */    stw r0,0x11C(r1)
+
     /* 00041B64: */    lwz r12,0x0(r30)
     /* 00041B68: */    mr r3,r30
-    /* 00041B6C: */    lwz r31,muAdvSelchrCTask_0xC1C(r28)
+    
     /* 00041B70: */    lwz r12,0x3C(r12)
     /* 00041B74: */    lwz r4,0x10(r29)
     /* 00041B78: */    mtctr r12
     /* 00041B7C: */    bctrl
-    /* 00041B80: */    mulli r5,r31,0xAC
-    /* 00041B84: */    lis r4,-0x6DB7
+    /* 00041B80: */    #mulli r5,r31,0xAC
+    /* 00041B84: */    #lis r4,-0x6DB7
     /* 00041B88: */    lis r0,0x4330
     /* 00041B8C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_9A0")]
     /* 00041B90: */    stw r0,0x118(r1)
-    /* 00041B94: */    add r5,r28,r5
-    /* 00041B98: */    lwz r5,0xE4(r5)
-    /* 00041B9C: */    addi r4,r4,0x2493
+    /* 00041B94: */    #add r5,r28,r5
+    /* 00041B98: */    #lwz r5,0xE4(r5)
+    /* 00041B9C: */    #addi r4,r4,0x2493
     /* 00041BA0: */    lfd f1,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_9A0")]
-    /* 00041BA4: */    mr r3,r29
-    /* 00041BA8: */    addi r0,r5,0x6
-    /* 00041BAC: */    mulhw r4,r4,r0
-    /* 00041BB0: */    add r0,r4,r0
-    /* 00041BB4: */    srawi r0,r0,2
-    /* 00041BB8: */    rlwinm r4,r0,1,31,31
-    /* 00041BBC: */    add r4,r0,r4
-    /* 00041BC0: */    subi r0,r4,0x1
-    /* 00041BC4: */    xoris r0,r0,0x8000
-    /* 00041BC8: */    stw r0,0x11C(r1)
+    /* 00041BA8: */    #addi r0,r5,0x6
+    /* 00041BAC: */    #mulhw r4,r4,r0
+    /* 00041BB0: */    #add r0,r4,r0
+    /* 00041BB4: */    #srawi r0,r0,2
+    /* 00041BB8: */    #rlwinm r4,r0,1,31,31
+    /* 00041BBC: */    #add r4,r0,r4
+    
     /* 00041BCC: */    lfd f0,0x118(r1)
     /* 00041BD0: */    fsubs f1,f0,f1
+    /* 00041BA4: */    mr r3,r29
     /* 00041BD4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameNode")]
     /* 00041BD8: */    cmpwi cr6,r31,0x0
-    /* 00041BDC: */    li r5,0x0
-    /* 00041BE0: */    li r3,0x0
+    /* 00041BDC: */    li r23, 0x0 #li r5,0x0
+    /* 00041BE0: */    li r25, 0x0 #li r3,0x0
     /* 00041BE4: */    ble- cr6,loc_41D8C
     /* 00041BE8: */    cmpwi r31,0x8
     /* 00041BEC: */    subi r8,r31,0x8
@@ -4459,103 +4944,112 @@ muAdvSelchrCTask__mainStepSelectTeamInit:
 loc_41C10:
     /* 00041C10: */    cmpwi r6,0x0
     /* 00041C14: */    beq- loc_41D44
-    /* 00041C18: */    addi r6,r8,0x7
-    /* 00041C1C: */    lis r7,-0x6DB7
-    /* 00041C20: */    rlwinm r6,r6,29,3,31
-    /* 00041C24: */    mr r4,r28
-    /* 00041C28: */    addi r0,r7,0x2493
-    /* 00041C2C: */    mtctr r6
+    /* 00041C18: */    addi r4,r8,0x7 #addi r6,r8,0x7
+    /* 00041C1C: */    #lis r7,-0x6DB7
+    /* 00041C20: */    rlwinm r4,r4,29,3,31 #rlwinm r6,r6,29,3,31
+    /* 00041C24: */    mr r3, r28 #mr r4,r28
+    /* 00041C28: */    #addi r0,r7,0x2493
+    /* 00041C2C: */    #mtctr r6
     /* 00041C30: */    cmpwi r8,0x0
     /* 00041C34: */    ble- loc_41D44
+    bl muAdvSelchrCTask__calcTeamListScrollYPos_helper
+    mr r23, r3
+    mr r25, r4
 loc_41C38:
-    /* 00041C38: */    lwz r6,0xE4(r4)
-    /* 00041C3C: */    addi r3,r3,0x8
-    /* 00041C40: */    lwz r7,0x190(r4)
-    /* 00041C44: */    addi r26,r6,0x6
-    /* 00041C48: */    lwz r6,0x23C(r4)
-    /* 00041C4C: */    addi r24,r7,0x6
-    /* 00041C50: */    lwz r7,0x2E8(r4)
-    /* 00041C54: */    addi r11,r6,0x6
-    /* 00041C58: */    lwz r8,0x440(r4)
-    /* 00041C5C: */    mulhw r27,r0,r26
-    /* 00041C60: */    addi r12,r7,0x6
-    /* 00041C64: */    lwz r7,0x4EC(r4)
-    /* 00041C68: */    addi r10,r8,0x6
-    /* 00041C6C: */    lwz r6,0x394(r4)
-    /* 00041C70: */    addi r8,r7,0x6
-    /* 00041C74: */    mulhw r23,r0,r24
-    /* 00041C78: */    add r26,r27,r26
-    /* 00041C7C: */    addi r9,r6,0x6
-    /* 00041C80: */    lwz r6,0x598(r4)
-    /* 00041C84: */    srawi r27,r26,2
-    /* 00041C88: */    addi r6,r6,0x6
-    /* 00041C8C: */    add r24,r23,r24
-    /* 00041C90: */    rlwinm r23,r27,1,31,31
-    /* 00041C94: */    mulhw r25,r0,r11
-    /* 00041C98: */    addi r4,r4,0x560
-    /* 00041C9C: */    add r22,r27,r23
-    /* 00041CA0: */    srawi r24,r24,2
-    /* 00041CA4: */    add r5,r5,r22
-    /* 00041CA8: */    rlwinm r23,r24,1,31,31
-    /* 00041CAC: */    add r26,r25,r11
-    /* 00041CB0: */    add r22,r24,r23
-    /* 00041CB4: */    mulhw r7,r0,r12
-    /* 00041CB8: */    srawi r27,r26,2
-    /* 00041CBC: */    add r5,r5,r22
-    /* 00041CC0: */    rlwinm r25,r27,1,31,31
-    /* 00041CC4: */    mulhw r11,r0,r9
-    /* 00041CC8: */    add r22,r27,r25
-    /* 00041CCC: */    add r7,r7,r12
-    /* 00041CD0: */    add r5,r5,r22
-    /* 00041CD4: */    srawi r26,r7,2
-    /* 00041CD8: */    add r9,r11,r9
-    /* 00041CDC: */    srawi r12,r9,2
-    /* 00041CE0: */    rlwinm r11,r26,1,31,31
-    /* 00041CE4: */    mulhw r7,r0,r10
-    /* 00041CE8: */    rlwinm r27,r12,1,31,31
-    /* 00041CEC: */    add r22,r26,r11
-    /* 00041CF0: */    add r12,r12,r27
-    /* 00041CF4: */    add r5,r5,r22
-    /* 00041CF8: */    mulhw r9,r0,r8
-    /* 00041CFC: */    add r7,r7,r10
-    /* 00041D00: */    add r5,r5,r12
-    /* 00041D04: */    srawi r10,r7,2
-    /* 00041D08: */    mulhw r7,r0,r6
-    /* 00041D0C: */    rlwinm r11,r10,1,31,31
-    /* 00041D10: */    add r8,r9,r8
-    /* 00041D14: */    add r10,r10,r11
-    /* 00041D18: */    srawi r8,r8,2
-    /* 00041D1C: */    add r5,r5,r10
-    /* 00041D20: */    add r6,r7,r6
-    /* 00041D24: */    rlwinm r9,r8,1,31,31
-    /* 00041D28: */    srawi r6,r6,2
-    /* 00041D2C: */    rlwinm r7,r6,1,31,31
-    /* 00041D30: */    add r8,r8,r9
-    /* 00041D34: */    add r5,r5,r8
-    /* 00041D38: */    add r6,r6,r7
-    /* 00041D3C: */    add r5,r5,r6
-    /* 00041D40: */    bdnz+ loc_41C38
+    /* 00041C38: */    #lwz r6,0xE4(r4)
+    /* 00041C3C: */    #addi r3,r3,0x8
+    /* 00041C40: */    #lwz r7,0x190(r4)
+    /* 00041C44: */    #addi r26,r6,0x6
+    /* 00041C48: */    #lwz r6,0x23C(r4)
+    /* 00041C4C: */    #addi r24,r7,0x6
+    /* 00041C50: */    #lwz r7,0x2E8(r4)
+    /* 00041C54: */    #addi r11,r6,0x6
+    /* 00041C58: */    #lwz r8,0x440(r4)
+    /* 00041C5C: */    #mulhw r27,r0,r26
+    /* 00041C60: */    #addi r12,r7,0x6
+    /* 00041C64: */    #lwz r7,0x4EC(r4)
+    /* 00041C68: */    #addi r10,r8,0x6
+    /* 00041C6C: */    #lwz r6,0x394(r4)
+    /* 00041C70: */    #addi r8,r7,0x6
+    /* 00041C74: */    #mulhw r23,r0,r24
+    /* 00041C78: */    #add r26,r27,r26
+    /* 00041C7C: */    #addi r9,r6,0x6
+    /* 00041C80: */    #lwz r6,0x598(r4)
+    /* 00041C84: */    #srawi r27,r26,2
+    /* 00041C88: */    #addi r6,r6,0x6
+    /* 00041C8C: */    #add r24,r23,r24
+    /* 00041C90: */    #rlwinm r23,r27,1,31,31
+    /* 00041C94: */    #mulhw r25,r0,r11
+    /* 00041C98: */    #addi r4,r4,0x560
+    /* 00041C9C: */    #add r22,r27,r23
+    /* 00041CA0: */    #srawi r24,r24,2
+    /* 00041CA4: */    #add r5,r5,r22
+    /* 00041CA8: */    #rlwinm r23,r24,1,31,31
+    /* 00041CAC: */    #add r26,r25,r11
+    /* 00041CB0: */    #add r22,r24,r23
+    /* 00041CB4: */    #mulhw r7,r0,r12
+    /* 00041CB8: */    #srawi r27,r26,2
+    /* 00041CBC: */    #add r5,r5,r22
+    /* 00041CC0: */    #rlwinm r25,r27,1,31,31
+    /* 00041CC4: */    #mulhw r11,r0,r9
+    /* 00041CC8: */    #add r22,r27,r25
+    /* 00041CCC: */    #add r7,r7,r12
+    /* 00041CD0: */    #add r5,r5,r22
+    /* 00041CD4: */    #srawi r26,r7,2
+    /* 00041CD8: */    #add r9,r11,r9
+    /* 00041CDC: */    #srawi r12,r9,2
+    /* 00041CE0: */    #rlwinm r11,r26,1,31,31
+    /* 00041CE4: */    #mulhw r7,r0,r10
+    /* 00041CE8: */    #rlwinm r27,r12,1,31,31
+    /* 00041CEC: */    #add r22,r26,r11
+    /* 00041CF0: */    #add r12,r12,r27
+    /* 00041CF4: */    #add r5,r5,r22
+    /* 00041CF8: */    #mulhw r9,r0,r8
+    /* 00041CFC: */    #add r7,r7,r10
+    /* 00041D00: */    #add r5,r5,r12
+    /* 00041D04: */    #srawi r10,r7,2
+    /* 00041D08: */    #mulhw r7,r0,r6
+    /* 00041D0C: */    #rlwinm r11,r10,1,31,31
+    /* 00041D10: */    #add r8,r9,r8
+    /* 00041D14: */    #add r10,r10,r11
+    /* 00041D18: */    #srawi r8,r8,2
+    /* 00041D1C: */    #add r5,r5,r10
+    /* 00041D20: */    #add r6,r7,r6
+    /* 00041D24: */    #rlwinm r9,r8,1,31,31
+    /* 00041D28: */    #srawi r6,r6,2
+    /* 00041D2C: */    #rlwinm r7,r6,1,31,31
+    /* 00041D30: */    #add r8,r8,r9
+    /* 00041D34: */    #add r5,r5,r8
+    /* 00041D38: */    #add r6,r6,r7
+    /* 00041D3C: */    #add r5,r5,r6
+    /* 00041D40: */    #bdnz+ loc_41C38
 loc_41D44:
-    /* 00041D44: */    mulli r6,r3,0xAC
-    /* 00041D48: */    lis r4,-0x6DB7
-    /* 00041D4C: */    sub r0,r31,r3
-    /* 00041D50: */    addi r4,r4,0x2493
-    /* 00041D54: */    add r6,r28,r6
-    /* 00041D58: */    mtctr r0
-    /* 00041D5C: */    cmpw r3,r31
+    /* 00041D44: */    #mulli r6,r3,0xAC
+    /* 00041D48: */    #lis r4,-0x6DB7
+    /* 00041D4C: */    sub r26,r31,r25 #sub r0,r31,r3
+    /* 00041D50: */    #addi r4,r4,0x2493
+    /* 00041D54: */    #add r6,r28,r6
+    /* 00041D58: */    #mtctr r0
+    /* 00041D5C: */    cmpw r25,r31 #cmpw r3,r31
     /* 00041D60: */    bge- loc_41D8C
 loc_41D64:
-    /* 00041D64: */    lwz r3,0xE4(r6)
-    /* 00041D68: */    addi r6,r6,0xAC
-    /* 00041D6C: */    addi r0,r3,0x6
-    /* 00041D70: */    mulhw r3,r4,r0
-    /* 00041D74: */    add r0,r3,r0
-    /* 00041D78: */    srawi r0,r0,2
-    /* 00041D7C: */    rlwinm r3,r0,1,31,31
-    /* 00041D80: */    add r0,r0,r3
-    /* 00041D84: */    add r5,r5,r0
-    /* 00041D88: */    bdnz+ loc_41D64
+    mr r3, r28
+    mr r4, r25
+    bl muAdvSelchrCTask__getNumTeamLine
+    addi r25, r25, 0x1
+    addic. r26, r26, -1
+    /* 00041D64: */    #lwz r3,0xE4(r6)
+    /* 00041D68: */    #addi r6,r6,0xAC
+    /* 00041D6C: */    #addi r0,r3,0x6
+    /* 00041D70: */    #mulhw r3,r4,r0
+    /* 00041D74: */    #add r0,r3,r0
+    /* 00041D78: */    #srawi r0,r0,2
+    /* 00041D7C: */    #rlwinm r3,r0,1,31,31
+    /* 00041D80: */    #add r0,r0,r3
+    /* 00041D84: */    add r23, r23, r3 #add r5,r5,r0
+    /* 00041D88: */    bne+ loc_41D64 #bdnz+ loc_41D64
 loc_41D8C:
+    mr r5, r23
     /* 00041D8C: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 5, "loc_17C50")]
     /* 00041D90: */    addi r3,r1,0x10
     /* 00041D94: */    addi r4,r4,0x0                           [R_PPC_ADDR16_LO(40, 5, "loc_17C50")]
@@ -4782,37 +5276,43 @@ loc_420BC:
     /* 000420E0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]
     /* 000420E4: */    lwz r31,muAdvSelchrCTask_0x938(r28)
     /* 000420E8: */    lwz r30,muAdvSelchrCTask_0x7E4(r28)
+    ## SSEEX: Refactor to just reuse functions for identical code (and to support variable number of team members per row)
+    mr r3, r28
+    mr r4, r29
+    bl muAdvSelchrCTask__getNumTeamLine
+    /* 00042144: */    subi r0,r3,0x1 #subi r0,r4,0x1
+    /* 00042148: */    xoris r0,r0,0x8000
+    /* 0004214C: */    stw r0,0xD4(r1)
+
     /* 000420EC: */    lwz r12,0x0(r31)
     /* 000420F0: */    mr r3,r31
     /* 000420F4: */    lwz r4,0x10(r30)
     /* 000420F8: */    lwz r12,0x3C(r12)
     /* 000420FC: */    mtctr r12
     /* 00042100: */    bctrl
-    /* 00042104: */    mulli r5,r29,0xAC
-    /* 00042108: */    lis r4,-0x6DB7
+    /* 00042104: */    #mulli r5,r29,0xAC
+    /* 00042108: */    #lis r4,-0x6DB7
     /* 0004210C: */    lis r0,0x4330
     /* 00042110: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_9A0")]
     /* 00042114: */    stw r0,0xD0(r1)
-    /* 00042118: */    add r5,r28,r5
-    /* 0004211C: */    lwz r5,0xE4(r5)
-    /* 00042120: */    addi r4,r4,0x2493
+    /* 00042118: */    #add r5,r28,r5
+    /* 0004211C: */    #lwz r5,0xE4(r5)
+    /* 00042120: */    #addi r4,r4,0x2493
     /* 00042124: */    lfd f1,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_9A0")]
     /* 00042128: */    mr r3,r30
-    /* 0004212C: */    addi r0,r5,0x6
-    /* 00042130: */    mulhw r4,r4,r0
-    /* 00042134: */    add r0,r4,r0
-    /* 00042138: */    srawi r0,r0,2
-    /* 0004213C: */    rlwinm r4,r0,1,31,31
-    /* 00042140: */    add r4,r0,r4
-    /* 00042144: */    subi r0,r4,0x1
-    /* 00042148: */    xoris r0,r0,0x8000
-    /* 0004214C: */    stw r0,0xD4(r1)
+    /* 0004212C: */    #addi r0,r5,0x6
+    /* 00042130: */    #mulhw r4,r4,r0
+    /* 00042134: */    #add r0,r4,r0
+    /* 00042138: */    #srawi r0,r0,2
+    /* 0004213C: */    #rlwinm r4,r0,1,31,31
+    /* 00042140: */    #add r4,r0,r4
+
     /* 00042150: */    lfd f0,0xD0(r1)
     /* 00042154: */    fsubs f1,f0,f1
     /* 00042158: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameNode")]
     /* 0004215C: */    cmpwi cr6,r29,0x0
-    /* 00042160: */    li r5,0x0
-    /* 00042164: */    li r3,0x0
+    /* 00042160: */    li r23, 0x0 #li r5,0x0
+    /* 00042164: */    li r25, 0x0 #li r3,0x0
     /* 00042168: */    ble- cr6,loc_42310
     /* 0004216C: */    cmpwi r29,0x8
     /* 00042170: */    subi r8,r29,0x8
@@ -4827,103 +5327,112 @@ loc_420BC:
 loc_42194:
     /* 00042194: */    cmpwi r6,0x0
     /* 00042198: */    beq- loc_422C8
-    /* 0004219C: */    addi r6,r8,0x7
-    /* 000421A0: */    lis r7,-0x6DB7
-    /* 000421A4: */    rlwinm r6,r6,29,3,31
-    /* 000421A8: */    mr r4,r28
-    /* 000421AC: */    addi r0,r7,0x2493
-    /* 000421B0: */    mtctr r6
+    /* 0004219C: */    addi r4,r8,0x7 #addi r6,r8,0x7
+    /* 000421A0: */    #lis r7,-0x6DB7
+    /* 000421A4: */    rlwinm r4,r4,29,3,31 #rlwinm r6,r6,29,3,31
+    /* 000421A8: */    mr r3, r28 #mr r4,r28
+    /* 000421AC: */    #addi r0,r7,0x2493
+    /* 000421B0: */    #mtctr r6
     /* 000421B4: */    cmpwi r8,0x0
     /* 000421B8: */    ble- loc_422C8
+    bl muAdvSelchrCTask__calcTeamListScrollYPos_helper
+    mr r23, r3
+    mr r25, r4
 loc_421BC:
-    /* 000421BC: */    lwz r6,0xE4(r4)
-    /* 000421C0: */    addi r3,r3,0x8
-    /* 000421C4: */    lwz r7,0x190(r4)
-    /* 000421C8: */    addi r26,r6,0x6
-    /* 000421CC: */    lwz r6,0x23C(r4)
-    /* 000421D0: */    addi r24,r7,0x6
-    /* 000421D4: */    lwz r7,0x2E8(r4)
-    /* 000421D8: */    addi r11,r6,0x6
-    /* 000421DC: */    lwz r8,0x440(r4)
-    /* 000421E0: */    mulhw r27,r0,r26
-    /* 000421E4: */    addi r12,r7,0x6
-    /* 000421E8: */    lwz r7,0x4EC(r4)
-    /* 000421EC: */    addi r10,r8,0x6
-    /* 000421F0: */    lwz r6,0x394(r4)
-    /* 000421F4: */    addi r8,r7,0x6
-    /* 000421F8: */    mulhw r23,r0,r24
-    /* 000421FC: */    add r26,r27,r26
-    /* 00042200: */    addi r9,r6,0x6
-    /* 00042204: */    lwz r6,0x598(r4)
-    /* 00042208: */    srawi r27,r26,2
-    /* 0004220C: */    addi r6,r6,0x6
-    /* 00042210: */    add r24,r23,r24
-    /* 00042214: */    rlwinm r23,r27,1,31,31
-    /* 00042218: */    mulhw r25,r0,r11
-    /* 0004221C: */    addi r4,r4,0x560
-    /* 00042220: */    add r22,r27,r23
-    /* 00042224: */    srawi r24,r24,2
-    /* 00042228: */    add r5,r5,r22
-    /* 0004222C: */    rlwinm r23,r24,1,31,31
-    /* 00042230: */    add r26,r25,r11
-    /* 00042234: */    add r22,r24,r23
-    /* 00042238: */    mulhw r7,r0,r12
-    /* 0004223C: */    srawi r27,r26,2
-    /* 00042240: */    add r5,r5,r22
-    /* 00042244: */    rlwinm r25,r27,1,31,31
-    /* 00042248: */    mulhw r11,r0,r9
-    /* 0004224C: */    add r22,r27,r25
-    /* 00042250: */    add r7,r7,r12
-    /* 00042254: */    add r5,r5,r22
-    /* 00042258: */    srawi r26,r7,2
-    /* 0004225C: */    add r9,r11,r9
-    /* 00042260: */    srawi r12,r9,2
-    /* 00042264: */    rlwinm r11,r26,1,31,31
-    /* 00042268: */    mulhw r7,r0,r10
-    /* 0004226C: */    rlwinm r27,r12,1,31,31
-    /* 00042270: */    add r22,r26,r11
-    /* 00042274: */    add r12,r12,r27
-    /* 00042278: */    add r5,r5,r22
-    /* 0004227C: */    mulhw r9,r0,r8
-    /* 00042280: */    add r7,r7,r10
-    /* 00042284: */    add r5,r5,r12
-    /* 00042288: */    srawi r10,r7,2
-    /* 0004228C: */    mulhw r7,r0,r6
-    /* 00042290: */    rlwinm r11,r10,1,31,31
-    /* 00042294: */    add r8,r9,r8
-    /* 00042298: */    add r10,r10,r11
-    /* 0004229C: */    srawi r8,r8,2
-    /* 000422A0: */    add r5,r5,r10
-    /* 000422A4: */    add r6,r7,r6
-    /* 000422A8: */    rlwinm r9,r8,1,31,31
-    /* 000422AC: */    srawi r6,r6,2
-    /* 000422B0: */    rlwinm r7,r6,1,31,31
-    /* 000422B4: */    add r8,r8,r9
-    /* 000422B8: */    add r5,r5,r8
-    /* 000422BC: */    add r6,r6,r7
-    /* 000422C0: */    add r5,r5,r6
-    /* 000422C4: */    bdnz+ loc_421BC
+    /* 000421BC: */    #lwz r6,0xE4(r4)
+    /* 000421C0: */    #addi r3,r3,0x8
+    /* 000421C4: */    #lwz r7,0x190(r4)
+    /* 000421C8: */    #addi r26,r6,0x6
+    /* 000421CC: */    #lwz r6,0x23C(r4)
+    /* 000421D0: */    #addi r24,r7,0x6
+    /* 000421D4: */    #lwz r7,0x2E8(r4)
+    /* 000421D8: */    #addi r11,r6,0x6
+    /* 000421DC: */    #lwz r8,0x440(r4)
+    /* 000421E0: */    #mulhw r27,r0,r26
+    /* 000421E4: */    #addi r12,r7,0x6
+    /* 000421E8: */    #lwz r7,0x4EC(r4)
+    /* 000421EC: */    #addi r10,r8,0x6
+    /* 000421F0: */    #lwz r6,0x394(r4)
+    /* 000421F4: */    #addi r8,r7,0x6
+    /* 000421F8: */    #mulhw r23,r0,r24
+    /* 000421FC: */    #add r26,r27,r26
+    /* 00042200: */    #addi r9,r6,0x6
+    /* 00042204: */    #lwz r6,0x598(r4)
+    /* 00042208: */    #srawi r27,r26,2
+    /* 0004220C: */    #addi r6,r6,0x6
+    /* 00042210: */    #add r24,r23,r24
+    /* 00042214: */    #rlwinm r23,r27,1,31,31
+    /* 00042218: */    #mulhw r25,r0,r11
+    /* 0004221C: */    #addi r4,r4,0x560
+    /* 00042220: */    #add r22,r27,r23
+    /* 00042224: */    #srawi r24,r24,2
+    /* 00042228: */    #add r5,r5,r22
+    /* 0004222C: */    #rlwinm r23,r24,1,31,31
+    /* 00042230: */    #add r26,r25,r11
+    /* 00042234: */    #add r22,r24,r23
+    /* 00042238: */    #mulhw r7,r0,r12
+    /* 0004223C: */    #srawi r27,r26,2
+    /* 00042240: */    #add r5,r5,r22
+    /* 00042244: */    #rlwinm r25,r27,1,31,31
+    /* 00042248: */    #mulhw r11,r0,r9
+    /* 0004224C: */    #add r22,r27,r25
+    /* 00042250: */    #add r7,r7,r12
+    /* 00042254: */    #add r5,r5,r22
+    /* 00042258: */    #srawi r26,r7,2
+    /* 0004225C: */    #add r9,r11,r9
+    /* 00042260: */    #srawi r12,r9,2
+    /* 00042264: */    #rlwinm r11,r26,1,31,31
+    /* 00042268: */    #mulhw r7,r0,r10
+    /* 0004226C: */    #rlwinm r27,r12,1,31,31
+    /* 00042270: */    #add r22,r26,r11
+    /* 00042274: */    #add r12,r12,r27
+    /* 00042278: */    #add r5,r5,r22
+    /* 0004227C: */    #mulhw r9,r0,r8
+    /* 00042280: */    #add r7,r7,r10
+    /* 00042284: */    #add r5,r5,r12
+    /* 00042288: */    #srawi r10,r7,2
+    /* 0004228C: */    #mulhw r7,r0,r6
+    /* 00042290: */    #rlwinm r11,r10,1,31,31
+    /* 00042294: */    #add r8,r9,r8
+    /* 00042298: */    #add r10,r10,r11
+    /* 0004229C: */    #srawi r8,r8,2
+    /* 000422A0: */    #add r5,r5,r10
+    /* 000422A4: */    #add r6,r7,r6
+    /* 000422A8: */    #rlwinm r9,r8,1,31,31
+    /* 000422AC: */    #srawi r6,r6,2
+    /* 000422B0: */    #rlwinm r7,r6,1,31,31
+    /* 000422B4: */    #add r8,r8,r9
+    /* 000422B8: */    #add r5,r5,r8
+    /* 000422BC: */    #add r6,r6,r7
+    /* 000422C0: */    #add r5,r5,r6
+    /* 000422C4: */    #bdnz+ loc_421BC
 loc_422C8:
-    /* 000422C8: */    mulli r6,r3,0xAC
-    /* 000422CC: */    lis r4,-0x6DB7
-    /* 000422D0: */    sub r0,r29,r3
-    /* 000422D4: */    addi r4,r4,0x2493
-    /* 000422D8: */    add r6,r28,r6
-    /* 000422DC: */    mtctr r0
-    /* 000422E0: */    cmpw r3,r29
+    /* 000422C8: */    #mulli r6,r3,0xAC
+    /* 000422CC: */    #lis r4,-0x6DB7
+    /* 000422D0: */    sub r26,r29,r25 #sub r0,r29,r3
+    /* 000422D4: */    #addi r4,r4,0x2493
+    /* 000422D8: */    #add r6,r28,r6
+    /* 000422DC: */    #mtctr r0
+    /* 000422E0: */    cmpw r25, r29 #cmpw r3,r29
     /* 000422E4: */    bge- loc_42310
 loc_422E8:
-    /* 000422E8: */    lwz r3,0xE4(r6)
-    /* 000422EC: */    addi r6,r6,0xAC
-    /* 000422F0: */    addi r0,r3,0x6
-    /* 000422F4: */    mulhw r3,r4,r0
-    /* 000422F8: */    add r0,r3,r0
-    /* 000422FC: */    srawi r0,r0,2
-    /* 00042300: */    rlwinm r3,r0,1,31,31
-    /* 00042304: */    add r0,r0,r3
-    /* 00042308: */    add r5,r5,r0
-    /* 0004230C: */    bdnz+ loc_422E8
+    mr r3, r28
+    mr r4, r25
+    bl muAdvSelchrCTask__getNumTeamLine
+    addi r25, r25, 0x1
+    addic. r26, r26, -1
+    /* 000422E8: */    #lwz r3,0xE4(r6)
+    /* 000422EC: */    #addi r6,r6,0xAC
+    /* 000422F0: */    #addi r0,r3,0x6
+    /* 000422F4: */    #mulhw r3,r4,r0
+    /* 000422F8: */    #add r0,r3,r0
+    /* 000422FC: */    #srawi r0,r0,2
+    /* 00042300: */    #rlwinm r3,r0,1,31,31
+    /* 00042304: */    #add r0,r0,r3
+    /* 00042308: */    add r23, r23, r3 #add r5,r5,r0
+    /* 0004230C: */    bne+ loc_422E8 #bdnz+ loc_422E8
 loc_42310:
+    mr r5, r23
     /* 00042310: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 5, "loc_17C50")]
     /* 00042314: */    addi r3,r1,0x8
     /* 00042318: */    addi r4,r4,0x0                           [R_PPC_ADDR16_LO(40, 5, "loc_17C50")]
