@@ -2956,7 +2956,10 @@ loc_4010C:
     nop
     nop
 
-    # +250
+    nop
+    nop
+
+    # +252
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
