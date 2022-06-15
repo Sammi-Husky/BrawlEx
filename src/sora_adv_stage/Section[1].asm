@@ -1,7 +1,6 @@
 .set testAddedMembers, 120
 .set addedMembers, 120
-
-.set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4
+.set maxNumberOfFighters, 40 + addedMembers
 
 .set muAdvSelchrCTask_0x7E4, 0x7E4 + testAddedMembers*4
 .set muAdvSelchrCTask_0x7E8, 0x7E8 + testAddedMembers*4

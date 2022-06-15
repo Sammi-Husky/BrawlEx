@@ -1,5 +1,7 @@
 // Type your code here, or load an example.
 
+#define MAX_NUMBER_OF_FIGHTERS 160
+
 int CHAR_CURSOR_POS = 0x1e;
 int IVAR11 = 0;
 int IVAR13 = 0;
@@ -30,6 +32,8 @@ class muAdvSelchrCTask {
         int field_0x560;
         char _spacer8[0x598 - 0x560 - 0x4];
         unsigned int team8MemberCount;
+
+        char subFighterArray[160];
 
 
 
@@ -121,7 +125,13 @@ int calcTeamListScrollYPos_helper2(muAdvSelchrCTask* menuTask, int iVar3, int iV
 }
 
 int findLocateCursorPosX_helper(int iVar3, int iVar5, unsigned int uVar7) {
-    return uVar7 + (iVar5*(-NUM_CHAR_PER_ROW));
+    return uVar7 + (iVar3*(-NUM_CHAR_PER_ROW));
+}
+
+void initializeSubFighterArray(muAdvSelchrCTask* menuTask) {
+    for (int i = 0; i < MAX_NUMBER_OF_FIGHTERS; i++) {
+        menuTask->subFighterArray[i] = i;
+    }
 }
 
 

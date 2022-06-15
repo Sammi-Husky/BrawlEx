@@ -38,7 +38,7 @@ loc_NumAddedTeamMembers:
 #        .byte 0x25      # Wolf
 #        .byte 0x26      # Snake
         .byte 0x27      # Sonic
-loc_AddedTeamMemberIds:
+loc_AddedTeamMemberCSSIds:
         .byte 0x2E      # Mewtwo
         .byte 0x2D      # Roy
         .byte 0x2F      # Knuckles
@@ -166,3 +166,164 @@ loc_AddedTeamMemberIds:
         .byte 0x00      # 159
 loc_NumberOfMembersPerRow:
         .byte 0x7
+loc_subCharacterCSSIds:
+        .byte 0x00      # 00 - Mario
+        .byte 0x01      # 01 - Donkey Kong
+        .byte 0x02      # 02 - Link
+        .byte 0x03      # 03 - Samus
+        .byte 0x04      # 04 - Zero Suit Samus
+        .byte 0x05      # 05 - Yoshi
+        .byte 0x06      # 06 - Kirby
+        .byte 0x07      # 07 - Fox
+        .byte 0x08      # 08 - Pikachu
+        .byte 0x09      # 09 - Luigi
+        .byte 0x0A      # 10 - Captain Falcon
+        .byte 0x0B      # 11 - Ness
+        .byte 0x0C      # 12 - Bowser
+        .byte 0x0D      # 13 - Peach
+        .byte 0x0E      # 14 - Zelda
+        .byte 0x0F      # 15 - Sheik
+        .byte 0x10      # 16 - Ice Climbers
+        .byte 0x11      # 17 - Marth
+        .byte 0x12      # 18 - Mr. Game and Watch
+        .byte 0x13      # 19 - Falco
+        .byte 0x14      # 20 - Ganondorf
+        .byte 0x35      # 21 - Wario -> Warioman
+        .byte 0x16      # 22 - Meta Knight
+        .byte 0x17      # 23 - Pit
+        .byte 0x18      # 24 - Olimar
+        .byte 0x19      # 25 - Lucas
+        .byte 0x1A      # 26 - Diddy Kong
+        .byte 0x1B      # 27 - Pokemon Trainer
+        .byte 0x1C      # 28 - Charizard
+        .byte 0x1D      # 29 - Squirtle
+        .byte 0x1E      # 30 - Ivysaur
+        .byte 0x1F      # 31 - Dedede
+        .byte 0x20      # 32 - Lucario
+        .byte 0x21      # 33 - Ike
+        .byte 0x22      # 34 - R.O.B.
+        .byte 0x23      # 35 - Jigglypuff
+        .byte 0x24      # 36 - Toon Link 
+        .byte 0x25      # 37 - Wolf
+        .byte 0x26      # 38 - Snake
+        .byte 0x27      # 39 - Sonic
+        .byte 0x28      # 40
+        .byte 0x29      # 41
+        .byte 0x2A      # 42
+        .byte 0x2B      # 43
+        .byte 0x2C      # 44
+        .byte 0x2D      # 45 - Roy
+        .byte 0x2E      # 46 - Mewtwo
+        .byte 0x2F      # 47 - Knuckles
+        .byte 0x30      # 48
+        .byte 0x31      # 49
+        .byte 0x32      # 50 - Ridley
+        .byte 0x33      # 51
+        .byte 0x34      # 52
+        .byte 0x35      # 53
+        .byte 0x36      # 54
+        .byte 0x37      # 55
+        .byte 0x38      # 56
+        .byte 0x39      # 57
+        .byte 0x3A      # 58
+        .byte 0x3B      # 59
+        .byte 0x3C      # 60
+        .byte 0x3D      # 61
+        .byte 0x3E      # 62
+        .byte 0x3F      # 63
+        .byte 0x40      # 64 - Dark Samus
+        .byte 0x41      # 65
+        .byte 0x42      # 66
+        .byte 0x43      # 67
+        .byte 0x44      # 68
+        .byte 0x45      # 69
+        .byte 0x46      # 70
+        .byte 0x47      # 71
+        .byte 0x48      # 72
+        .byte 0x49      # 73
+        .byte 0x4A      # 74
+        .byte 0x4B      # 75
+        .byte 0x4C      # 76
+        .byte 0x4D      # 77
+        .byte 0x4E      # 78
+        .byte 0x4F      # 79
+        .byte 0x50      # 80
+        .byte 0x51      # 81
+        .byte 0x52      # 82
+        .byte 0x53      # 83
+        .byte 0x54      # 84
+        .byte 0x55      # 85
+        .byte 0x56      # 86
+        .byte 0x57      # 87
+        .byte 0x58      # 88
+        .byte 0x59      # 89
+        .byte 0x5A      # 90
+        .byte 0x5B      # 91
+        .byte 0x5C      # 92
+        .byte 0x5D      # 93
+        .byte 0x5E      # 94
+        .byte 0x5F      # 95
+        .byte 0x60      # 96
+        .byte 0x61      # 97
+        .byte 0x62      # 98
+        .byte 0x63      # 99
+        .byte 0x64      # 100
+        .byte 0x65      # 101
+        .byte 0x66      # 102
+        .byte 0x67      # 103 
+        .byte 0x68      # 104
+        .byte 0x69      # 105
+        .byte 0x6A      # 106
+        .byte 0x6B      # 107
+        .byte 0x6C      # 108
+        .byte 0x6D      # 109
+        .byte 0x6E      # 110
+        .byte 0x6F      # 111
+        .byte 0x70      # 112
+        .byte 0x71      # 113
+        .byte 0x72      # 114
+        .byte 0x73      # 115
+        .byte 0x74      # 116
+        .byte 0x75      # 117
+        .byte 0x76      # 118
+        .byte 0x77      # 119
+        .byte 0x78      # 120
+        .byte 0x79      # 121
+        .byte 0x7A      # 122
+        .byte 0x7B      # 123
+        .byte 0x7C      # 124
+        .byte 0x7D      # 125
+        .byte 0x7E      # 126
+        .byte 0x7F      # 127
+        .byte 0x80      # 128
+        .byte 0x81      # 129
+        .byte 0x82      # 130
+        .byte 0x83      # 131
+        .byte 0x84      # 132
+        .byte 0x85      # 133
+        .byte 0x86      # 134
+        .byte 0x87      # 135
+        .byte 0x88      # 136
+        .byte 0x89      # 137
+        .byte 0x8A      # 138
+        .byte 0x8B      # 139
+        .byte 0x8C      # 140
+        .byte 0x8D      # 141
+        .byte 0x8E      # 142
+        .byte 0x8F      # 143
+        .byte 0x90      # 144
+        .byte 0x91      # 145
+        .byte 0x92      # 146
+        .byte 0x93      # 147
+        .byte 0x94      # 148
+        .byte 0x95      # 149
+        .byte 0x96      # 150
+        .byte 0x97      # 151
+        .byte 0x98      # 152
+        .byte 0x99      # 153
+        .byte 0x9A      # 154
+        .byte 0x9B      # 155
+        .byte 0x9C      # 156
+        .byte 0x9D      # 157
+        .byte 0x9E      # 158
+        .byte 0x9F      # 159

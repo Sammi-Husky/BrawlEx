@@ -20,6 +20,9 @@
 .set Data8F8_0xD4, Data8F8_0xD0 + 0x4
 .set Data8F8_0xD8, Data8F8_0xD4 + 0x4
 
+.set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4 + maxNumberOfFighters # original size + number of new muObjects + number of characters for sub character selection 
+.set muAdvSelchrCTask_SubFighterCSSIdArray, 0xC60 + 3*addedMembers*4
+
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
     /* 0003DDF0: */    mflr r0
@@ -249,6 +252,17 @@ loc_3DFA8:
     /* 0003E164: */    stw r4,muAdvSelchrCTask_0xC0C(r30)
     /* 0003E168: */    stw r4,muAdvSelchrCTask_0xC10(r30)
     /* 0003E16C: */    stw r4,muAdvSelchrCTask_0xC14(r30)
+
+    ## SSEEX: Initialize array to keep track of sub fighter CSS id
+    addi r6, r30, muAdvSelchrCTask_SubFighterCSSIdArray
+    li r10, maxNumberOfFighters
+    li r9, 0
+    mtctr r10
+loc_initializeFighterCSSIdArray: 
+    stbx r9,r6,r9   # \ Current sub id is just the main id at the start hence storing and incrementing from 0 to maxNumberOfFighters
+    addi r9,r9,1    # /
+    bdnz loc_initializeFighterCSSIdArray
+    
     /* 0003E170: */    lwz r31,0xC(r1)
     /* 0003E174: */    lwz r30,0x8(r1)
     /* 0003E178: */    lwz r0,0x14(r1)
@@ -1054,8 +1068,8 @@ loc_addExTeamMembers:
     lbz r5,0x0(r12)        [R_PPC_ADDR16_LO(40, 8, "loc_NumAddedTeamMembers")] # Get Number of additional team members 
     
     lwz r3, 0xe4(r29)      # Get current team members
-    lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberIds")]
-    addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberIds")]
+    lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
+    addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
     
     cmpwi r14, 0x1         # Check if override
     bne- loc_notOverride 
@@ -1283,27 +1297,32 @@ muAdvSelchrCTask__getTeamMemberDetail:
     /* 0003EE6C: */    add r4,r3,r4
     /* 0003EE70: */    add r4,r4,r0
     /* 0003EE74: */    # lwz r0,0x44(r4)
-    lbz r0,0x44(r4)                                # SSEEX: Load team member as byte instead of word
-    /* 0003EE78: */    cmpwi r0,0x1B
-    /* 0003EE7C: */    bne- loc_3EE88
-    /* 0003EE80: */    lwz r3,muAdvSelchrCTask_0xC30(r3)
-    /* 0003EE84: */    blr
+    lbz r4,0x44(r4)                                # SSEEX: Load team member as byte instead of word
+loc_swapIDForSubID:
+    /* 0003EE78: */    cmpwi r4,0x1B #cmpwi r0,0x1B
+    /* 0003EE7C: */    #bne- loc_3EE88
+    /* 0003EE80: */    #lwz r3,muAdvSelchrCTask_0xC30(r3)
+    /* 0003EE84: */    #blr
 loc_3EE88:
     /* 0003EE88: */    bne- loc_3EE94
     /* 0003EE8C: */    lwz r3,muAdvSelchrCTask_0xC30(r3)
     /* 0003EE90: */    blr
 loc_3EE94:
-    /* 0003EE94: */    cmpwi r0,0xE
+    /* 0003EE94: */    cmpwi r4,0xE #cmpwi r0,0xE
     /* 0003EE98: */    bne- loc_3EEA4
     /* 0003EE9C: */    lwz r3,muAdvSelchrCTask_0xC34(r3)
     /* 0003EEA0: */    blr
 loc_3EEA4:
-    /* 0003EEA4: */    cmpwi r0,0x3
+    /* 0003EEA4: */    cmpwi r4,0x3 #cmpwi r0,0x3
     /* 0003EEA8: */    bne- loc_3EEB4
     /* 0003EEAC: */    lwz r3,muAdvSelchrCTask_0xC38(r3)
     /* 0003EEB0: */    blr
 loc_3EEB4:
-    /* 0003EEB4: */    mr r3,r0
+    ## SSEEX: Get subfighter id from sub fighter CSS id array
+    addi r3, r3, muAdvSelchrCTask_SubFighterCSSIdArray
+    lbzx r3, r3, r4
+
+    /* 0003EEB4: */    #mr r3,r0
     /* 0003EEB8: */    blr
 muAdvSelchrCTask__attachMemberToTeamPanel:
     /* 0003EEBC: */    stwu r1,-0x60(r1)
@@ -2958,8 +2977,54 @@ loc_4010C:
 
     nop
     nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
 
-    # +252
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    
+    nop
+    nop
+    nop
+    nop
+
+    # +294
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -3938,13 +4003,13 @@ loc_40DA0:
     /* 00040DAC: */    mr r3,r18
     /* 00040DB0: */    mr r5,r25
     /* 00040DB4: */    bl muAdvSelchrCTask__getTeamMember
-    /* 00040DB8: */    cmpwi r3,0x1B
     /* 00040DBC: */    mr r21,r3
-    /* 00040DC0: */    beq- loc_40DD4
-    /* 00040DC4: */    cmpwi r3,0xE
-    /* 00040DC8: */    beq- loc_40DD4
-    /* 00040DCC: */    cmpwi r3,0x3
-    /* 00040DD0: */    bne- loc_40F24
+    /* 00040DB8: */    #cmpwi r3,0x1B
+    /* 00040DC0: */    #beq- loc_40DD4
+    /* 00040DC4: */    #cmpwi r3,0xE
+    /* 00040DC8: */    #beq- loc_40DD4
+    /* 00040DCC: */    #cmpwi r3,0x3
+    /* 00040DD0: */    #bne- loc_40F24
 loc_40DD4:
     /* 00040DD4: */    mr r3,r18
     /* 00040DD8: */    mr r4,r19
@@ -3967,13 +4032,26 @@ loc_40E10:
     /* 00040E14: */    beq- loc_40F24
     /* 00040E18: */    cmpwi r21,0xE
     /* 00040E1C: */    beq- loc_40E78
-    /* 00040E20: */    bge- loc_40E30
+    /* 00040E20: */    #bge- loc_40E30
     /* 00040E24: */    cmpwi r21,0x3
     /* 00040E28: */    beq- loc_40EB4
-    /* 00040E2C: */    b loc_40EEC
+    /* 00040E2C: */    #b loc_40EEC
 loc_40E30:
     /* 00040E30: */    cmpwi r21,0x1B
     /* 00040E34: */    beq- loc_40E3C
+
+    ## SSEEX: Update sub fighter CSS id
+    addi r4, r18, muAdvSelchrCTask_SubFighterCSSIdArray
+    lbzx r3, r4, r21
+    cmpw r3, r21            # Check if sub id is the same as main id
+    mr r5, r21
+    bne+ loc_updateSubFighterCSSId
+    lis r12,0x0                               [R_PPC_ADDR16_HA(40, 8, "loc_subCharacterCSSIds")]
+    addi r12,r12,0x0                          [R_PPC_ADDR16_LO(40, 8, "loc_subCharacterCSSIds")]
+    lbzx r5, r12, r21       # Load alt id from data section
+loc_updateSubFighterCSSId:
+    stbx r5, r4, r21
+    
     /* 00040E38: */    b loc_40EEC
 loc_40E3C:
     /* 00040E3C: */    subi r0,r17,0x1
@@ -4519,24 +4597,27 @@ loc_415E8:
     #nop                                                 # 
     /* 000415F0: */    add r3,r26,r0
     /* 000415F4: */    # lwz r3,0x44(r3)
-    lbz r3,0x44(r3)                                     # SSEEX: Load team member as byte instead of word
-    /* 000415F8: */    cmpwi r3,0x1B
-    /* 000415FC: */    bne- loc_41608
-    /* 00041600: */    lwz r3,muAdvSelchrCTask_0xC30(r28)
-    /* 00041604: */    b loc_41630
-loc_41608:
-    /* 00041608: */    bne- loc_41614
-    /* 0004160C: */    lwz r3,muAdvSelchrCTask_0xC30(r28)
-    /* 00041610: */    b loc_41630
-loc_41614:
-    /* 00041614: */    cmpwi r3,0xE
-    /* 00041618: */    bne- loc_41624
-    /* 0004161C: */    lwz r3,muAdvSelchrCTask_0xC34(r28)
-    /* 00041620: */    b loc_41630
-loc_41624:
-    /* 00041624: */    cmpwi r3,0x3
-    /* 00041628: */    bne- loc_41630
-    /* 0004162C: */    lwz r3,muAdvSelchrCTask_0xC38(r28)
+    lbz r4,0x44(r3)                                     # SSEEX: Load team member as byte instead of word
+    mr r3, r28
+    bl loc_swapIDForSubID                               # SSEEX: Redirect to function to eliminate duplicate code
+    /* 000415F8: */    #cmpwi r3,0x1B
+    /* 000415FC: */    #bne- loc_41608
+    /* 00041600: */    ##lwz r3,muAdvSelchrCTask_0xC30(r28)
+    /* 00041604: */    ##b loc_41630
+#loc_41608:
+    /* 00041608: */    #bne- loc_41614
+    /* 0004160C: */    #lwz r3,muAdvSelchrCTask_0xC30(r28)
+    /* 00041610: */    #b loc_41630
+#loc_41614:
+    /* 00041614: */    #cmpwi r3,0xE
+    /* 00041618: */    #bne- loc_41624
+    /* 0004161C: */    #lwz r3,muAdvSelchrCTask_0xC34(r28)
+    /* 00041620: */    #b loc_41630
+#loc_41624:
+    /* 00041624: */    #cmpwi r3,0x3
+    /* 00041628: */    #bne- loc_storeSubIdResult1
+    /* 0004162C: */    #lwz r3,muAdvSelchrCTask_0xC38(r28)
+
 loc_41630:
     /* 00041630: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
     /* 00041634: */    cmpwi r3,0x1B
@@ -4580,27 +4661,29 @@ loc_416B8:
     #nop                                                 # 
     /* 000416BC: */    add r3,r3,r0
     /* 000416C0: */    # lwz r0,0x44(r3)
-    lbz r0,0x44(r3)                                     # SSEEX: Load team member as byte instead of word
-    /* 000416C4: */    cmpwi r0,0x1B
-    /* 000416C8: */    bne- loc_416D4
-    /* 000416CC: */    lwz r0,muAdvSelchrCTask_0xC30(r28)
-    /* 000416D0: */    b loc_416FC
+    lbz r4,0x44(r3)                                     # SSEEX: Load team member as byte instead of word
+    mr r3, r28
+    bl loc_swapIDForSubID                               # SSEEX: Redirect to function to eliminate duplicate code
+    /* 000416C4: */    #cmpwi r0,0x1B
+    /* 000416C8: */    #bne- loc_416D4
+    /* 000416CC: */    ##lwz r0,muAdvSelchrCTask_0xC30(r28)
+    /* 000416D0: */    ##b loc_416FC
 loc_416D4:
-    /* 000416D4: */    bne- loc_416E0
-    /* 000416D8: */    lwz r0,muAdvSelchrCTask_0xC30(r28)
-    /* 000416DC: */    b loc_416FC
+    /* 000416D4: */    #bne- loc_416E0
+    /* 000416D8: */    #lwz r0,muAdvSelchrCTask_0xC30(r28)
+    /* 000416DC: */    #b loc_416FC
 loc_416E0:
-    /* 000416E0: */    cmpwi r0,0xE
-    /* 000416E4: */    bne- loc_416F0
-    /* 000416E8: */    lwz r0,muAdvSelchrCTask_0xC34(r28)
-    /* 000416EC: */    b loc_416FC
+    /* 000416E0: */    #cmpwi r0,0xE
+    /* 000416E4: */    #bne- loc_416F0
+    /* 000416E8: */    #lwz r0,muAdvSelchrCTask_0xC34(r28)
+    /* 000416EC: */    #b loc_416FC
 loc_416F0:
-    /* 000416F0: */    cmpwi r0,0x3
-    /* 000416F4: */    bne- loc_416FC
-    /* 000416F8: */    lwz r0,muAdvSelchrCTask_0xC38(r28)
+    /* 000416F0: */    #cmpwi r0,0x3
+    /* 000416F4: */    #bne- loc_416FC
+    /* 000416F8: */    #lwz r0,muAdvSelchrCTask_0xC38(r28)
 loc_416FC:
-    /* 000416FC: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041700: */    stw r0,0x54(r3)
+    /* 000416FC: */    lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041700: */    stw r3,0x54(r4) #stw r0,0x54(r3)
     /* 00041704: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041708: */    lwz r3,0x54(r3)
     /* 0004170C: */    cmpwi r3,0x1B
@@ -4624,29 +4707,31 @@ loc_41740:
     /* 00041748: */    addi r26,r3,0x44
     /* 0004174C: */    # rlwinm r0,r0,2,0,29
     /* 00041750: */    # lwzx r0,r26,r0
-    #nop                                                         #
-    lbzx r0,r26,r0                                              # SSEEX
-    /* 00041754: */    cmpwi r0,0x1B
-    /* 00041758: */    bne- loc_41764
-    /* 0004175C: */    lwz r0,muAdvSelchrCTask_0xC30(r28)
-    /* 00041760: */    b loc_4178C
+    #nop                                                        #
+    lbzx r4,r26,r0                                              # SSEEX: Load CSS id as byte instead of word
+    mr r3, r28
+    bl loc_swapIDForSubID                               # SSEEX: Redirect to function to eliminate duplicate code
+    /* 00041754: */    #cmpwi r0,0x1B
+    /* 00041758: */    #bne- loc_41764
+    /* 0004175C: */    ##lwz r0,muAdvSelchrCTask_0xC30(r28)
+    /* 00041760: */    ##b loc_4178C
 loc_41764:
-    /* 00041764: */    bne- loc_41770
-    /* 00041768: */    lwz r0,muAdvSelchrCTask_0xC30(r28)
-    /* 0004176C: */    b loc_4178C
+    /* 00041764: */    #bne- loc_41770
+    /* 00041768: */    #lwz r0,muAdvSelchrCTask_0xC30(r28)
+    /* 0004176C: */    #b loc_4178C
 loc_41770:
-    /* 00041770: */    cmpwi r0,0xE
-    /* 00041774: */    bne- loc_41780
-    /* 00041778: */    lwz r0,muAdvSelchrCTask_0xC34(r28)
-    /* 0004177C: */    b loc_4178C
+    /* 00041770: */    #cmpwi r0,0xE
+    /* 00041774: */    #bne- loc_41780
+    /* 00041778: */    #lwz r0,muAdvSelchrCTask_0xC34(r28)
+    /* 0004177C: */    #b loc_4178C
 loc_41780:
-    /* 00041780: */    cmpwi r0,0x3
-    /* 00041784: */    bne- loc_4178C
-    /* 00041788: */    lwz r0,muAdvSelchrCTask_0xC38(r28)
+    /* 00041780: */    #cmpwi r0,0x3
+    /* 00041784: */    #bne- loc_4178C
+    /* 00041788: */    #lwz r0,muAdvSelchrCTask_0xC38(r28)
 loc_4178C:
     /* 0004178C: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041794: */    stw r3,0x60(r4) #stw r0,0x60(r4)
     /* 00041790: */    mr r3,r30
-    /* 00041794: */    stw r0,0x60(r4)
     /* 00041798: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
     /* 0004179C: */    rlwinm r0,r3,1,31,31
     /* 000417A0: */    xori r0,r0,0x1
@@ -4661,27 +4746,30 @@ loc_417C0:
     /* 000417C0: */    lwz r0,muAdvSelchrCTask_0xC0C(r28)
 loc_417C4:
     /* 000417C4: */    rlwinm r0,r0,2,0,29
-    /* 000417C8: */    lwzx r0,r26,r0
-    /* 000417CC: */    cmpwi r0,0x1B
-    /* 000417D0: */    bne- loc_417DC
-    /* 000417D4: */    lwz r0,muAdvSelchrCTask_0xC30(r28)
-    /* 000417D8: */    b loc_41804
+    /* 000417C8: */    #lwzx r0,r26,r0
+    lbzx r4,r26,r0                                      # SSEEX: Load CSS id as byte instead of word
+    mr r3, r28
+    bl loc_swapIDForSubID                               # SSEEX: Redirect to function to eliminate duplicate code
+    /* 000417CC: */    #cmpwi r0,0x1B
+    /* 000417D0: */    #bne- loc_417DC
+    /* 000417D4: */    ##lwz r0,muAdvSelchrCTask_0xC30(r28)
+    /* 000417D8: */    ##b loc_41804
 loc_417DC:
-    /* 000417DC: */    bne- loc_417E8
-    /* 000417E0: */    lwz r0,muAdvSelchrCTask_0xC30(r28)
-    /* 000417E4: */    b loc_41804
+    /* 000417DC: */    #bne- loc_417E8
+    /* 000417E0: */    #lwz r0,muAdvSelchrCTask_0xC30(r28)
+    /* 000417E4: */    #b loc_41804
 loc_417E8:
-    /* 000417E8: */    cmpwi r0,0xE
-    /* 000417EC: */    bne- loc_417F8
-    /* 000417F0: */    lwz r0,muAdvSelchrCTask_0xC34(r28)
-    /* 000417F4: */    b loc_41804
+    /* 000417E8: */    #cmpwi r0,0xE
+    /* 000417EC: */    #bne- loc_417F8
+    /* 000417F0: */    #lwz r0,muAdvSelchrCTask_0xC34(r28)
+    /* 000417F4: */    #b loc_41804
 loc_417F8:
-    /* 000417F8: */    cmpwi r0,0x3
-    /* 000417FC: */    bne- loc_41804
-    /* 00041800: */    lwz r0,muAdvSelchrCTask_0xC38(r28)
+    /* 000417F8: */    #cmpwi r0,0x3
+    /* 000417FC: */    #bne- loc_41804
+    /* 00041800: */    #lwz r0,muAdvSelchrCTask_0xC38(r28)
 loc_41804:
-    /* 00041804: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041808: */    stw r0,0x64(r3)
+    /* 00041804: */    lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041808: */    stw r3,0x64(r4) #stw r0,0x64(r3)
     /* 0004180C: */    b loc_4181C
 loc_41810:
     /* 00041810: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
