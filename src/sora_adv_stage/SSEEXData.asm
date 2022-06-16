@@ -179,7 +179,7 @@ loc_subCharacterCSSIds:
         .byte 0x09      # 09 - Luigi
         .byte 0x0A      # 10 - Captain Falcon
         .byte 0x0B      # 11 - Ness
-        .byte 0x0C      # 12 - Bowser
+        .byte 0x30      # 12 - Bowser -> Giga Bowser
         .byte 0x0D      # 13 - Peach
         .byte 0x0E      # 14 - Zelda
         .byte 0x0F      # 15 - Sheik
