@@ -1,15 +1,13 @@
 
-# TODO: Fix trophies
 # TODO: Force setMenuData to pop up to select fighters? (will probs get overidden by selection)
 
+# TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
 # TODO: Fix Great Maze savepoint stocks for Ex fighters
-# TODO: Investigate C-Stick sub characters
-## Expand muAdvSelchrCTask to have area to keep track of current id
-## SSEEX data section to define alt id (0x1B is none)
 # TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
 ## e.g. 047001 40   047001 36   FFFFFF 35 (with FFFFFF is whether Great Maze has been unlocked)
 ## Then after write to bit section of module if level id corresponds and flip bit on based on character id and then save part of section to a file on save
 ## Better yet, do it based on level id where 99Y9XXl where XX decides the character ID to unlock
+## Ideally could find space in advSaveData somewhere when sd saving becomes a thing
 # TODO: Levels that lock the character based on YYYYXXm is the character to lock to and (n is when this ends)?
 loc_stAdventure2__changeStep_addSequenceIndex:
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]

@@ -55,8 +55,22 @@
       "Expand": false,
       "ExpandSize": 0
     },
-    null,
-    null,
+    {
+      "Path": "SSEEX.asm",
+      "SectionID": 7,
+      "HasCode": true,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "SSEEXData.asm",
+      "SectionID": 8,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
     null,
     null,
     null,

@@ -265,6 +265,8 @@ loc_3A8:
 loc_3F0:
     /* 000003F0: */    li r28,0x0
     /* 000003F4: */    li r29,0x0
+    lis r26, 0x9018         # \
+    lwz r26, 0x1330(r26)    # / Get GameGlobal->advSaveData
     /* 000003F8: */    b loc_434
 loc_3FC:
     /* 000003FC: */    lwz r12,0x0(r27)
@@ -272,9 +274,11 @@ loc_3FC:
     /* 00000404: */    lwz r12,0x18(r12)
     /* 00000408: */    mtctr r12
     /* 0000040C: */    bctrl
-    /* 00000410: */    add r4,r30,r29
-    /* 00000414: */    stw r3,0x1B8(r4)
-    /* 00000418: */    mr r3,r27
+    bl __unresolved                          [R_PPC_REL24(33, 7, "loc_muAdvGameOverTask____ct_exFighterTrophies")]
+    /* 00000410: */    #add r4,r30,r29
+    /* 00000414: */    #stw r3,0x1B8(r4)
+    /* 00000418: */    #mr r3,r27
+loc_exFighterTrophiesFinished:
     /* 0000041C: */    lwz r12,0x0(r27)
     /* 00000420: */    lwz r12,0x20(r12)
     /* 00000424: */    mtctr r12
