@@ -183,7 +183,7 @@ loc_subCharacterCSSIds:
         .byte 0x0D      # 13 - Peach
         .byte 0x0E      # 14 - Zelda
         .byte 0x0F      # 15 - Sheik
-        .byte 0x10      # 16 - Ice Climbers
+        .byte 0x37      # 16 - Ice Climbers -> Sopo
         .byte 0x11      # 17 - Marth
         .byte 0x12      # 18 - Mr. Game and Watch
         .byte 0x13      # 19 - Falco
@@ -327,3 +327,86 @@ loc_subCharacterCSSIds:
         .byte 0x9D      # 157
         .byte 0x9E      # 158
         .byte 0x9F      # 159
+        .byte 0xA0      # 160
+        .byte 0xA1      # 161
+        .byte 0xA2      # 162
+        .byte 0xA3      # 163
+        .byte 0xA4      # 164
+        .byte 0xA5      # 165
+        .byte 0xA6      # 166
+        .byte 0xA7      # 167
+        .byte 0xA8      # 168
+        .byte 0xA9      # 169
+        .byte 0xAA      # 170
+        .byte 0xAB      # 171
+        .byte 0xAC      # 172
+        .byte 0xAD      # 173
+        .byte 0xAE      # 174
+        .byte 0xAF      # 175
+        .byte 0xB0      # 176
+        .byte 0xB1      # 177
+        .byte 0xB2      # 178
+        .byte 0xB3      # 179
+        .byte 0xB4      # 180
+        .byte 0xB5      # 181
+        .byte 0xB6      # 182
+        .byte 0xB7      # 183
+        .byte 0xB8      # 184
+        .byte 0xB9      # 185
+        .byte 0xBA      # 186
+        .byte 0xBB      # 187
+        .byte 0xBC      # 188
+        .byte 0xBD      # 189
+        .byte 0xBE      # 190
+        .byte 0xBF      # 191
+        .byte 0xC0      # 192
+        .byte 0xC1      # 193
+        .byte 0xC2      # 194
+        .byte 0xC3      # 195
+        .byte 0xC4      # 196
+        .byte 0xC5      # 197
+        .byte 0xC6      # 198
+        .byte 0xC7      # 199
+        .byte 0xC8      # 200
+        .byte 0xC9      # 201
+        .byte 0xCA      # 202
+        .byte 0xCB      # 203
+        .byte 0xCC      # 204
+        .byte 0xCD      # 205
+        .byte 0xCE      # 206
+        .byte 0xCF      # 207
+        .byte 0xD0      # 208
+        .byte 0xD1      # 209
+        .byte 0xD2      # 210
+        .byte 0xD3      # 211
+        .byte 0xD4      # 212
+        .byte 0xD5      # 213
+        .byte 0xD6      # 214
+        .byte 0xD7      # 215
+        .byte 0xD8      # 216
+        .byte 0xD9      # 217
+        .byte 0xDA      # 218
+        .byte 0xDB      # 219
+        .byte 0xDC      # 220
+        .byte 0xDD      # 221
+        .byte 0xDE      # 222
+        .byte 0xDF      # 223
+        .byte 0xE0      # 224
+        .byte 0xE1      # 225
+        .byte 0xE2      # 226
+        .byte 0xE3      # 227
+        .byte 0xE4      # 228
+        .byte 0xE5      # 229
+        .byte 0xE6      # 230
+        .byte 0xE7      # 231
+        .byte 0xE8      # 232
+        .byte 0xE9      # 233
+        .byte 0xEA      # 234
+        .byte 0xEB      # 235
+        .byte 0xEC      # 236
+        .byte 0xED      # 237
+        .byte 0xEE      # 238
+        .byte 0xEF      # 239
+        .byte 0xF0      # 240
+        .byte 0xF1      # 241
+        .byte 0xF2      # 242
