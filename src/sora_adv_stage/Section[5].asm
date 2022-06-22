@@ -3061,7 +3061,7 @@ loc_2AC8:
         .4byte 0x00000000
         .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "stActTriggerEnemyPop__userProc")]
         .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "stActTriggerEnemyPop____dt")]
-        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "stAdventureMenuSavepoint__processBegin")]
+        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "stActTriggerEnemyPop__updateBegin")]
         .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "stTriggerCB__updateFixPosition")]
         .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "stActTriggerEnemyPop__updateEnd")]
 loc_2AE4:
@@ -3937,7 +3937,7 @@ loc_37BC:
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_3848")]
         .4byte 0x00000000
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processDefault")]
-        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "loc_1777C")]
+        .4byte 0x00000000         [R_PPC_ADDR32(40, 1, "stAdventureMenuSavepoint__processBegin")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processAnim")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processUpdate")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processPreMapCorrection")]

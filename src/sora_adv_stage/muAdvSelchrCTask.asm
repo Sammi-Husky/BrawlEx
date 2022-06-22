@@ -42,11 +42,32 @@ muAdvSelchrCTask__create:
     /* 0003DE28: */    bl muAdvSelchrCTask____ct
     /* 0003DE2C: */    mr r31,r3
 loc_3DE30:
+    ## SSEEX: Put back level clear flag (as it was previously modified by muAdvDifficultyTask__mainStepSelectedMain if override was selected
+    lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    addi r12, r12, 0x0                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    lbz r4,0x0(r12)                         
+    cmpwi r4, 0x1
+    blt+ loc_noResetLevelClear
+    bne- loc_finishedSettingOverrideState
+    li r4, 0x2                          # Set flag to 2 to ensure level clear flag can't get reset again when a muAdvSelchrCTask is created (i.e. only will happen on map screen)
+    stb r4,0x0(r12)                         
+loc_finishedSettingOverrideState:    
+    lwz r10,-0x8(r12)                         
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r4,-0x4(r12)        # |
+    mulli r0,r10,0x14       # |
+    lwz r3,0x30(r3)         # | gameGlobal->advSaveData->levelSaveData[selectedLevel].clearFlag = 4
+    add r3,r3,r0            # |
+    stw r4,0x4(r3)          # /
+loc_noResetLevelClear:
+
     /* 0003DE30: */    mr r3,r31
     /* 0003DE34: */    mr r4,r28
     /* 0003DE38: */    mr r5,r29
     /* 0003DE3C: */    mr r6,r30
     /* 0003DE40: */    bl muAdvSelchrCTask__loc_3E418
+
     /* 0003DE44: */    mr r3,r31
     /* 0003DE48: */    lwz r31,0x1C(r1)
     /* 0003DE4C: */    lwz r30,0x18(r1)
@@ -644,10 +665,14 @@ muAdvSelchrCTask__setMenuData:
     /* 0003E6D0: */    mr r30,r4
 
     ## SSEEX: Check for input to override and have all characters available
+    # TODO: Select 6 if holding L + R?
  loc_checkIfOverride:
-    li r14, 0x0            # Default setting (no override)
-    lis r8, 0x805B         # \         
-    ori r8, r8, 0xACC0     # / Get global gfPadSystem       
+    lis r12,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    lbz r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    cmpwi r14, 0x3          # \ Check if current override setting should make all characters visible
+    beq- loc_singleTeam     # /
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem     
     li r7, 0x0                      # \
     li r3, 0x46                     # |
 loc_checkForOverrideInput:          # |
@@ -660,7 +685,10 @@ loc_checkForOverrideInput:          # |
     ble+ loc_checkForOverrideInput  # /
     b loc_overrideCheckFinished        
 loc_teamMemberOverride:
-    li r14, 0x1                 # Set override
+    cmpwi r14, 0x2
+    li r14, 0x3                 
+    bne- loc_singleTeam             # Check if should set unlock override and store so that anytime CSS pops up during stage characters remain present  
+    stb r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     b loc_singleTeam
 loc_overrideCheckFinished:
 
@@ -908,7 +936,7 @@ loc_3E9F0:
     /* 0003E9FC: */    lwz r0,0x4898(r3)
 
     ## SSEEX: Override character save file data
-    cmpwi r14, 0x1
+    cmpwi r14, 0x3
     bne- loc_noSaveDataOverride1
     lis r0, 0xBFF9          # Override with completed character save data
     ori r0, r0, 0xFFFF      # 
@@ -1013,7 +1041,7 @@ loc_3EB3C:
     /* 0003EB48: */    lwz r0,0x4898(r3)
 
     ## SSEEX: Override character save file data
-    cmpwi r14, 0x1
+    cmpwi r14, 0x3
     bne- loc_noSaveDataOverride2
     lis r0, 0xBFF9          # Override with completed character save data
     ori r0, r0, 0xFFFF      # 
@@ -1071,15 +1099,16 @@ loc_addExTeamMembers:
     lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
     addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
     
-    cmpwi r14, 0x1         # Check if override
+    cmpwi r14, 0x3         # Check if unlock override
     bne- loc_notOverride 
     addi r5, r5, 0x1     
     subi r4, r4, 0x1     # Add Sonic since for some reason not included when overriding save
     b loc_addFightersToTeamMenu
 loc_notOverride:
-    lis r12, 0x9018         # \
-    lwz r12, 0x1330(r12)    # | Check if Great Maze has been completed (GameGlobal-advSaveData->greatMaze1ClearDifficulty)
-    lwz r12, 0x260(r12)     # |
+    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r12,0x30(r12)       # |
+    lwz r12, 0x260(r12)     # |  Check if Great Maze has been completed (GameGlobal-advSaveData->greatMaze1ClearDifficulty)
     cmpwi r12, 0x0          # /
     blt loc_skipAddFightersToTeamMenu
 loc_addFightersToTeamMenu:
@@ -2992,39 +3021,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop
-    nop
-    nop
-    nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    
-    nop
-    nop
-    nop
-    nop
-
-    # +294
+    # +266
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -3767,12 +3765,13 @@ muAdvSelchrCTask__selCharMain:
     /* 00040B34: */    mr r25,r28
 
     ## SSEX: Input to move cursor pos to a random fighter on SSE CSS 
+    # TODO: R to randomize team cursor
     mr r3,r18              
     mr r4,r27
     bl __unresolved                          [R_PPC_REL24(40, 1, "muAdvSelchrCTask__getNumTeamMember")]
     mr r15, r3              # Store numTeamMember
-    lis r8, 0x805B         # \         
-    ori r8, r8, 0xACC0     # / Get global gfPadSystem   
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
     li r7, 0x0                      # \
     li r9, 0x46                     # |
 loc_checkForRandomInput:            # |
@@ -4617,7 +4616,9 @@ loc_415E8:
     /* 00041624: */    #cmpwi r3,0x3
     /* 00041628: */    #bne- loc_storeSubIdResult1
     /* 0004162C: */    #lwz r3,muAdvSelchrCTask_0xC38(r28)
-
+    lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersCSSIds")]
+    addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersCSSIds")]
+    stbx r3, r12, r25
 loc_41630:
     /* 00041630: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
     /* 00041634: */    cmpwi r3,0x1B
@@ -4684,8 +4685,10 @@ loc_416F0:
 loc_416FC:
     /* 000416FC: */    lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041700: */    stw r3,0x54(r4) #stw r0,0x54(r3)
-    /* 00041704: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041708: */    lwz r3,0x54(r3)
+    lis r12,0x0                                 [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersP2CSSId")]
+    stb r3,0x0(r12)                             [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersP2CSSId")]
+    /* 00041704: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041708: */    #lwz r3,0x54(r3)
     /* 0004170C: */    cmpwi r3,0x1B
     /* 00041710: */    bne- loc_41718
     /* 00041714: */    mr r3,r29
@@ -4701,6 +4704,8 @@ loc_41734:
     /* 00041734: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041738: */    li r0,0x28
     /* 0004173C: */    stw r0,0x54(r3)
+    lis r12,0x0                                 [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersP2CSSId")]
+    stb r0,0x0(r12)                             [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersP2CSSId")]
 loc_41740:
     /* 00041740: */    lwz r0,muAdvSelchrCTask_0xABC(r28)
     /* 00041744: */    add r3,r28,r31

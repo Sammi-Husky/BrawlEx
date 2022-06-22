@@ -1,5 +1,6 @@
 
-# TODO: Force setMenuData to pop up to select fighters? (will probs get overidden by selection)
+# TODO: 242 spaces (can save some space by making teamMemberCount a byte instead of uint)
+# TODO: Select 6 no matter what if L + R
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
 # TODO: Fix Great Maze savepoint stocks for Ex fighters
