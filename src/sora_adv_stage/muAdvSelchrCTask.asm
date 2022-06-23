@@ -20,8 +20,9 @@
 .set Data8F8_0xD4, Data8F8_0xD0 + 0x4
 .set Data8F8_0xD8, Data8F8_0xD4 + 0x4
 
-.set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4 + maxNumberOfFighters # original size + number of new muObjects + number of characters for sub character selection 
-.set muAdvSelchrCTask_SubFighterCSSIdArray, 0xC60 + 3*addedMembers*4
+.set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4 + 0x1 + maxNumberOfFighters # original size + number of new muObjects + byte for og number of characters to select + number of characters for sub character selection 
+.set muAdvSelchrCTask_originalNumMembersToSelect, 0xC60 + 3*addedMembers*4
+.set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_originalNumMembersToSelect + 0x1
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
@@ -42,26 +43,6 @@ muAdvSelchrCTask__create:
     /* 0003DE28: */    bl muAdvSelchrCTask____ct
     /* 0003DE2C: */    mr r31,r3
 loc_3DE30:
-    ## SSEEX: Put back level clear flag (as it was previously modified by muAdvDifficultyTask__mainStepSelectedMain if override was selected
-    lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
-    addi r12, r12, 0x0                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
-    lbz r4,0x0(r12)                         
-    cmpwi r4, 0x1
-    blt+ loc_noResetLevelClear
-    bne- loc_finishedSettingOverrideState
-    li r4, 0x2                          # Set flag to 2 to ensure level clear flag can't get reset again when a muAdvSelchrCTask is created (i.e. only will happen on map screen)
-    stb r4,0x0(r12)                         
-loc_finishedSettingOverrideState:    
-    lwz r10,-0x8(r12)                         
-    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r4,-0x4(r12)        # |
-    mulli r0,r10,0x14       # |
-    lwz r3,0x30(r3)         # | gameGlobal->advSaveData->levelSaveData[selectedLevel].clearFlag = 4
-    add r3,r3,r0            # |
-    stw r4,0x4(r3)          # /
-loc_noResetLevelClear:
-
     /* 0003DE30: */    mr r3,r31
     /* 0003DE34: */    mr r4,r28
     /* 0003DE38: */    mr r5,r29
@@ -486,14 +467,63 @@ muAdvSelchrCTask__loc_3E418:
     /* 0003E43C: */    mr r29,r4
     /* 0003E440: */    stw r5,muAdvSelchrCTask_0xC58(r3)
     /* 0003E444: */    stw r6,muAdvSelchrCTask_0xC5C(r3)
-    /* 0003E448: */    bl muAdvSelchrCTask__setMenuData
+
     /* 0003E44C: */    lwz r7,0x4(r29)
+    /* 0003E464: */    stw r7,0x6FC(r31)
+    ## SSEEX: Put back level clear flag (as it was previously modified by muAdvDifficultyTask__mainStepSelectedMain if override was selected
+    lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    addi r12, r12, 0x0                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    lbz r6,0x0(r12)                         
+    cmpwi r6, 0x1
+    blt+ loc_noResetLevelClear
+    bne- loc_finishedSettingOverrideState
+    li r6, 0x2                          # Set flag to 2 to ensure level clear flag can't get reset again when a muAdvSelchrCTask is created (i.e. only will happen on map screen)
+    stb r6,0x0(r12)                         
+loc_finishedSettingOverrideState:    
+    lwz r10,-0x8(r12)       # Get selectedLevel                  
+    lis r5,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r5,0x0(r5)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r6,-0x4(r12)        # Get original clear flag
+    mulli r0,r10,0x14       # \
+    lwz r5,0x30(r5)         # | gameGlobal->advSaveData->levelSaveData[selectedLevel].clearFlag = originalClearFlag
+    add r5,r5,r0            # |
+    stw r6,0x4(r5)          # /
+    
+    cmpwi r6, 0x2                           # \
+    bgt- loc_noResetLevelClear              # |
+    cmpwi r10, 0x4                          # |
+    beq- loc_setNumMembersToSelectToTwo     # |
+    cmpwi r10, 0xd                          # |
+    beq- loc_setNumMembersToSelectToTwo     # |
+    cmpwi r10, 0x11                         # |
+    beq- loc_setNumMembersToSelectToTwo     # |
+    cmpwi r10, 0x12                         # |
+    beq- loc_setNumMembersToSelectToTwo     # | Get original number of members to select based on level id (case 4 in scAdvMap::process)
+    #cmpwi r10, 0x1a                        # | (if stage has not been completed yet)
+    #beq- loc_setNumMembersToSelectToFour   # |
+    cmpwi r10, 0x1e                         # |
+    bge- loc_setNumMembersToSelectToFour    # |
+    b loc_noResetLevelClear                 # |
+loc_setNumMembersToSelectToTwo:             # |
+    li r7,0x2                               # |
+    b loc_noResetLevelClear                 # |
+loc_setNumMembersToSelectToFour:            # |
+    li r7,0x4                               # /
+loc_noResetLevelClear:                      
+    lwz r0, 0x10(r29)                       # \
+    cmpwi r0, 0x0                           # |
+    blt+ loc_notCoop                        # | Subtract 1 if coop since coop selects one less for P1
+    subi r7, r7, 0x1                        # |
+loc_notCoop:                                # /
+    stb r7, muAdvSelchrCTask_originalNumMembersToSelect(r3)
+
+    /* 0003E448: */    bl muAdvSelchrCTask__setMenuData
+
     /* 0003E450: */    li r3,0x0
     /* 0003E454: */    lbz r6,0x8(r29)
     /* 0003E458: */    lbz r5,0x9(r29)
     /* 0003E45C: */    lwz r4,0x18(r29)
     /* 0003E460: */    lbz r0,0xA(r29)
-    /* 0003E464: */    stw r7,0x6FC(r31)
     /* 0003E468: */    cmpwi r0,0x0
     /* 0003E46C: */    stb r6,muAdvSelchrCTask_0xC28(r31)
     /* 0003E470: */    stb r5,muAdvSelchrCTask_0xC29(r31)
@@ -2991,38 +3021,12 @@ loc_4010C:
     nop
     nop
     nop
-    nop
+    nop 
 
     nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
+    
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +266
+    # +251
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -3776,7 +3780,7 @@ muAdvSelchrCTask__selCharMain:
     li r9, 0x46                     # |
 loc_checkForRandomInput:            # |
     lhzx r5, r9, r8                 # | 
-    andi. r5, r5, 0x0020            # | Check for R input in each gfPadStatus (TODO: maybe combine with checkIfOverride in if need to optimize codespace?)
+    andi. r5, r5, 0x0020            # | Check for R input in each gfPadStatus
     bne- loc_randomSelect           # |
     addi r9, r9, 0x40               # |
     addi r7, r7, 0x1                # |
@@ -4640,6 +4644,11 @@ loc_41660:
     /* 0004166C: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
     /* 00041670: */    addi r30,r28,muAdvSelchrCTask_0xAC0
     /* 00041674: */    mr r3,r30
+    lbz r10, muAdvSelchrCTask_originalNumMembersToSelect(r28)       # \
+    cmpw r10, r0                                                    # | If original num members to select is less, then store as numSelectedFighters
+    bgt+ loc_dontStoreOriginalNumMembersToSelect                    # | (so that same amount of lives is preserved)
+    mr r0, r10                                                      # /
+loc_dontStoreOriginalNumMembersToSelect:
     /* 00041678: */    stw r0,0x50(r4)
     /* 0004167C: */    lwz r0,muAdvSelchrCTask_0xC08(r28)
     /* 00041680: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
