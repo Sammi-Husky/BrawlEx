@@ -1,3 +1,7 @@
+## TODO: Put macros in a singular asm file
+
+.set addedMembers, 120
+.set muAdvSelchrCTask_0xC24, 0xC24 + 3*addedMembers*4
 
 loc_muAdvLoadTask__create_patchSoraModules:
     mr r30,r3                                # Original operation
