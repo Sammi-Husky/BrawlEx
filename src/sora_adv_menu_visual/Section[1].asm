@@ -1198,6 +1198,27 @@ muAdvSelchrBTask__selectMain:
     /* 0000114C: */    mr r28,r4
     /* 00001150: */    add r23,r3,r30
     /* 00001154: */    lwz r31,0x190(r23)
+    
+    ## SSEEX: Hold R to randomize team cursor
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r7, 0x0                      # \
+    li r9, 0x46                     # |
+loc_checkForRandomInput:            # |
+    lhzx r5, r9, r8                 # | 
+    andi. r5, r5, 0x0020            # | Check for R input in each gfPadStatus
+    bne- loc_randomSelect           # |
+    addi r9, r9, 0x40               # |
+    addi r7, r7, 0x1                # |
+    cmpwi r7, 0x8                   # |
+    ble+ loc_checkForRandomInput    # /
+    b loc_randomSelectFinished
+loc_randomSelect:
+    lwz r3, 0x334(r27)              # Get menuTask->numAvailableMembers
+    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
+    stw r3,0x190(r23)               # set new charCursorPos
+loc_randomSelectFinished:
+
     /* 00001158: */    addi r3,r23,0xBC
     /* 0000115C: */    mr r29,r31
     /* 00001160: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
@@ -1400,6 +1421,20 @@ loc_144C:
     /* 00001458: */    cmpwi r0,0x0
     /* 0000145C: */    ble- loc_147C
 loc_1460:
+    ## SSEEX: Hold Y to be able to select character again even if already selected
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r6, 0x0                                      # \
+    li r9, 0x46                                     # |
+loc_checkToSelectEvenIfAlreadySelected:             # |
+    lhzx r0, r9, r8                                 # | 
+    andi. r0, r0, 0x0800                            # | Check for Y input in each gfPadStatus 
+    bne- loc_1474                                   # | 
+    addi r9, r9, 0x40                               # |
+    addi r6, r6, 0x1                                # |
+    cmpwi r6, 0x8                                   # |
+    ble+ loc_checkToSelectEvenIfAlreadySelected     # /
+   
     /* 00001460: */    lwz r0,0x164(r5)
     /* 00001464: */    cmpw r29,r0
     /* 00001468: */    bne- loc_1474
@@ -1474,74 +1509,75 @@ loc_14C0:
     /* 0000156C: */    li r4,0x8
     /* 00001570: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneRoot__add")]
     /* 00001574: */    lwz r4,0x338(r24)
-    /* 00001578: */    addi r3,r19,0x1
-    /* 0000157C: */    sub r0,r4,r3
-    /* 00001580: */    cmpwi r0,0x1
-    /* 00001584: */    bne- loc_1684
-    /* 00001588: */    lwz r0,0x334(r27)
-    /* 0000158C: */    sub r0,r0,r3
-    /* 00001590: */    cmpwi r0,0x1
-    /* 00001594: */    bne- loc_1684
-    /* 00001598: */    mr r3,r27
-    /* 0000159C: */    bl muAdvSelchrBTask__getNotNumberingPos
-    /* 000015A0: */    cmpwi r28,0x0
-    /* 000015A4: */    mr r26,r3
-    /* 000015A8: */    li r4,0xE
-    /* 000015AC: */    bne- loc_15B4
-    /* 000015B0: */    li r4,0x4
+    ## SSEEX: Removed auto select character to give chance to select same character multiple times
+    /* 00001578: */    #addi r3,r19,0x1
+    /* 0000157C: */    #sub r0,r4,r3
+    /* 00001580: */    #cmpwi r0,0x1
+    /* 00001584: */    #bne- loc_1684
+    /* 00001588: */    #lwz r0,0x334(r27)
+    /* 0000158C: */    #sub r0,r0,r3
+    /* 00001590: */    #cmpwi r0,0x1
+    /* 00001594: */    #bne- loc_1684
+    /* 00001598: */    #mr r3,r27
+    /* 0000159C: */    #bl muAdvSelchrBTask__getNotNumberingPos
+    /* 000015A0: */    #cmpwi r28,0x0
+    /* 000015A4: */    #mr r26,r3
+    /* 000015A8: */    #li r4,0xE
+    /* 000015AC: */    #bne- loc_15B4
+    /* 000015B0: */    #li r4,0x4
 loc_15B4:
-    /* 000015B4: */    addi r3,r19,0x2
-    /* 000015B8: */    lis r0,0x4330
-    /* 000015BC: */    xoris r3,r3,0x8000
-    /* 000015C0: */    add r4,r4,r19
-    /* 000015C4: */    stw r3,0x56C(r1)
-    /* 000015C8: */    lis r3,0x0                               [R_PPC_ADDR16_HA(29, 4, "loc_78")]
-    /* 000015CC: */    addi r4,r4,0x1
-    /* 000015D0: */    lfd f1,0x0(r3)                           [R_PPC_ADDR16_LO(29, 4, "loc_78")]
-    /* 000015D4: */    stw r0,0x568(r1)
-    /* 000015D8: */    rlwinm r0,r4,2,0,29
-    /* 000015DC: */    add r4,r27,r0
-    /* 000015E0: */    lfd f0,0x568(r1)
-    /* 000015E4: */    lwz r22,0x4C(r4)
-    /* 000015E8: */    fsubs f1,f0,f1
-    /* 000015EC: */    mr r3,r22
-    /* 000015F0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameTex")]
-    /* 000015F4: */    lfs f0,0x3C(r22)
-    /* 000015F8: */    mulli r0,r26,0x14
-    /* 000015FC: */    mr r3,r22
-    /* 00001600: */    stfs f0,0x80(r1)
-    /* 00001604: */    addi r4,r1,0x80
-    /* 00001608: */    add r5,r27,r0
-    /* 0000160C: */    lfs f0,0x40(r22)
-    /* 00001610: */    stfs f0,0x84(r1)
-    /* 00001614: */    lfs f0,0x44(r22)
-    /* 00001618: */    stfs f0,0x88(r1)
-    /* 0000161C: */    lfs f1,0x274(r5)
-    /* 00001620: */    lfs f0,0x270(r5)
-    /* 00001624: */    stfs f1,0x34(r1)
-    /* 00001628: */    stfs f0,0x30(r1)
-    /* 0000162C: */    lwz r0,0x34(r1)
-    /* 00001630: */    lwz r5,0x30(r1)
-    /* 00001634: */    stw r0,0x2C(r1)
-    /* 00001638: */    lfs f0,0x2C(r1)
-    /* 0000163C: */    stw r5,0x28(r1)
-    /* 00001640: */    lfs f1,0x28(r1)
-    /* 00001644: */    stfs f0,0x24(r1)
-    /* 00001648: */    stfs f1,0x20(r1)
-    /* 0000164C: */    stfs f1,0x80(r1)
-    /* 00001650: */    stfs f0,0x84(r1)
-    /* 00001654: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setTrans")]
-    /* 00001658: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_8059FF80")]
-    /* 0000165C: */    lwz r5,0x10(r22)
-    /* 00001660: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_8059FF80")]
-    /* 00001664: */    li r4,0x8
-    /* 00001668: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneRoot__add")]
-    /* 0000166C: */    addi r3,r19,0x1
-    /* 00001670: */    addi r0,r19,0x2
-    /* 00001674: */    rlwinm r3,r3,2,0,29
-    /* 00001678: */    stwx r26,r21,r3
-    /* 0000167C: */    stw r0,0x18C(r25)
-    /* 00001680: */    b loc_186C
+    /* 000015B4: */    #addi r3,r19,0x2
+    /* 000015B8: */    #lis r0,0x4330
+    /* 000015BC: */    #xoris r3,r3,0x8000
+    /* 000015C0: */    #add r4,r4,r19
+    /* 000015C4: */    #stw r3,0x56C(r1)
+    /* 000015C8: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(29, 4, "loc_78")]
+    /* 000015CC: */    #addi r4,r4,0x1
+    /* 000015D0: */    #lfd f1,0x0(r3)                           [R_PPC_ADDR16_LO(29, 4, "loc_78")]
+    /* 000015D4: */    #stw r0,0x568(r1)
+    /* 000015D8: */    #rlwinm r0,r4,2,0,29
+    /* 000015DC: */    #add r4,r27,r0
+    /* 000015E0: */    #lfd f0,0x568(r1)
+    /* 000015E4: */    #lwz r22,0x4C(r4)
+    /* 000015E8: */    #fsubs f1,f0,f1
+    /* 000015EC: */    #mr r3,r22
+    /* 000015F0: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameTex")]
+    /* 000015F4: */    #lfs f0,0x3C(r22)
+    /* 000015F8: */    #mulli r0,r26,0x14
+    /* 000015FC: */    #mr r3,r22
+    /* 00001600: */    #stfs f0,0x80(r1)
+    /* 00001604: */    #addi r4,r1,0x80
+    /* 00001608: */    #add r5,r27,r0
+    /* 0000160C: */    #lfs f0,0x40(r22)
+    /* 00001610: */    #stfs f0,0x84(r1)
+    /* 00001614: */    #lfs f0,0x44(r22)
+    /* 00001618: */    #stfs f0,0x88(r1)
+    /* 0000161C: */    #lfs f1,0x274(r5)
+    /* 00001620: */    #lfs f0,0x270(r5)
+    /* 00001624: */    #stfs f1,0x34(r1)
+    /* 00001628: */    #stfs f0,0x30(r1)
+    /* 0000162C: */    #lwz r0,0x34(r1)
+    /* 00001630: */    #lwz r5,0x30(r1)
+    /* 00001634: */    #stw r0,0x2C(r1)
+    /* 00001638: */    #lfs f0,0x2C(r1)
+    /* 0000163C: */    #stw r5,0x28(r1)
+    /* 00001640: */    #lfs f1,0x28(r1)
+    /* 00001644: */    #stfs f0,0x24(r1)
+    /* 00001648: */    #stfs f1,0x20(r1)
+    /* 0000164C: */    #stfs f1,0x80(r1)
+    /* 00001650: */    #stfs f0,0x84(r1)
+    /* 00001654: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setTrans")]
+    /* 00001658: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_8059FF80")]
+    /* 0000165C: */    #lwz r5,0x10(r22)
+    /* 00001660: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_8059FF80")]
+    /* 00001664: */    #li r4,0x8
+    /* 00001668: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneRoot__add")]
+    /* 0000166C: */    #addi r3,r19,0x1
+    /* 00001670: */    #addi r0,r19,0x2
+    /* 00001674: */    #rlwinm r3,r3,2,0,29
+    /* 00001678: */    #stwx r26,r21,r3
+    /* 0000167C: */    #stw r0,0x18C(r25)
+    /* 00001680: */    #b loc_186C
 loc_1684:
     /* 00001684: */    lwz r0,0x18C(r25)
     /* 00001688: */    cmpw r0,r4
@@ -1730,65 +1766,66 @@ loc_1904:
 loc_1908:
     /* 00001908: */    cmpw r5,r7
     /* 0000190C: */    blt+ loc_18AC
-    /* 00001910: */    cmpwi r6,0x1
-    /* 00001914: */    bgt- loc_19F8
-    /* 00001918: */    add r4,r27,r30
-    /* 0000191C: */    rlwinm r0,r3,2,0,29
-    /* 00001920: */    add r4,r4,r0
-    /* 00001924: */    cmpwi r28,0x0
-    /* 00001928: */    stw r29,0x164(r4)
-    /* 0000192C: */    addi r0,r3,0x1
-    /* 00001930: */    li r5,0xE
-    /* 00001934: */    stw r0,0x18C(r25)
-    /* 00001938: */    bne- loc_1940
-    /* 0000193C: */    li r5,0x4
+    ## SSEEX: Removed auto select last character left to give chance to select same character multiple times
+    /* 00001910: */    #cmpwi r6,0x1
+    /* 00001914: */    #bgt- loc_19F8
+    /* 00001918: */    #add r4,r27,r30
+    /* 0000191C: */    #rlwinm r0,r3,2,0,29
+    /* 00001920: */    #add r4,r4,r0
+    /* 00001924: */    #cmpwi r28,0x0
+    /* 00001928: */    #stw r29,0x164(r4)
+    /* 0000192C: */    #addi r0,r3,0x1
+    /* 00001930: */    #li r5,0xE
+    /* 00001934: */    #stw r0,0x18C(r25)
+    /* 00001938: */    #bne- loc_1940
+    /* 0000193C: */    #li r5,0x4
 loc_1940:
-    /* 00001940: */    addi r4,r3,0x1
-    /* 00001944: */    lis r0,0x4330
-    /* 00001948: */    xoris r4,r4,0x8000
-    /* 0000194C: */    add r5,r5,r3
-    /* 00001950: */    stw r4,0x56C(r1)
-    /* 00001954: */    lis r3,0x0                               [R_PPC_ADDR16_HA(29, 4, "loc_78")]
-    /* 00001958: */    rlwinm r4,r5,2,0,29
-    /* 0000195C: */    lfd f1,0x0(r3)                           [R_PPC_ADDR16_LO(29, 4, "loc_78")]
-    /* 00001960: */    stw r0,0x568(r1)
-    /* 00001964: */    add r3,r27,r4
-    /* 00001968: */    lwz r17,0x4C(r3)
-    /* 0000196C: */    lfd f0,0x568(r1)
-    /* 00001970: */    mr r3,r17
-    /* 00001974: */    fsubs f1,f0,f1
-    /* 00001978: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameTex")]
-    /* 0000197C: */    lfs f0,0x3C(r17)
-    /* 00001980: */    mulli r0,r29,0x14
-    /* 00001984: */    mr r3,r17
-    /* 00001988: */    stfs f0,0x68(r1)
-    /* 0000198C: */    addi r4,r1,0x68
-    /* 00001990: */    add r5,r27,r0
-    /* 00001994: */    lfs f0,0x40(r17)
-    /* 00001998: */    stfs f0,0x6C(r1)
-    /* 0000199C: */    lfs f0,0x44(r17)
-    /* 000019A0: */    stfs f0,0x70(r1)
-    /* 000019A4: */    lfs f1,0x274(r5)
-    /* 000019A8: */    lfs f0,0x270(r5)
-    /* 000019AC: */    stfs f1,0x1C(r1)
-    /* 000019B0: */    stfs f0,0x18(r1)
-    /* 000019B4: */    lwz r0,0x1C(r1)
-    /* 000019B8: */    lwz r5,0x18(r1)
-    /* 000019BC: */    stw r0,0x14(r1)
-    /* 000019C0: */    lfs f0,0x14(r1)
-    /* 000019C4: */    stw r5,0x10(r1)
-    /* 000019C8: */    lfs f1,0x10(r1)
-    /* 000019CC: */    stfs f0,0xC(r1)
-    /* 000019D0: */    stfs f1,0x8(r1)
-    /* 000019D4: */    stfs f1,0x68(r1)
-    /* 000019D8: */    stfs f0,0x6C(r1)
-    /* 000019DC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setTrans")]
-    /* 000019E0: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_8059FF80")]
-    /* 000019E4: */    lwz r5,0x10(r17)
-    /* 000019E8: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_8059FF80")]
-    /* 000019EC: */    li r4,0x8
-    /* 000019F0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneRoot__add")]
-    /* 000019F4: */    b loc_1F10
+    /* 00001940: */    #addi r4,r3,0x1
+    /* 00001944: */    #lis r0,0x4330
+    /* 00001948: */    #xoris r4,r4,0x8000
+    /* 0000194C: */    #add r5,r5,r3
+    /* 00001950: */    #stw r4,0x56C(r1)
+    /* 00001954: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(29, 4, "loc_78")]
+    /* 00001958: */    #rlwinm r4,r5,2,0,29
+    /* 0000195C: */    #lfd f1,0x0(r3)                           [R_PPC_ADDR16_LO(29, 4, "loc_78")]
+    /* 00001960: */    #stw r0,0x568(r1)
+    /* 00001964: */    #add r3,r27,r4
+    /* 00001968: */    #lwz r17,0x4C(r3)
+    /* 0000196C: */    #lfd f0,0x568(r1)
+    /* 00001970: */    #mr r3,r17
+    /* 00001974: */    #fsubs f1,f0,f1
+    /* 00001978: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameTex")]
+    /* 0000197C: */    #lfs f0,0x3C(r17)
+    /* 00001980: */    #mulli r0,r29,0x14
+    /* 00001984: */    #mr r3,r17
+    /* 00001988: */    #stfs f0,0x68(r1)
+    /* 0000198C: */    #addi r4,r1,0x68
+    /* 00001990: */    #add r5,r27,r0
+    /* 00001994: */    #lfs f0,0x40(r17)
+    /* 00001998: */    #stfs f0,0x6C(r1)
+    /* 0000199C: */    #lfs f0,0x44(r17)
+    /* 000019A0: */    #stfs f0,0x70(r1)
+    /* 000019A4: */    #lfs f1,0x274(r5)
+    /* 000019A8: */    #lfs f0,0x270(r5)
+    /* 000019AC: */    #stfs f1,0x1C(r1)
+    /* 000019B0: */    #stfs f0,0x18(r1)
+    /* 000019B4: */    #lwz r0,0x1C(r1)
+    /* 000019B8: */    #lwz r5,0x18(r1)
+    /* 000019BC: */    #stw r0,0x14(r1)
+    /* 000019C0: */    #lfs f0,0x14(r1)
+    /* 000019C4: */    #stw r5,0x10(r1)
+    /* 000019C8: */    #lfs f1,0x10(r1)
+    /* 000019CC: */    #stfs f0,0xC(r1)
+    /* 000019D0: */    #stfs f1,0x8(r1)
+    /* 000019D4: */    #stfs f1,0x68(r1)
+    /* 000019D8: */    #stfs f0,0x6C(r1)
+    /* 000019DC: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setTrans")]
+    /* 000019E0: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_8059FF80")]
+    /* 000019E4: */    #lwz r5,0x10(r17)
+    /* 000019E8: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_8059FF80")]
+    /* 000019EC: */    #li r4,0x8
+    /* 000019F0: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneRoot__add")]
+    /* 000019F4: */    #b loc_1F10
 loc_19F8:
     /* 000019F8: */    rlwinm. r0,r20,0,22,22
     /* 000019FC: */    beq- loc_1B9C
@@ -2236,6 +2273,20 @@ loc_201C:
     /* 00002028: */    cmpwi r0,0x0
     /* 0000202C: */    ble- loc_204C
 loc_2030:
+    ## SSEEX: Hold Y to be able to move cursor to character again even if already selected
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r6, 0x0                                      # \
+    li r9, 0x46                                     # |
+loc_checkToMoveCursorEvenIfAlreadySelected:         # |
+    lhzx r0, r9, r8                                 # | 
+    andi. r0, r0, 0x0800                            # | Check for Y input in each gfPadStatus 
+    bne- loc_2044                                   # | 
+    addi r9, r9, 0x40                               # |
+    addi r6, r6, 0x1                                # |
+    cmpwi r6, 0x8                                   # |
+    ble+ loc_checkToMoveCursorEvenIfAlreadySelected # /    
+
     /* 00002030: */    lwz r0,0x164(r5)
     /* 00002034: */    cmpw r29,r0
     /* 00002038: */    bne- loc_2044
@@ -2369,10 +2420,10 @@ muAdvSelchrBTask__storeResult:
     bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
     /* 000021FC: */    #stw r31,0x1C(r1)
     /* 00002200: */    mr r31,r3
-    /* 00002204: */    lwz r0,0x348(r3)
-    /* 00002208: */    cmpwi r0,0x0
-    /* 0000220C: */    beq- loc_22F8
-    /* 00002210: */    mr r3,r0
+    /* 00002204: */    lwz r29,0x348(r3) #lwz r0,0x348(r3)
+    /* 00002208: */    cmpwi r29,0x0 #cmpwi r0,0x0
+    /* 0000220C: */    beq- loc_noResult
+    /* 00002210: */    mr r3,r29 #mr r3,r0
     /* 00002214: */    li r4,0x0
     /* 00002218: */    li r5,0x68
     /* 0000221C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
@@ -2384,27 +2435,33 @@ muAdvSelchrBTask__storeResult:
 loc_2234:
     /* 00002234: */    lwz r0,0x164(r6)
     /* 00002238: */    addi r6,r6,0x4
-    /* 0000223C: */    lwz r3,0x348(r31)
+    /* 0000223C: */    #lwz r3,0x348(r31)
     /* 00002240: */    addi r8,r8,0x1
     /* 00002244: */    mulli r0,r0,0x14
     /* 00002248: */    add r5,r31,r0
     /* 0000224C: */    lbz r0,0x26C(r5)
     /* 00002250: */    extsb r0,r0
-    /* 00002254: */    stwx r0,r3,r7
-    /* 00002258: */    lwz r0,0x348(r31)
-    /* 0000225C: */    add r3,r0,r7
+    /* 00002254: */    stwx r0,r29,r7 #stwx r0,r3,r7
+    /* 00002258: */    #lwz r0,0x348(r31)
+    /* 0000225C: */    add r3,r29,r7 #add r3,r0,r7
     /* 00002260: */    addi r7,r7,0x4
     /* 00002264: */    stw r4,0x28(r3)
+
+    divwu r9,r8,r30        # \
+    mullw r9,r9,r30        # | if (currentCount % numFighters == 0) i.e. check if all fighters have been looped through
+    cmpw r8,r9             # |
+    bne+ loc_2268          # /
+    /* 00002220: */    mr r6,r31      # Reset to repeat so that CSS Ids can fill up (e.g. 07 09 07 09 07 09...)
 loc_2268:
     /* 00002268: */    lwz r30,0x18C(r31) #lwz r0,0x18C(r31)
-    /* 0000226C: */    cmpw r8,r30 #cmpw r8,r0
+    /* 0000226C: */    cmpwi r8,0xA  #cmpw r8,r30 #cmpw r8,r0
     /* 00002270: */    blt+ loc_2234                                      
-    /* 00002274: */    lwz r4,0x348(r31)
+    /* 00002274: */    #lwz r4,0x348(r31)
     /* 00002278: */    addi r3,r31,0x194
-    /* 0000227C: */    stw r30,0x50(r4) #stw r0,0x50(r4)
+    /* 0000227C: */    #stw r30,0x50(r29) #stw r0,0x50(r4)
     /* 00002280: */    lwz r0,0x264(r31)
-    /* 00002284: */    lwz r4,0x348(r31)
-    /* 00002288: */    stw r0,0x5C(r4)
+    /* 00002284: */    #lwz r4,0x348(r31)
+    /* 00002288: */    stw r0,0x5C(r29) #stw r0,0x5C(r4)
     /* 0000228C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
     /* 00002290: */    rlwinm r0,r3,1,31,31
     /* 00002294: */    xori r0,r0,0x1
@@ -2436,17 +2493,59 @@ loc_22E0:
     /* 000022F0: */    #lwz r3,0x348(r31)
     /* 000022F4: */    #stw r0,0x58(r3)
 loc_22F8:
-    lwz r5,0x348(r31)
+    ## SSEEX: Overwrite member selection with selection from Map CSS if overwrite flag is on
+
     li r0,0x3E
-    stw r0,0x58(r5) 
+    stw r0,0x58(r29) 
     
     lis r12,0x0                               [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                          [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     lbz r10, 0x0(r12)
-    bl __unresolved                           [R_PPC_REL24(29, 7, "loc_muAdvSelchrBTask__storeResult_checkIfOverride")]   
-loc_checkOverrideFinished:  
-    stw r4,0x54(r5)                 # store in menuTask->advSelchrResult->p2CSSId
+    cmpwi r10, 0x2
+    blt+ loc_checkOverrideFinished
+    li r27, 0x0
+    lbz r7, 0x3(r12)            # Get previous selected P2 CSS ID
 
+    cmpwi r7, 0x28              # Check if P2 has been selected before
+    beq+ loc_checkForMemberAmountOverride
+    mr r4, r7                   # Set P2 to overridden P2
+    
+loc_checkForMemberAmountOverride:
+    lbz r8, 0x1(r12)            # \ Check if should override number of team members
+    cmpwi r8, 0x1               # /
+    bne+ loc_noOverrideAmount
+    lbz r30, 0x2(r12)           # Set desired number of team members selected
+    cmpwi r30, 0x0
+    bne+ loc_noOverrideAmount
+    li r30, 0x1             # Set number of team members to 1 (since then it will pick the overridden character instead of defaulting to normal character)
+loc_noOverrideAmount:
+
+    addi r12, r12, 0x4      # Move pointer to start of loc_overrideCharactersCSSIds
+    b loc_startOverwriteMembers
+loc_overwriteMember:
+    lbzx r6, r12, r27                       # \
+    mulli r10, r27, 0x4                     # |
+    /* 00002254: */    stwx r6,r29,r10      # | Overwrite menuTask->advSelchrResult->cssIDs with previous selected CSS Ids
+    /* 0000225C: */    add r6,r29,r10       # |
+    li r8,0x3E                              # |
+    /* 00002264: */    stw r8,0x28(r6)      # |
+    addi r27,r27,0x1                        # /
+loc_startOverwriteMembers:
+    cmpwi r27,0xA #cmpw r27,r30
+    blt+ loc_overwriteMember
+loc_checkOverrideFinished:
+    lwz r6, 0x0(r29)            # \
+    cmpw r6, r4                 # |
+    bne+ loc_p1AndP2NotSame     # | Increment advSelchrResult->numSelectedFighters by one if p1 and p2 selected the same character (and numSelectedFighters less than 10)
+    cmpwi r30, 0xA              # | (to counteract having one fewer stock)
+    bge- loc_p1AndP2NotSame     # |
+    addi r30, r30, 0x1          # /
+loc_p1AndP2NotSame:
+
+    stw r30,0x50(r29)                # Store number of teammates
+
+    stw r4,0x54(r29)                 # store in menuTask->advSelchrResult->p2CSSId
+loc_noResult:
     addi r11,r1,0x20
     bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]
     /* 000022F8: */    lwz r0,0x24(r1)
@@ -2860,6 +2959,21 @@ loc_2904:
     /* 00002910: */    addi r26,r26,0xD8
     /* 00002914: */    addi r27,r27,0xD8
     /* 00002918: */    blt+ loc_2854
+
+    ## SSEEX: Finish selecting characters if L is pressed (so don't need to pick all the characters present)
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem     
+    li r7, 0x0                          # \
+    li r3, 0x46                         # |
+loc_checkForEarlySelectInput:           # |
+    lhzx r5, r3, r8                     # | 
+    andi. r5, r5, 0x0040                # | Check for L input in each gfPadStatus
+    bne- loc_finishSelecting            # |
+    addi r3, r3, 0x40                   # |
+    addi r7, r7, 0x1                    # |
+    cmpwi r7, 0x8                       # |
+    ble+ loc_checkForEarlySelectInput   # /
+    
     /* 0000291C: */    lwz r3,0x18C(r31)
     /* 00002920: */    lwz r0,0x338(r31)
     /* 00002924: */    cmpw r3,r0
@@ -2868,6 +2982,7 @@ loc_2904:
     /* 00002930: */    lwz r0,0x33C(r31)
     /* 00002934: */    cmpw r3,r0
     /* 00002938: */    blt- loc_2A9C
+loc_finishSelecting:
     /* 0000293C: */    lfs f31,0x70(r29)
     /* 00002940: */    mr r28,r31
     /* 00002944: */    addi r27,r31,0x194
@@ -3035,6 +3150,61 @@ muAdvSelchrBTask__mainStepZombieInit:
 muAdvSelchrBTask__mainStepZombieMain:
     /* 00002BA4: */    lwz r3,0xB4(r3)
     /* 00002BA8: */    blr
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop
+
+    # +47
+
 muAdvSelchrBTask__isSelected:
     /* 00002BAC: */    lwz r0,0xB4(r3)
     /* 00002BB0: */    cmpwi r0,0x2

@@ -1574,7 +1574,7 @@ loc_1648:
     /* 0000168C: */    add r3,r3,r0
     /* 00001690: */    lwz r0,0x4(r3)
     /* 00001694: */    #cmpwi r0,0x1
-    bl __unresolved                                             [R_PPC_REL24(31, 7, "loc_muAdvSelmapTask__controllProc_checkIfOverride")]    
+    b __unresolved                                             [R_PPC_REL24(31, 7, "loc_muAdvSelmapTask__controllProc_checkIfOverride")]    
 loc_noOverride:
     /* 00001698: */    bne- loc_1768
     /* 0000169C: */    cmpwi r29,0x4

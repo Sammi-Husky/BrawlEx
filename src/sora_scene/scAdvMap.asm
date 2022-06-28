@@ -832,6 +832,7 @@ loc_1D7AC:
     /* 0001D7BC: */    stw r3,0x14(r29)
 loc_1D7C0:
     /* 0001D7C0: */    lwz r3,0x14(r29)
+SSEEX_patchThree:
     /* 0001D7C4: */    lwz r0,muAdvSelchrCTask_0xC24(r3)
     /* 0001D7C8: */    cmpwi r0,0x2
     /* 0001D7CC: */    beq- loc_1D7E4

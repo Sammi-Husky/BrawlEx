@@ -21,8 +21,8 @@
 .set Data8F8_0xD8, Data8F8_0xD4 + 0x4
 
 .set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4 + 0x1 + maxNumberOfFighters # original size + number of new muObjects + byte for og number of characters to select + number of characters for sub character selection 
-.set muAdvSelchrCTask_originalNumMembersToSelect, 0xC60 + 3*addedMembers*4
-.set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_originalNumMembersToSelect + 0x1
+.set muAdvSelchrCTask_desiredNumMembersToSelect, 0xC60 + 3*addedMembers*4
+.set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
@@ -470,12 +470,14 @@ muAdvSelchrCTask__loc_3E418:
 
     /* 0003E44C: */    lwz r7,0x4(r29)
     /* 0003E464: */    stw r7,0x6FC(r31)
+
     ## SSEEX: Put back level clear flag (as it was previously modified by muAdvDifficultyTask__mainStepSelectedMain if override was selected
+    ## And override amount of characters to pick
     lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12, r12, 0x0                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     lbz r6,0x0(r12)                         
     cmpwi r6, 0x1
-    blt+ loc_noResetLevelClear
+    blt+ loc_overrideMemberAmountFinished
     bne- loc_finishedSettingOverrideState
     li r6, 0x2                          # Set flag to 2 to ensure level clear flag can't get reset again when a muAdvSelchrCTask is created (i.e. only will happen on map screen)
     stb r6,0x0(r12)                         
@@ -488,9 +490,14 @@ loc_finishedSettingOverrideState:
     lwz r5,0x30(r5)         # | gameGlobal->advSaveData->levelSaveData[selectedLevel].clearFlag = originalClearFlag
     add r5,r5,r0            # |
     stw r6,0x4(r5)          # /
-    
+
+    cmpwi r10, 0xA                          # \
+    bne+ loc_notLakeShore                   # |
+    li r0, 0x4                              # | Set number of members to pick to four if it's Lake Shore (since it's two otherwise)
+    stw r0,0x6FC(r31)                       # / 
+ loc_notLakeShore:   
     cmpwi r6, 0x2                           # \
-    bgt- loc_noResetLevelClear              # |
+    bgt- loc_characterAmountFromLevelSet    # |
     cmpwi r10, 0x4                          # |
     beq- loc_setNumMembersToSelectToTwo     # |
     cmpwi r10, 0xd                          # |
@@ -502,21 +509,47 @@ loc_finishedSettingOverrideState:
     #cmpwi r10, 0x1a                        # | (if stage has not been completed yet)
     #beq- loc_setNumMembersToSelectToFour   # |
     cmpwi r10, 0x1e                         # |
-    bge- loc_setNumMembersToSelectToFour    # |
-    b loc_noResetLevelClear                 # |
+    bge- loc_setNumMembersToSelectToFour    # | 
+    b loc_characterAmountFromLevelSet       # |
 loc_setNumMembersToSelectToTwo:             # |
     li r7,0x2                               # |
-    b loc_noResetLevelClear                 # |
+    b loc_characterAmountFromLevelSet       # |
 loc_setNumMembersToSelectToFour:            # |
     li r7,0x4                               # /
-loc_noResetLevelClear:                      
+
+loc_characterAmountFromLevelSet:
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r6, 0x0                              # \
+    li r9, 0x46                             # |
+loc_checkForMemberAmountOverride:           # |
+    lhzx r5, r9, r8                         # | 
+    andi. r0, r5, 0x0010                    # | Check for Z input in each gfPadStatus
+    bne- loc_setMemberAmountTen             # |
+    andi. r0, r5, 0x0800                    # | Check for Y input in each gfPadStatus
+    bne- loc_setMemberAmountTwo             # | TODO: Check why if two people pick same character they have one less stock
+    addi r9, r9, 0x40                       # |
+    addi r6, r6, 0x1                        # |
+    cmpwi r6, 0x8                           # |
+    ble+ loc_checkForMemberAmountOverride   # /
+    b loc_overrideMemberAmountFinished 
+loc_setMemberAmountTen:
+    li r7, 0xA              # Max characters result struct holds
+    b loc_setMemberAmountOverride
+loc_setMemberAmountTwo:
+    li r7, 0x2              # So that can stay playing the same characters during co-op
+loc_setMemberAmountOverride:
+    stw r7,0x6FC(r31)                       # Set number of members to pick
+    li r10, 0x1
+    stb r10, 0x1(r12)                       # Set override character amount flag
+
+loc_overrideMemberAmountFinished:                   
     lwz r0, 0x10(r29)                       # \
     cmpwi r0, 0x0                           # |
     blt+ loc_notCoop                        # | Subtract 1 if coop since coop selects one less for P1
     subi r7, r7, 0x1                        # |
 loc_notCoop:                                # /
-    stb r7, muAdvSelchrCTask_originalNumMembersToSelect(r3)
-
+    stb r7, muAdvSelchrCTask_desiredNumMembersToSelect(r3)
     /* 0003E448: */    bl muAdvSelchrCTask__setMenuData
 
     /* 0003E450: */    li r3,0x0
@@ -695,7 +728,6 @@ muAdvSelchrCTask__setMenuData:
     /* 0003E6D0: */    mr r30,r4
 
     ## SSEEX: Check for input to override and have all characters available
-    # TODO: Select 6 if holding L + R?
  loc_checkIfOverride:
     lis r12,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     lbz r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
@@ -715,9 +747,7 @@ loc_checkForOverrideInput:          # |
     ble+ loc_checkForOverrideInput  # /
     b loc_overrideCheckFinished        
 loc_teamMemberOverride:
-    cmpwi r14, 0x2
-    li r14, 0x3                 
-    bne- loc_singleTeam             # Check if should set unlock override and store so that anytime CSS pops up during stage characters remain present  
+    li r14, 0x3                     # Set unlock override so that anytime CSS pops up during stage characters remain present  
     stb r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     b loc_singleTeam
 loc_overrideCheckFinished:
@@ -2956,77 +2986,25 @@ loc_4010C:
     nop
     nop
     nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
+    
     nop 
-
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
     nop
     
-
-    # +251
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    
+    # +205
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -3220,6 +3198,21 @@ loc_403BC:
     /* 000403E4: */    cmpwi r0,0x0
     /* 000403E8: */    ble- loc_40408
 loc_403EC:
+
+    ## SSEEX: Hold Y to be able to move cursor to character again even if already selected
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r6, 0x0                                      # \
+    li r9, 0x46                                     # |
+loc_checkToMoveCursorEvenIfAlreadySelected:         # |
+    lhzx r5, r9, r8                                 # | 
+    andi. r5, r5, 0x0800                            # | Check for Y input in each gfPadStatus 
+    bne- loc_403FC                                  # | 
+    addi r9, r9, 0x40                               # |
+    addi r6, r6, 0x1                                # |
+    cmpwi r6, 0x8                                   # |
+    ble+ loc_checkToMoveCursorEvenIfAlreadySelected # /
+
     /* 000403EC: */    lwz r0,0xA8(r4)
     /* 000403F0: */    cmpw r28,r0
     /* 000403F4: */    bne- loc_403FC
@@ -3768,8 +3761,7 @@ muAdvSelchrCTask__selCharMain:
     /* 00040B24: */    mr r28,r3
     /* 00040B34: */    mr r25,r28
 
-    ## SSEX: Input to move cursor pos to a random fighter on SSE CSS 
-    # TODO: R to randomize team cursor
+    ## SSEEX: Input to move cursor pos to a random fighter on SSE CSS 
     mr r3,r18              
     mr r4,r27
     bl __unresolved                          [R_PPC_REL24(40, 1, "muAdvSelchrCTask__getNumTeamMember")]
@@ -4126,11 +4118,27 @@ loc_40F24:
     /* 00040F2C: */    bl gfPadStatus__bitcheckEdgeOn
     /* 00040F30: */    cmpwi r3,0x0
     /* 00040F34: */    beq- loc_41014
+
+    ## SSEEX: Hold Y to be able to select character again even if already selected
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r6, 0x0                                  # \
+    li r9, 0x46                                 # |
+loc_checkToSelectEvenIfAlreadySelected:         # |
+    lhzx r5, r9, r8                             # | 
+    andi. r5, r5, 0x0800                        # | Check for Y input in each gfPadStatus
+    bne- loc_skipAlreadySelectedCheck           # |
+    addi r9, r9, 0x40                           # |
+    addi r6, r6, 0x1                            # |
+    cmpwi r6, 0x8                               # |
+    ble+ loc_checkToSelectEvenIfAlreadySelected # /
+
     /* 00040F38: */    mr r3,r18
     /* 00040F3C: */    mr r4,r25
     /* 00040F40: */    bl muAdvSelchrCTask__getMemberNumber
     /* 00040F44: */    cmpwi r3,0x0
     /* 00040F48: */    bge- loc_41014
+loc_skipAlreadySelectedCheck:
     /* 00040F4C: */    lwz r3,0x148(r26)
     /* 00040F50: */    lwz r0,muAdvSelchrCTask_0xC10(r31)
     /* 00040F54: */    cmpw r3,r0
@@ -4185,38 +4193,39 @@ loc_41004:
     /* 0004100C: */    bl muAdvSaveLoadTask__loadResource
     /* 00041010: */    li r20,0x1
 loc_41014:
-    /* 00041014: */    add r21,r18,r29
-    /* 00041018: */    lwz r0,muAdvSelchrCTask_0xC10(r31)
-    /* 0004101C: */    lwz r17,muAdvSelchrCTask_0xAB8(r21)
-    /* 00041020: */    cmpw r17,r0
-    /* 00041024: */    bge- loc_41090
-    /* 00041028: */    mr r3,r18
-    /* 0004102C: */    bl muAdvSelchrCTask__getNumFreeChar
-    /* 00041030: */    cmpwi r3,0x1
-    /* 00041034: */    bgt- loc_41090
-    /* 00041038: */    mr r3,r18
-    /* 0004103C: */    mr r4,r19
-    /* 00041040: */    mr r5,r25
-    /* 00041044: */    bl muAdvSelchrCTask__findNextCharCursorPos
-    /* 00041048: */    cmpwi r3,0x0
-    /* 0004104C: */    blt- loc_41054
-    /* 00041050: */    mr r25,r3
+    ## SSEEX: Removed auto select last character left to give chance to select same character multiple times
+    /* 00041014: */    #add r21,r18,r29
+    /* 00041018: */    #lwz r0,muAdvSelchrCTask_0xC10(r31)
+    /* 0004101C: */    #lwz r17,muAdvSelchrCTask_0xAB8(r21)
+    /* 00041020: */    #cmpw r17,r0
+    /* 00041024: */    #bge- loc_41090
+    /* 00041028: */    #mr r3,r18
+    /* 0004102C: */    #bl muAdvSelchrCTask__getNumFreeChar
+    /* 00041030: */    #cmpwi r3,0x1
+    /* 00041034: */    #bgt- loc_41090
+    /* 00041038: */    #mr r3,r18
+    /* 0004103C: */    #mr r4,r19
+    /* 00041040: */    #mr r5,r25
+    /* 00041044: */    #bl muAdvSelchrCTask__findNextCharCursorPos
+    /* 00041048: */    #cmpwi r3,0x0
+    /* 0004104C: */    #blt- loc_41054
+    /* 00041050: */    #mr r25,r3
 loc_41054:
-    /* 00041054: */    add r3,r18,r29
-    /* 00041058: */    rlwinm r0,r17,2,0,29
-    /* 0004105C: */    add r3,r3,r0
-    /* 00041060: */    addi r6,r17,0x1
-    /* 00041064: */    stw r25,muAdvSelchrCTask_0xA18(r3)
-    /* 00041068: */    mr r3,r18
-    /* 0004106C: */    mr r4,r19
-    /* 00041070: */    mr r5,r25
-    /* 00041074: */    stw r6,muAdvSelchrCTask_0xAB8(r21)
-    /* 00041078: */    bl muAdvSelchrCTask__dispNumber
-    /* 0004107C: */    mr r3,r18
-    /* 00041080: */    li r4,0x0
-    /* 00041084: */    bl muAdvSaveLoadTask__loadResource
-    /* 00041088: */    li r3,0x1
-    /* 0004108C: */    b loc_41234
+    /* 00041054: */    #add r3,r18,r29
+    /* 00041058: */    #rlwinm r0,r17,2,0,29
+    /* 0004105C: */    #add r3,r3,r0
+    /* 00041060: */    #addi r6,r17,0x1
+    /* 00041064: */    #stw r25,muAdvSelchrCTask_0xA18(r3)
+    /* 00041068: */    #mr r3,r18
+    /* 0004106C: */    #mr r4,r19
+    /* 00041070: */    #mr r5,r25
+    /* 00041074: */    #stw r6,muAdvSelchrCTask_0xAB8(r21)
+    /* 00041078: */    #bl muAdvSelchrCTask__dispNumber
+    /* 0004107C: */    #mr r3,r18
+    /* 00041080: */    #li r4,0x0
+    /* 00041084: */    #bl muAdvSaveLoadTask__loadResource
+    /* 00041088: */    #li r3,0x1
+    /* 0004108C: */    #b loc_41234
 loc_41090:
     /* 00041090: */    addi r3,r1,0x48
     /* 00041094: */    li r4,0x200
@@ -4588,7 +4597,6 @@ loc_415BC:
     /* 000415C8: */    lwzx r29,r3,r0
 loc_415CC:
     /* 000415CC: */    lwz r0,muAdvSelchrCTask_0xC1C(r28)
-    /* 000415D0: */    mr r30,r28
     /* 000415D4: */    li r25,0x0
     /* 000415D8: */    li r27,0x0
     /* 000415DC: */    mulli r31,r0,0xAC
@@ -4639,16 +4647,24 @@ loc_41644:
     /* 0004165C: */    stw r3,0x28(r4)
 loc_41660:
     /* 00041660: */    lwz r0,muAdvSelchrCTask_0xAB8(r28)
-    /* 00041664: */    cmpw r25,r0
+    divwu r9,r25,r0         # \
+    mullw r9,r9,r0          # | if (currentCount % numFighters == 0) i.e. check if all fighters have been looped through
+    cmpw r25,r9             # |
+    bne+ loc_notMultiple    # /
+    /* 000415D0: */    mr r30,r28       # Reset to repeat so that loc_overrideCharactersCSSIds can fill up (e.g. 07 09 07 09 07 09...)
+loc_notMultiple:
+    /* 00041664: */    cmpwi r25, 0xA #cmpw r25,r0
     /* 00041668: */    blt+ loc_415E8
     /* 0004166C: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
     /* 00041670: */    addi r30,r28,muAdvSelchrCTask_0xAC0
     /* 00041674: */    mr r3,r30
-    lbz r10, muAdvSelchrCTask_originalNumMembersToSelect(r28)       # \
-    cmpw r10, r0                                                    # | If original num members to select is less, then store as numSelectedFighters
-    bgt+ loc_dontStoreOriginalNumMembersToSelect                    # | (so that same amount of lives is preserved)
-    mr r0, r10                                                      # /
-loc_dontStoreOriginalNumMembersToSelect:
+    lbz r10, muAdvSelchrCTask_desiredNumMembersToSelect(r28)       # \
+    cmpw r10, r0                                                   # | If original num members to select is less, then store as numSelectedFighters
+    bgt+ loc_dontStoreDesiredNumMembersToSelect                    # | (so that same amount of lives is preserved)
+    mr r0, r10                                                     # /
+loc_dontStoreDesiredNumMembersToSelect:
+    lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersAmount")]
+    stb r0, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersAmount")]
     /* 00041678: */    stw r0,0x50(r4)
     /* 0004167C: */    lwz r0,muAdvSelchrCTask_0xC08(r28)
     /* 00041680: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
@@ -4695,7 +4711,20 @@ loc_416FC:
     /* 000416FC: */    lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041700: */    stw r3,0x54(r4) #stw r0,0x54(r3)
     lis r12,0x0                                 [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersP2CSSId")]
-    stb r3,0x0(r12)                             [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersP2CSSId")]
+    addi r12,r12,0x0                            [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersP2CSSId")]
+    stb r3,0x0(r12)
+    lbz r10,0x1(r12)            # \
+    cmpw r3, r10                # |
+    bne+ loc_p1AndP2NotSame     # | Increment advSelchrResult->numSelectedFighters by one if p1 and p2 selected the same character
+    lwz r10,-0xB(r12)           # | and not in Great Maze 
+    cmpwi r10, 0x1e             # | and numSelectedFighters less than 10
+    bge- loc_p1AndP2NotSame     # | (to counteract having one fewer stock)
+    lwz r10,0x50(r4)            # |
+    cmpwi r10, 0xA              # |
+    bge- loc_p1AndP2NotSame     # |
+    addi r10, r10, 0x1          # |
+    stw r10,0x50(r4)            # /
+loc_p1AndP2NotSame:
     /* 00041704: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041708: */    #lwz r3,0x54(r3)
     /* 0004170C: */    cmpwi r3,0x1B
@@ -5306,6 +5335,7 @@ loc_41F60:
     /* 00041F68: */    li r5,0x40
     /* 00041F6C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
 loc_41F70:
+    /* 00042014: */    lwz r22,muAdvSelchrCTask_0xC1C(r28)
     /* 00041F70: */    rlwinm. r0,r31,0,28,28
     /* 00041F74: */    lwz r27,0x10(r1)
     /* 00041F78: */    lwz r0,0x40(r1)
@@ -5347,7 +5377,6 @@ loc_41F70:
     /* 00042008: */    lbz r4,0x86(r1)
     /* 0004200C: */    lbz r3,0x87(r1)
     /* 00042010: */    lbz r0,0x88(r1)
-    /* 00042014: */    lwz r22,muAdvSelchrCTask_0xC1C(r28)
     /* 00042018: */    stw r27,0x50(r1)
     /* 0004201C: */    mr r29,r22
     /* 00042020: */    stw r26,0x54(r1)
@@ -5391,6 +5420,27 @@ loc_420A0:
     /* 000420B4: */    bge- loc_420BC
     /* 000420B8: */    addi r29,r29,0x1
 loc_420BC:
+
+    ## SSEEX: Hold R to randomize team cursor
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r7, 0x0                      # \
+    li r9, 0x46                     # |
+loc_checkForTeamRandomInput:        # |
+    lhzx r5, r9, r8                 # | 
+    andi. r5, r5, 0x0020            # | Check for R input in each gfPadStatus
+    bne- loc_teamRandomSelect       # |
+    addi r9, r9, 0x40               # |
+    addi r7, r7, 0x1                # |
+    cmpwi r7, 0x8                   # |
+    ble+ loc_checkForTeamRandomInput # /
+    b loc_teamRandomSelectFinished 
+loc_teamRandomSelect:
+    lwz r3, 0x6F8(r28)              # Get number of teams
+    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
+    mr r29, r3                      # New teamCursorPos
+loc_teamRandomSelectFinished:
+
     /* 000420BC: */    cmpw r29,r22
     /* 000420C0: */    beq- loc_423F8
     /* 000420C4: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]

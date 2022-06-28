@@ -2801,6 +2801,10 @@ loc_overrideSelectedLevelClear:
         .4byte 0x00000000
 loc_overrideCharactersFlag:
         .byte 0x00                      # 0 - No Override   # 1 - Override and difficulty selection open   # 2 - CSS open  # 3 - CSS open and character unlocks overridden
+loc_overrideCharactersAmountFlag:
+        .byte 0x00
+loc_overrideCharactersAmount:
+        .byte 0x00
 loc_overrideCharactersP2CSSId:
         .byte 0x00
 loc_overrideCharactersCSSIds:

@@ -13,5 +13,5 @@ loc_notExFighterTrophy:
     stw r3,0x1B8(r4)    # / Original operations (store in muAdvGameOverTask->fighterTrophyIds[index]
     mr r3,r27           #
     addi r26, r26, 0x1
-    bl __unresolved                          [R_PPC_REL24(33, 1, "loc_exFighterTrophiesFinished")]
+    b __unresolved                          [R_PPC_REL24(33, 1, "loc_exFighterTrophiesFinished")]
     

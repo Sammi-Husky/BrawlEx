@@ -274,7 +274,7 @@ loc_3FC:
     /* 00000404: */    lwz r12,0x18(r12)
     /* 00000408: */    mtctr r12
     /* 0000040C: */    bctrl
-    bl __unresolved                          [R_PPC_REL24(33, 7, "loc_muAdvGameOverTask____ct_exFighterTrophies")]
+    b __unresolved                          [R_PPC_REL24(33, 7, "loc_muAdvGameOverTask____ct_exFighterTrophies")]
     /* 00000410: */    #add r4,r30,r29
     /* 00000414: */    #stw r3,0x1B8(r4)
     /* 00000418: */    #mr r3,r27
