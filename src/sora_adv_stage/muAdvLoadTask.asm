@@ -5,9 +5,7 @@ muAdvLoadTask__create:
     /* 00047B30: */    stw r0,0x14(r1)
     /* 00047B34: */    stw r31,0xC(r1)
     /* 00047B38: */    stw r30,0x8(r1)
-    /* 00047B3C: */    #mr r30,r3
-    b __unresolved                                              [R_PPC_REL24(40, 7, "loc_muAdvLoadTask__create_patchSoraModules")] 
-loc_finishedPatching:                                      
+    /* 00047B3C: */    mr r30,r3
     /* 00047B40: */    li r3,0x1898
     /* 00047B44: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
     /* 00047B48: */    cmpwi r3,0x0
