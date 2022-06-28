@@ -2511,14 +2511,16 @@ loc_22F8:
     mr r4, r7                   # Set P2 to overridden P2
     
 loc_checkForMemberAmountOverride:
+    cmpwi r30, 0x0
+    bne+ loc_notZeroMembers
+    li r30, 0x1             # Set number of team members to 1 (since then it will pick the overridden character instead of defaulting to normal character)
+loc_notZeroMembers:
     lbz r8, 0x1(r12)            # \ Check if should override number of team members
     cmpwi r8, 0x1               # /
     bne+ loc_noOverrideAmount
     lbz r30, 0x2(r12)           # Set desired number of team members selected
-    cmpwi r30, 0x0
-    bne+ loc_noOverrideAmount
-    li r30, 0x1             # Set number of team members to 1 (since then it will pick the overridden character instead of defaulting to normal character)
-loc_noOverrideAmount:
+loc_noOverrideAmount:    
+    
 
     addi r12, r12, 0x4      # Move pointer to start of loc_overrideCharactersCSSIds
     b loc_startOverwriteMembers
@@ -2959,23 +2961,26 @@ loc_2904:
     /* 00002910: */    addi r26,r26,0xD8
     /* 00002914: */    addi r27,r27,0xD8
     /* 00002918: */    blt+ loc_2854
+    /* 0000291C: */    lwz r3,0x18C(r31)
+    cmpwi r3, 0x1                   # Need a least one character selected otherwise crashes first selection if no character has been selected before
+    blt- loc_skipEarlyInputCheck
 
     ## SSEEX: Finish selecting characters if L is pressed (so don't need to pick all the characters present)
     lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
     lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem     
     li r7, 0x0                          # \
-    li r3, 0x46                         # |
+    li r4, 0x46                         # |
 loc_checkForEarlySelectInput:           # |
-    lhzx r5, r3, r8                     # | 
+    lhzx r5, r4, r8                     # | 
     andi. r5, r5, 0x0040                # | Check for L input in each gfPadStatus
     bne- loc_finishSelecting            # |
-    addi r3, r3, 0x40                   # |
+    addi r4, r4, 0x40                   # |
     addi r7, r7, 0x1                    # |
     cmpwi r7, 0x8                       # |
     ble+ loc_checkForEarlySelectInput   # /
-    
-    /* 0000291C: */    lwz r3,0x18C(r31)
+loc_skipEarlyInputCheck:
     /* 00002920: */    lwz r0,0x338(r31)
+    
     /* 00002924: */    cmpw r3,r0
     /* 00002928: */    blt- loc_2A9C
     /* 0000292C: */    lwz r3,0x264(r31)
@@ -3200,10 +3205,8 @@ muAdvSelchrBTask__mainStepZombieMain:
     nop 
     nop 
     nop 
-    nop 
-    nop
 
-    # +47
+    # +45
 
 muAdvSelchrBTask__isSelected:
     /* 00002BAC: */    lwz r0,0xB4(r3)
