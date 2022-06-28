@@ -8,6 +8,8 @@ loc_muAdvNameTask__create_patchSoraModules:
     
     lis r10, 0x4800
 
+    ### Fix Increment Fighter Respawn Index for Ex Characters
+
     ## op b 0x28
     addi r9, r10, 0x28
     # @ sqAdventure::setAdventureCondition
@@ -42,5 +44,21 @@ loc_muAdvNameTask__create_patchSoraModules:
     # @ scAdvVisual::process
     lis r12, 0x0                            [R_PPC_ADDR16_HA(1, 1, "SSEEX_patchFour")]
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_patchFour")]
+    
+    ### Always Make Back to Map Option Available in SSE Pause Screen
+
+    ## b 0x18
+    addi r9, r10, 0x18
+    # @ IfAdvPause::startPause
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchOne")]
+    stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchOne")]
+
+    ## op nop
+    lis r9, 0x6000
+    # @ IfAdvPause::topMenuMain
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchTwo")]
+    stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchTwo")]
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchThree")]
+    stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchThree")]
 
     b __unresolved                           [R_PPC_REL24(28, 1, "loc_finishedPatching")]
