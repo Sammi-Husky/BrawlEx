@@ -1,6 +1,5 @@
 
 ## SSEEX: Check for override input to later force open difficulty and CSS menu
-## TODO: Play that special sound
 loc_muAdvSelmapTask__controllProc_checkIfOverride:
     li r10, 0x0
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]

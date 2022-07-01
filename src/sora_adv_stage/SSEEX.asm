@@ -2,10 +2,16 @@
 # TODO: 242 spaces (can save some space by making teamMemberCount a byte instead of uint)
 
 # TODO: Impossible mode, 1 stock if holding X at map level selection
-# TODO: Keep track of completion time for speedrunning (check if can use the space in FFFFFFFF in each level's struct)
-# TODO: Always display Back To Map even if didn't complete level yet?
+# TODO: Keep track of completion time for speedrunning (check if can use the space in FFFFFFFF in each level's struct), and high score (last field in level's struct maybe or use part of clear percentage since it uses full word for no reason) (although high scores can be farmed from infinite respawns)
+## Maybe do it Sonic style and display score as a combo of speed and score, also try to display speed at Level Clear
+## Use getGameFrameDelta
 
-# TODO: Investigate Warioman crashing on respawn in Vs stages (might just be a Kirby issue), investigate Giga Bowser being able to through doors
+# TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
+# TODO: Investigate crash with Ex soundbanks (maybe delay respawn time or offset distance from ground always? check around warpTarget function calls)
+## Time before respawn gets set in end of adFtEvent::notifyEventDead, need to find initial spawn time
+
+# TODO: Fix pointer wizardry in SSE?
+# TODO: Investigate Lucas up throw on enemy crash
 # TODO: Fix Great Maze savepoint stocks for Ex fighters
 # TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
 ## e.g. 047001 40   047001 36   FFFFFF 35 (with FFFFFF is whether Great Maze has been unlocked)
