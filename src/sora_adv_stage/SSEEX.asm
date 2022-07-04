@@ -7,18 +7,19 @@
 ## Use getGameFrameDelta
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
-# TODO: Investigate crash with Ex soundbanks (maybe delay respawn time or offset distance from ground always? check around warpTarget function calls)
-## Time before respawn gets set in end of adFtEvent::notifyEventDead, need to find initial spawn time
-
-# TODO: Fix pointer wizardry in SSE?
 # TODO: Investigate Lucas up throw on enemy crash
+# TODO: Fix pointer wizardry in SSE?
+# TODO: Fix Hitbox Sound Change code to work in SSE
 # TODO: Fix Great Maze savepoint stocks for Ex fighters
+# TODO: Load second fighter ahead of time (by setting P2's gmPlayerInitData early in sqAdventure::setAdventureCondition just like in co-op)
+
 # TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
 ## e.g. 047001 40   047001 36   FFFFFF 35 (with FFFFFF is whether Great Maze has been unlocked)
 ## Then after write to bit section of module if level id corresponds and flip bit on based on character id and then save part of section to a file on save
 ## Better yet, do it based on level id where 99Y9XXl where XX decides the character ID to unlock
 ## Ideally could find space in advSaveData somewhere when sd saving becomes a thing
-# TODO: Levels that lock the character based on YYYYXXm is the character to lock to and (n is when this ends)?
+# TODO: Investigate how mu_adv_selchrb_tbl.dat is used to set characters to pick
+
 loc_stAdventure2__changeStep_addSequenceIndex:
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     li r6, 29                   # \

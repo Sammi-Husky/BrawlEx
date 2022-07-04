@@ -9563,17 +9563,20 @@ loc_8A30:
     /* 00008A38: */    lwz r5,0x8(r16)
     /* 00008A3C: */    addi r0,r4,0x1
     /* 00008A40: */    stb r0,0x9(r1)
-    /* 00008A44: */    lbz r0,0xF4(r5)
-    /* 00008A48: */    lbzx r3,r3,r4
-    /* 00008A4C: */    cmplw r3,r0
-    /* 00008A50: */    bne- loc_8A60
-    /* 00008A54: */    lbz r0,0xF5(r5)
-    /* 00008A58: */    cmpwi r0,0x0
-    /* 00008A5C: */    beq- loc_8A6C
+    ## SSEEX: Disable 'potential' P2's fighter from loading in the beginning of the stage
+    # This is to address the issue of Ex soundbanks crashing if P1's Ex fighter moves in the very beginning of the stage as 'potential' P2's fighter loads when not in co-op
+    # (tradeoff is if P2 joins in the middle of the stage it will lag to load the fighter)
+    /* 00008A44: */    nop #lbz r0,0xF4(r5)
+    /* 00008A48: */    nop #lbzx r3,r3,r4
+    /* 00008A4C: */    nop #cmplw r3,r0
+    /* 00008A50: */    nop #bne- loc_8A60
+    /* 00008A54: */    nop #lbz r0,0xF5(r5)
+    /* 00008A58: */    nop #cmpwi r0,0x0
+    /* 00008A5C: */    nop #beq- loc_8A6C
 loc_8A60:
-    /* 00008A60: */    stb r3,0xF4(r5)
-    /* 00008A64: */    li r0,0x0
-    /* 00008A68: */    stb r0,0xF5(r5)
+    /* 00008A60: */    nop #stb r3,0xF4(r5)
+    /* 00008A64: */    nop #li r0,0x0
+    /* 00008A68: */    nop #stb r0,0xF5(r5)
 loc_8A6C:
     /* 00008A6C: */    addi r11,r1,0xC0
     /* 00008A70: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_14")]
