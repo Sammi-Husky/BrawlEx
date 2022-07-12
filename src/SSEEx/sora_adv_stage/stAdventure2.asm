@@ -2020,14 +2020,14 @@ grHitCircleObserver__remove:
     /* 00001D8C: */    addi r1,r1,0x10
     /* 00001D90: */    blr
 stAdventure2__changeStep:
-    /* 00001D94: */    stwu r1,-0x20(r1)
+    /* 00001D94: */    stwu r1,-0xF0(r1) #stwu r1,-0x20(r1)
     /* 00001D98: */    mflr r0
-    /* 00001D9C: */    stw r0,0x24(r1)
-    /* 00001DA0: */    addi r11,r1,0x20
+    /* 00001D9C: */    stw r0,0xF4(r1) #stw r0,0x24(r1)
+    /* 00001DA0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
     /* 00001DA4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
-    /* 00001DA8: */    lwz r6,0x524(r3)
+    /* 00001DA8: */    lwz r8,0x524(r3) #lwz r6,0x524(r3)
     /* 00001DAC: */    mr r31,r3
-    /* 00001DB0: */    lbz r0,0x603(r6)
+    /* 00001DB0: */    lbz r0,0x603(r8) #lbz r0,0x603(r6)
     /* 00001DB4: */    cmplwi r0,0x1
     /* 00001DB8: */    bne- loc_1FE0
     /* 00001DBC: */    lis r5,0x0                               [R_PPC_ADDR16_HA(40, 6, "loc_16C")]
@@ -2093,66 +2093,74 @@ loc_1E70:
 loc_1E98:
     /* 00001E98: */    li r4,0x2
     /* 00001E9C: */    li r0,0x0
-    /* 00001EA0: */    stb r4,0x603(r6)
+    /* 00001EA0: */    stb r4,0x603(r8) #stb r4,0x603(r6)
     /* 00001EA4: */    li r27,0x0
     /* 00001EA8: */    lwz r7,0x51C(r3)
-    /* 00001EAC: */    lwz r8,0x524(r3)
+    /* 00001EAC: */    #lwz r8,0x524(r3)
     /* 00001EB0: */    cmpwi r7,0x0
     /* 00001EB4: */    stb r0,0x0(r5)                           [R_PPC_ADDR16_LO(40, 6, "loc_16C")]
-    /* 00001EB8: */    lwz r4,0x628(r8)
+    /* 00001EB8: */    lwz r6,0x628(r8) #lwz r4,0x628(r8)
     /* 00001EBC: */    bne- loc_1EC8
-    /* 00001EC0: */    li r0,0x0
+    /* 00001EC0: */    #li r0,0x0
     /* 00001EC4: */    b loc_1F04
 loc_1EC8:
     /* 00001EC8: */    lwz r0,0x520(r3)
-    /* 00001ECC: */    li r6,0x0
+    /* 00001ECC: */    li r9,0x0 #li r6,0x0
     /* 00001ED0: */    mtctr r0
     /* 00001ED4: */    cmplwi r0,0x0
     /* 00001ED8: */    ble- loc_1F00
 loc_1EDC:
-    /* 00001EDC: */    lwzx r0,r7,r6
-    /* 00001EE0: */    add r5,r7,r6
-    /* 00001EE4: */    cmplw r0,r4
+    /* 00001EDC: */    lwzx r0,r7,r9 #lwzx r0,r7,r6
+    /* 00001EE0: */    add r5,r7,r9 #add r5,r7,r6
+    /* 00001EE4: */    cmplw r0,r6 #cmplw r0,r4
     /* 00001EE8: */    bne- loc_1EF8
     /* 00001EEC: */    mr r27,r5
-    /* 00001EF0: */    li r0,0x1
+    /* 00001EF0: */    #li r0,0x1
     /* 00001EF4: */    b loc_1F04
 loc_1EF8:
-    /* 00001EF8: */    addi r6,r6,0x2C
+    /* 00001EF8: */    addi r9,r9,0x2C #addi r6,r6,0x2C
     /* 00001EFC: */    bdnz+ loc_1EDC
 loc_1F00:
-    /* 00001F00: */    li r0,0x0
+    /* 00001F00: */    #li r0,0x0
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_findExternalADSJ")]
 loc_1F04:
-    /* 00001F04: */    cmpwi r0,0x0
+    lwz r8,0x524(r31)
+    /* 00001F04: */    cmpwi r27,0x0 #cmpwi r0,0x0
     /* 00001F08: */    beq- loc_1FE0
-    /* 00001F0C: */    lbz r0,0x4(r27)
-    /* 00001F10: */    cmplwi r0,0x2
-    /* 00001F14: */    bne- loc_1F50
-    /* 00001F18: */    li r4,0x8
-    /* 00001F1C: */    li r0,0x0
-    /* 00001F20: */    stb r4,0x603(r8)
-    /* 00001F24: */    li r4,0x0
-    /* 00001F28: */    li r5,0x20
-    /* 00001F2C: */    lwz r6,0x524(r3)
-    /* 00001F30: */    stw r0,0x62C(r6)
-    /* 00001F34: */    lwz r3,0x524(r3)
-    /* 00001F38: */    addi r3,r3,0x630
+    /* 00001F50: */    lwz r0,0x8(r27)      # \
+    /* 00001F5C: */    stw r0,0x62C(r8)     # |
+    /* 00001F0C: */    lbz r9,0x4(r27)      # |
+    /* 00001F10: */    cmplwi r9,0x2        # |
+    /* 00001F14: */    blt- loc_1F50        # |
+    /* 00001F18: */    li r4,0x8            # | SSEEX
+    cmplwi r9, 0x4                          # |
+    blt+ loc_changedStepJumpState           # | When Flag0 is:
+    addi r4, r9, 0xA                        # | 4 -> stepJumpState=0xE, 5 -> stepJumpState=0xF
+loc_changedStepJumpState:                   # | 0xE - signify playing a custom movie after a non-normal level
+    /* 00001F20: */    stb r4,0x603(r8)     # | 0xF - signify playing a custom movie after a non-normal level and continuing regular SSE flow after
+    /* 00001F40: */    #lwz r6,0x524(r31)   # | 
+    /* 00001F44: */    li r4,0x1            # |
+    /* 00001F48: */    stb r4,0x605(r8)     # | Rearranged to introduce to new condition 
+    cmplwi r9, 0x3                          # | (to keep jumpLevelId to determine if thp should be played based on current jumpLevelid)
+    bge+ loc_1F50                           # | 
+    /* 00001F24: */    li r4,0x0            # |
+    /* 00001F28: */    li r5,0x20           # |
+    /* 00001F2C: */    #lwz r6,0x524(r31)   # | 
+    /* 00001F30: */    stw r4,0x62C(r8)     # |
+    /* 00001F34: */    #lwz r3,0x524(r3)    # |
+    /* 00001F38: */    addi r3,r8,0x630     # /
     /* 00001F3C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    /* 00001F40: */    lwz r3,0x524(r31)
-    /* 00001F44: */    li r0,0x1
-    /* 00001F48: */    stb r0,0x605(r3)
     /* 00001F4C: */    b loc_1FE0
 loc_1F50:
-    /* 00001F50: */    lwz r0,0x8(r27)
     /* 00001F54: */    li r4,0x0
     /* 00001F58: */    li r5,0x20
-    /* 00001F5C: */    stw r0,0x62C(r8)
-    /* 00001F60: */    lwz r3,0x524(r3)
-    /* 00001F64: */    addi r3,r3,0x630
+    /* 00001F60: */    #lwz r3,0x524(r3)
+    /* 00001F64: */    addi r3,r8,0x630 #addi r3,r3,0x630
     /* 00001F68: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    /* 00001F6C: */    # lwz r3,0x524(r31)
-    bl __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_addSequenceIndex")]
+    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_addSequenceIndex")]
 loc_addedSequenceIndex:
+    /* 00001F6C: */    lwz r3,0x524(r31)
     /* 00001F70: */    addi r4,r27,0xC
     /* 00001F74: */    li r5,0x1F
     /* 00001F78: */    addi r3,r3,0x630
@@ -2171,6 +2179,8 @@ loc_addedSequenceIndex:
     /* 00001FAC: */    lwz r4,0x62C(r4)
     /* 00001FB0: */    mtctr r12
     /* 00001FB4: */    bctrl
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_uploadCustomTracklist")]
+loc_finishedCustomTracklist:
     /* 00001FB8: */    cmpw r30,r3
     /* 00001FBC: */    bne- loc_1FC4
     /* 00001FC0: */    li r29,0x1
@@ -2183,18 +2193,18 @@ loc_1FC4:
     /* 00001FD8: */    li r5,0x1
     /* 00001FDC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "adKeepManager__setGlobalFlag")]
 loc_1FE0:
-    /* 00001FE0: */    addi r11,r1,0x20
+    /* 00001FE0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
     /* 00001FE4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]
-    /* 00001FE8: */    lwz r0,0x24(r1)
+    /* 00001FE8: */    lwz r0,0xF4(r1) #lwz r0,0x24(r1)
     /* 00001FEC: */    mtlr r0
-    /* 00001FF0: */    addi r1,r1,0x20
+    /* 00001FF0: */    addi r1,r1,0xF0 #addi r1,r1,0x20
     /* 00001FF4: */    blr
 stAdventure2__requestStepJump:
     /* 00001FF8: */    lwz r5,0x524(r3)
     /* 00001FFC: */    li r0,0x1
     /* 00002000: */    stw r4,0x628(r5)
-    /* 00002004: */    lwz r3,0x524(r3)
-    /* 00002008: */    stb r0,0x603(r3)
+    /* 00002004: */    #lwz r3,0x524(r3)
+    /* 00002008: */    stb r0,0x603(r5) #stb r0,0x603(r3)
     /* 0000200C: */    blr
 Vec2f____as:
     /* 00002010: */    lfs f1,0x0(r4)
@@ -8227,7 +8237,8 @@ loc_7738:
     /* 00007740: */    bdnz+ loc_771C
 loc_7744:
     /* 00007744: */    li r3,-0x1
-    /* 00007748: */    blr
+    b __unresolved                                       [R_PPC_REL24(40, 7, "loc_stAdventure2__getBgmId_customTracklist")]
+    /* 00007748: */    #blr
 stAdventure2__getBgmVolume:
     /* 0000774C: */    stwu r1,-0x10(r1)
     /* 00007750: */    lwz r6,0x1D0(r3)
@@ -8246,10 +8257,11 @@ loc_7774:
     /* 00007780: */    cmplw r5,r0
     /* 00007784: */    bne- loc_77C0
     /* 00007788: */    rlwinm r3,r7,4,0,27
-    /* 0000778C: */    lis r0,0x4330
     /* 00007790: */    add r3,r6,r3
-    /* 00007794: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_68")]
     /* 00007798: */    lwz r5,0x8(r3)
+loc_bgmConvertToFloat:
+    /* 0000778C: */    lis r0,0x4330
+    /* 00007794: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_68")]
     /* 0000779C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_A4")]
     /* 000077A0: */    stw r0,0x8(r1)
     /* 000077A4: */    lfd f2,0x0(r4)                           [R_PPC_ADDR16_LO(40, 4, "loc_68")]
@@ -8264,8 +8276,10 @@ loc_77C0:
     /* 000077C4: */    addi r7,r7,0x1
     /* 000077C8: */    bdnz+ loc_7774
 loc_77CC:
-    /* 000077CC: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_80")]
-    /* 000077D0: */    lfs f1,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_80")]
+    /* 000077CC: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_80")]
+    /* 000077D0: */    #lfs f1,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_80")]
+    li r5, 0x0
+    b __unresolved                                       [R_PPC_REL24(40, 7, "loc_stAdventure2__getBgmVolume_customTracklist")]
 loc_77D4:
     /* 000077D4: */    addi r1,r1,0x10
     /* 000077D8: */    blr
@@ -8294,9 +8308,12 @@ loc_7824:
     /* 00007828: */    addi r7,r7,0x1
     /* 0000782C: */    bdnz+ loc_7800
 loc_7830:
-    /* 00007830: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_2C")]
-    /* 00007834: */    lfs f1,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_2C")]
-    /* 00007838: */    blr
+    /* 00007830: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_2C")]
+    /* 00007834: */    #lfs f1,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_2C")]
+    stwu r1,-0x10(r1)
+    li r5, 0x0
+    b __unresolved                                       [R_PPC_REL24(40, 7, "loc_stAdventure2__getBgmPlayOffsetFrame_customTracklist")]
+    /* 00007838: */    #blr
 stAdventure2__isNextStepBgmEqualNowStepBgmFromFlag:
     /* 0000783C: */    lbz r0,0x550(r3)
     /* 00007840: */    rlwinm r3,r0,31,31,31
@@ -9564,7 +9581,7 @@ loc_8A30:
     /* 00008A3C: */    addi r0,r4,0x1
     /* 00008A40: */    stb r0,0x9(r1)
     ## SSEEX: Disable 'potential' P2's fighter from loading in the beginning of the stage
-    # This is to address the issue of Ex soundbanks crashing if P1's Ex fighter moves in the very beginning of the stage as 'potential' P2's fighter loads when not in co-op
+    # This is to address the issue of Ex soundbanks crashing when P1's Ex fighter moves in the very beginning of the stage as 'potential' P2's fighter loads when not in co-op
     # (tradeoff is if P2 joins in the middle of the stage it will lag to load the fighter)
     /* 00008A44: */    nop #lbz r0,0xF4(r5)
     /* 00008A48: */    nop #lbzx r3,r3,r4

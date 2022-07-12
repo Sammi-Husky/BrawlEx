@@ -25889,3 +25889,15 @@ loc_18550:
         .4byte 0x74616765
         .4byte 0x2E637070
         .4byte 0x00000000
+loc_adsjFolderPath:
+        .asciz "/stage/adventure/stepjump/"
+        .balign 4
+loc_adsjFilePath:
+        .asciz "%s%08x.adsj"
+        .balign 4
+loc_tlstFolderPath:
+        .asciz "/sound/tracklist/adventure/"
+        .balign 4
+loc_tlstFilePath:
+        .asciz "%s%08x.tlst"
+        .balign 4

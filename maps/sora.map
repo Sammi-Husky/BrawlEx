@@ -275,6 +275,7 @@
 8001ec10 gfFileIO__deleteFile
 8001ee94 gfFileIO__checkFreeSize
 8001f084 gfFileIO__checkFile
+8001f0d0 gfFileIO__checkFile_
 8001f0d4 gfFileIO__checkFile1
 8001f390 gfFileIO__checkFileNAND
 8001f4b0 gfFileIO__checkFileVF
