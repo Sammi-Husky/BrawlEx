@@ -142,8 +142,8 @@ HOOK @ $806e8920 # in sqSequence::setNext (case 10)
 {   
     stw	r19, 0x24(r28)          # Original operation
     lbz r5, 0x603(r29)          # \
-    cmpwi r5, 0xF               # |
-    bne+ noResetJumpLevelId     # | If advSaveData->stepJumpState is 0xF, reset advSaveData->jumpLevelId to siginify that can continue on normal SSE path
+    cmpwi r5, 0xE               # |
+    bne+ noResetJumpLevelId     # | If advSaveData->stepJumpState is 0xE, reset advSaveData->jumpLevelId to siginify that can continue on normal SSE path
     li r5, 0x0                  # |
     stw r5, 0x62C(r29)          # |
     b revertSequenceIndex       # /
@@ -151,7 +151,6 @@ noResetJumpLevelId:
     lwz r5, 0x62C(r29)  # \
     cmpwi r5, 0x0       # | If advSaveData->jumpLevelId is 0, skip and continue normal SSE path
     beq+ %END%          # /
-
     li r0, 0x1B         # Set sqAdventure->state to 27 to setup next stage
     li r5, 0x2          # \
     stb r5, 0x603(r29)  # / Set advSaveData->stepJumpState to 2
@@ -220,15 +219,18 @@ end:
 #  Use new stepJumpStates to End Non-Normal Level Battles  #
 ############################################################
 
-# advSaveData->stepJumpState=0xE -> used for when adsj flag0 is 4 which is to signify playing a custom movie after a non-normal level
-# advSaveData->stepJumpState=0xF -> used for when adsj flag0 is 5 which is to signify playing a custom movie after a non-normal level and continuing regular SSE flow after
+# advSaveData->stepJumpState=0xD -> used for when adsj flag0 is 4 which is to signify playing a custom movie after a non-normal level
+# advSaveData->stepJumpState=0xE -> used for when adsj flag0 is 5 which is to signify playing a custom movie after a non-normal level and continuing regular SSE flow after
+# advSaveData->stepJumpState=0xF -> used for when adsj flag0 is 5 which is to signify returning to regular SSE flow after a non-normal level
 
 HOOK @ $8095c9b0 # in stOperatorRuleAdventure::isEnd
 {
     cmplwi r0, 2    # Original operation (check if stepJumpState is 2) 
     beq+ %END%
-    cmplwi r0, 0xE  # \ 
-    beq+ %END%      # | Also end if stepJumpState is 0xE or 0xF (new states for custom non normal levels of whether to play movie after it)
+    cmplwi r0, 0xD  # \ 
+    beq+ %END%      # | 
+    cmplwi r0, 0xE  # | Also end if stepJumpState is 0xD, 0xE, 0xF (new states for custom non normal levels of whether to play movie after it)
+    beq+ %END%      # |
     cmplwi r0, 0xF  # / 
 }
 

@@ -16,7 +16,7 @@
 # TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
 ## e.g. 047001 40   047001 36   FFFFFF 35 (with FFFFFF is whether Great Maze has been unlocked)
 ## Then after write to bit section of module if level id corresponds and flip bit on based on character id and then save part of section to a file on save
-## Better yet, do it based on level id where 99Y9XXl where XX decides the character ID to unlock
+## Better yet, do it based on level id where 99Y9XXl where XX decides the character ID to unlock. (do this in stAdventure::changeStep based on gdorId)
 ## Ideally could find space in advSaveData somewhere when sd saving becomes a thing
 # TODO: Investigate movie param files, see if it's used when to play a brstm (try to make it use tlsts maybe?)
 # TODO: Investigate putting entirely new level markers on the map
@@ -28,6 +28,7 @@
 # Useful if want to end stage at any time
 ######################################################################################################################
 loc_stAdventure2__changeStep_addSequenceIndex:
+    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     li r6, 29                   # \
     rlwinm r0, r6, 2, 0, 29     # | gfSceneManager->sequenceList[29] (get sqAdventure)
     add r5, r3, r0              # |
@@ -38,7 +39,7 @@ loc_stAdventure2__changeStep_addSequenceIndex:
     #slwi r0, r0, 1              # | Add to sequence index (sequenceIndex + addedSequenceIndex)
     add r3, r3, r0              # / 
     stw r3, 0x10(r5)            # Store new sequenceIndex
-    b __unresolved                           [R_PPC_REL24(40, 1, "loc_addedSequenceIndex")]
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_1FE0")]
 
 ######################################################################################################################
 ## SSEEX: Check for a seperate adsj file based on level door id (e.g. 28000204.adsj) if not found in adventure_common
@@ -66,6 +67,7 @@ loc_stAdventure2__changeStep_findExternalADSJ:
     lis r27, 0x8053
     ori r27, r27, 0xF014
 loc_adsjNotFound:
+    lwz r8,0x524(r31)
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_1F04")]
 
 ####################################################################################################################################################

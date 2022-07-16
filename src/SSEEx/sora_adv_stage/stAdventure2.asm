@@ -2124,7 +2124,6 @@ loc_1F00:
     /* 00001F00: */    #li r0,0x0
     b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_findExternalADSJ")]
 loc_1F04:
-    lwz r8,0x524(r31)
     /* 00001F04: */    cmpwi r27,0x0 #cmpwi r0,0x0
     /* 00001F08: */    beq- loc_1FE0
     /* 00001F50: */    lwz r0,0x8(r27)      # \
@@ -2135,14 +2134,17 @@ loc_1F04:
     /* 00001F18: */    li r4,0x8            # | SSEEX
     cmplwi r9, 0x4                          # |
     blt+ loc_changedStepJumpState           # | When Flag0 is:
-    addi r4, r9, 0xA                        # | 4 -> stepJumpState=0xE, 5 -> stepJumpState=0xF
-loc_changedStepJumpState:                   # | 0xE - signify playing a custom movie after a non-normal level
-    /* 00001F20: */    stb r4,0x603(r8)     # | 0xF - signify playing a custom movie after a non-normal level and continuing regular SSE flow after
-    /* 00001F40: */    #lwz r6,0x524(r31)   # | 
+    addi r4, r9, 0x9                        # | 4 -> stepJumpState=0xD, 5 -> stepJumpState=0xE, 6 -> stepJumpState=0xF
+loc_changedStepJumpState:                   # | 0xD - signify playing a custom movie after a non-normal level
+    /* 00001F20: */    stb r4,0x603(r8)     # | 0xE - signify playing a custom movie after a non-normal level and continuing regular SSE flow after
+    /* 00001F40: */    #lwz r6,0x524(r31)   # | 0xF - signify continuing regular SSE flow after a non-normal level
     /* 00001F44: */    li r4,0x1            # |
     /* 00001F48: */    stb r4,0x605(r8)     # | Rearranged to introduce to new condition 
-    cmplwi r9, 0x3                          # | (to keep jumpLevelId to determine if thp should be played based on current jumpLevelid)
+    cmplwi r9, 0x6                          # | (to keep jumpLevelId to determine if thp should be played based on current jumpLevelid)
+    beq- loc_resetJumpInfo                  # |
+    cmplwi r9, 0x3                          # | 
     bge+ loc_1F50                           # | 
+loc_resetJumpInfo:                          # |
     /* 00001F24: */    li r4,0x0            # |
     /* 00001F28: */    li r5,0x20           # |
     /* 00001F2C: */    #lwz r6,0x524(r31)   # | 
@@ -2150,16 +2152,13 @@ loc_changedStepJumpState:                   # | 0xE - signify playing a custom m
     /* 00001F34: */    #lwz r3,0x524(r3)    # |
     /* 00001F38: */    addi r3,r8,0x630     # /
     /* 00001F3C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    /* 00001F4C: */    b loc_1FE0
+    /* 00001F4C: */    b loc_addSequenceIndex
 loc_1F50:
     /* 00001F54: */    li r4,0x0
     /* 00001F58: */    li r5,0x20
     /* 00001F60: */    #lwz r3,0x524(r3)
     /* 00001F64: */    addi r3,r8,0x630 #addi r3,r3,0x630
     /* 00001F68: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
-    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_addSequenceIndex")]
-loc_addedSequenceIndex:
     /* 00001F6C: */    lwz r3,0x524(r31)
     /* 00001F70: */    addi r4,r27,0xC
     /* 00001F74: */    li r5,0x1F
@@ -2192,6 +2191,8 @@ loc_1FC4:
     /* 00001FD4: */    li r4,0x3EA
     /* 00001FD8: */    li r5,0x1
     /* 00001FDC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "adKeepManager__setGlobalFlag")]
+loc_addSequenceIndex:
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_addSequenceIndex")]
 loc_1FE0:
     /* 00001FE0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
     /* 00001FE4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]
