@@ -151,7 +151,8 @@ noResetJumpLevelId:
     lwz r5, 0x62C(r29)  # \
     cmpwi r5, 0x0       # | If advSaveData->jumpLevelId is 0, skip and continue normal SSE path
     beq+ %END%          # /
-    li r0, 0x1B         # Set sqAdventure->state to 43 to setup next stage
+
+    li r0, 0x1B         # Set sqAdventure->state to 27 to setup next stage
     li r5, 0x2          # \
     stb r5, 0x603(r29)  # / Set advSaveData->stepJumpState to 2
 revertSequenceIndex:
@@ -292,6 +293,40 @@ HOOK @ $80945cc0 # in stLoaderStageAdventureCommon::updateStepId
     li r0, 0x1
 }
 
+#################################################################################################################
+#  Put P1 and P2 Initial Slot IDs at the back of advSaveData->selectedSlotIds Queue in sqAdventure::setSelChar  #
+#################################################################################################################
+
+HOOK @ $806ec368 
+{
+    lbz	r0, 0x5FA(r9)   # Original operation
+    lwz r12, 0x62C(r29) # \
+    cmpwi r12, 0x0      # | Check if advSaveData->jumpLevelId is 0x0
+    beq+ %END%          # /
+    lwz r12, 0x24(r22)  # \
+    lwz r12, 0x50(r12)  # | Make current index seqAdv->advSelchrResult->numSelectedFighters - 1 
+    subi r0, r12, 0x1   # /
+    add r4, r8, r0      # \ advSaveData->selectedSlotIds[numSelectedFighters - 1] = slotId
+    stb r3, 0x5(r4)     # / 
+    li r12, -1          # \ advSaveData->numReserveStocks = -1 (start at -1 so then it can be added to)
+    stb r12, 0x5FA(r9)  # /
+}
+
+HOOK @ $806ec4d4
+{
+    lbz	r0, 0x5FA(r8)   # Original operation
+    lwz r12, 0x62C(r29) # \ 
+    cmpwi r12, 0x0      # | Check if advSaveData->jumpLevelId is 0x0
+    beq+ %END%          # /
+    lwz r12, 0x24(r22)  # \
+    lwz r0, 0x50(r12)   # / Make current index seqAdv->advSelchrResult->numSelectedFighters
+    add r4, r7, r0      # \ advSaveData->selectedSlotIds[numSelectedFighters] = p2SlotId
+    stb r3, 0x5(r4)     # / 
+    li r12, -1          # \ advSaveData->numReserveStocks = -1 (start at -1 so then it can be added to)
+    stb r12, 0x5FA(r8)  # /
+}
+
+op lbz r6,0x5FA(r4) @ $806ec610   # Use advSaveData->numReserveStocks instead of advSelchrResult->numSelectedFighters 
 
 #############################################################################
 !Change filename of figdisp.pac to figdisx.pac Except During SSE [Kapedani]

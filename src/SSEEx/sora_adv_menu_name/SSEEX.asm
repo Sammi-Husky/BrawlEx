@@ -23,7 +23,7 @@ loc_muAdvNameTask__create_patchSoraModules:
 
     ## op b 0x1C
     addi r9, r10, 0x1C
-    # @ stOperatorFighterRebirth::processBegin
+    # @ stOperatorFighterRebirthAdventure::processBegin
     lis r12, 0x0                            [R_PPC_ADDR16_HA(27, 1, "SSEEX_patchTwo")]
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(27, 1, "SSEEX_patchTwo")]
     lis r12, 0x0                            [R_PPC_ADDR16_HA(27, 1, "SSEEX_patchThree")]

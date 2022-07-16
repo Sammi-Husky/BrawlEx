@@ -1,15 +1,15 @@
 muAdvSelchrBTask__create:
-    /* 00000000: */    stwu r1,-0x20(r1)
+    /* 00000000: */    stwu r1,-0xC0(r1) #stwu r1,-0x20(r1)
     /* 00000004: */    mflr r0
-    /* 00000008: */    stw r0,0x24(r1)
-    /* 0000000C: */    addi r11,r1,0x20
+    /* 00000008: */    stw r0,0xC4(r1) #stw r0,0x24(r1)
+    /* 0000000C: */    addi r11,r1,0xC0 #addi r11,r1,0x20
     /* 00000010: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
     /* 00000014: */    lis r31,0x0                              [R_PPC_ADDR16_HA(29, 5, "loc_0")]
     /* 00000018: */    mr r27,r3
     /* 0000001C: */    mr r28,r4
     /* 00000020: */    mr r29,r5
     /* 00000024: */    addi r31,r31,0x0                         [R_PPC_ADDR16_LO(29, 5, "loc_0")]
-    /* 00000028: */    li r3,0x36C
+    /* 00000028: */    li r3,0x370 #0x36C
     /* 0000002C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
     /* 00000030: */    cmpwi r3,0x0
     /* 00000034: */    mr r30,r3
@@ -18,11 +18,11 @@ muAdvSelchrBTask__create:
     /* 00000040: */    mr r30,r3
 loc_44:
     /* 00000044: */    stw r28,0x350(r30)
-    /* 00000048: */    lwz r4,0x4(r27)
     /* 0000004C: */    stw r29,0x354(r30)
     /* 00000050: */    lwz r0,0x0(r27)
-    /* 00000054: */    cmpwi r4,0x0
     /* 00000058: */    stw r0,0x368(r30)
+    /* 00000048: */    lwz r4,0x4(r27)
+    /* 00000054: */    cmpwi r4,0x0
     /* 0000005C: */    blt- loc_6C
     /* 00000060: */    addi r3,r30,0xBC
     /* 00000064: */    rlwinm r4,r4,0,24,31
@@ -49,20 +49,39 @@ loc_84:
     /* 000000B0: */    li r6,0x0
     /* 000000B4: */    li r7,0x0
     /* 000000B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__readRequest")]
+    /* 000000C4: */    addi r4,r31,0x44
+
+    ## SSEEX: If jumpLevelID is not 0 then it's a bonus Ex video and thus should skip character selection (TODO: Later have option to select characters based on if there are characters in settingTable or not)
+    lis r6,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r6,0x0(r6)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r6, 0x30(r6)      # | Get GameGlobal->advSaveData->jumpLevelId
+    lwz r6, 0x62C(r6)     # | (if it's 0 then skip)
+    stw r6, 0x36C(r30)    # | Save jumpLevelId for easy access later
+    cmpwi r6, 0x0         # |
+    beq+ loc_notExVideo   # /
+
+    addi r3, r1, 0x8
+    lis r4,0x0                              [R_PPC_ADDR16_HA(29, 5, "loc_selchrbFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(29, 5, "loc_selchrbFilePath")]
+    lis r5,0x0                              [R_PPC_ADDR16_HA(29, 5, "loc_selchrbFolderPath")]
+    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(29, 5, "loc_selchrbFolderPath")]
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    addi r4, r1, 0x8
+loc_notExVideo:
+
     /* 000000BC: */    lwz r5,0x354(r30)
     /* 000000C0: */    addi r3,r30,0x360
-    /* 000000C4: */    addi r4,r31,0x44
     /* 000000C8: */    li r6,0x0
     /* 000000CC: */    li r7,0x0
-    /* 000000D0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__readRequest")]
+    /* 000000D0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__readRequest")]    
     /* 000000D4: */    li r0,0x0
-    /* 000000D8: */    addi r11,r1,0x20
     /* 000000DC: */    stb r0,0x364(r30)
+    /* 000000D8: */    addi r11,r1,0xC0 #addi r11,r1,0x20
     /* 000000E0: */    mr r3,r30
     /* 000000E4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]
-    /* 000000E8: */    lwz r0,0x24(r1)
+    /* 000000E8: */    lwz r0,0xC4(r1) #lwz r0,0x24(r1)
     /* 000000EC: */    mtlr r0
-    /* 000000F0: */    addi r1,r1,0x20
+    /* 000000F0: */    addi r1,r1,0xC0 #addi r1,r1,0x20
     /* 000000F4: */    blr
 muAdvSelchrBTask____ct:
     /* 000000F8: */    stwu r1,-0x10(r1)
@@ -679,6 +698,17 @@ loc_9E0:
     /* 000009EC: */    addi r3,r25,0x360
     /* 000009F0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__release")]
 loc_9F4:
+    lwz r0, 0x36C(r25)
+    cmpwi r0, 0x0
+    beq+ loc_normalTable
+    cmpwi r29, 0x0
+    li r28, 0x0
+    li r31, 0x0
+    beq+ loc_exSelbNotFound
+    addi r27, r29, 0x4
+    lbz r31, 0x0(r29)
+    b loc_skipUtRelocate
+loc_normalTable:
     /* 000009F4: */    mr r4,r29
     /* 000009F8: */    mr r5,r26
     /* 000009FC: */    addi r3,r1,0x8
@@ -688,13 +718,13 @@ loc_9F4:
     /* 00000A0C: */    addi r4,r4,0x0                           [R_PPC_ADDR16_LO(29, 5, "loc_104")]
     /* 00000A10: */    bl __unresolved                          [R_PPC_REL24(0, 4, "utRelocate__getPublicAddress")]
     /* 00000A14: */    rlwinm r0,r27,3,0,28
-    /* 00000A18: */    lis r4,0x0                               [R_PPC_ADDR16_HA(29, 4, "loc_20")]
     /* 00000A1C: */    add r28,r3,r0
-    /* 00000A20: */    lfs f31,0x0(r4)                          [R_PPC_ADDR16_LO(29, 4, "loc_20")]
     /* 00000A24: */    lwz r27,0x4(r28)
+loc_skipUtRelocate:
+    /* 00000A18: */    lis r4,0x0                               [R_PPC_ADDR16_HA(29, 4, "loc_20")]
+    /* 00000A20: */    lfs f31,0x0(r4)                          [R_PPC_ADDR16_LO(29, 4, "loc_20")]
     /* 00000A28: */    mr r30,r25
     /* 00000A2C: */    li r26,0x0
-    /* 00000A30: */    lis r31,0x0                              [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     /* 00000A34: */    b loc_AB0
 loc_A38:
     /* 00000A38: */    lbz r0,0x0(r27)
@@ -707,7 +737,8 @@ loc_A38:
     /* 00000A54: */    stfs f0,0x278(r30)
     /* 00000A58: */    lfs f0,0x10(r27)
     /* 00000A5C: */    stfs f0,0x27C(r30)
-    /* 00000A60: */    lwz r3,0x0(r31)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    /* 00000A30: */    lis r3,0x0                              [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    /* 00000A60: */    lwz r3,0x0(r3)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     /* 00000A64: */    bl __unresolved                          [R_PPC_REL24(0, 4, "GameGlobal__getGlobalRecordMenuDatap")]
     /* 00000A68: */    lbz r0,0x28(r3)
     /* 00000A6C: */    rlwinm. r0,r0,25,31,31
@@ -733,12 +764,15 @@ loc_AB0:
     /* 00000AB4: */    extsb. r0,r0
     /* 00000AB8: */    bge+ loc_A38
     /* 00000ABC: */    stw r26,0x334(r25)
-    /* 00000AC0: */    mr r3,r29
-    /* 00000AC4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfHeapManager__free")]
-    /* 00000AC8: */    lbz r31,0x0(r28)
+    cmpwi r28, 0x0
+    beq loc_skipFillingMembers
     /* 00000ACC: */    addi r3,r1,0x8
     /* 00000AD0: */    li r4,-0x1
     /* 00000AD4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IpHuman____dt")]
+    /* 00000AC8: */    lbz r31,0x0(r28)
+loc_skipFillingMembers:
+    /* 00000AC0: */    mr r3,r29
+    /* 00000AC4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfHeapManager__free")]
     /* 00000AD8: */    mr r3,r31
     /* 00000ADC: */    psq_l f31,0x68(r1),0,0
     /* 00000AE0: */    lfd f31,0x60(r1)
@@ -748,6 +782,11 @@ loc_AB0:
     /* 00000AF0: */    mtlr r0
     /* 00000AF4: */    addi r1,r1,0x70
     /* 00000AF8: */    blr
+loc_exSelbNotFound:
+    lis r3, 0x0001          # \ Set selchrBIndex to 0xFFFF (i.e. don't select any characters)
+    subi r0, r3, 0x1        # /
+    stw r0,0x368(r25)
+    b loc_skipFillingMembers
 muAdvSelchrBTask__createObjResFile:
     /* 00000AFC: */    stwu r1,-0x70(r1)
     /* 00000B00: */    mflr r0
@@ -2418,6 +2457,11 @@ muAdvSelchrBTask__storeResult:
     /* 000021F8: */    stw r0,0x24(r1)
     addi r11,r1,0x20
     bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
+
+    lis r28,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r28,0x0(r28)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r28, 0x8(r28)       # Get gmGlobalModeMelee
+
     /* 000021FC: */    #stw r31,0x1C(r1)
     /* 00002200: */    mr r31,r3
     /* 00002204: */    lwz r29,0x348(r3) #lwz r0,0x348(r3)
@@ -2455,7 +2499,14 @@ loc_2234:
 loc_2268:
     /* 00002268: */    lwz r30,0x18C(r31) #lwz r0,0x18C(r31)
     /* 0000226C: */    cmpwi r8,0xA  #cmpw r8,r30 #cmpw r8,r0
-    /* 00002270: */    blt+ loc_2234                                      
+    /* 00002270: */    blt+ loc_2234
+    ## SSEEX: Store current character as first default result CSS ID
+    cmpwi r30, 0x0
+    bgt+ loc_atLeastOneMember
+    lbz r3, 0x98(r28)       # \ Store current GameGlobal->gmPlayer1InitData.slotID (as CSS ID) as a default selected CSS ID (AdvSelchrResult->cssIDs[0])
+    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
+    stw r3, 0x0(r29)        # /
+loc_atLeastOneMember:                                      
     /* 00002274: */    #lwz r4,0x348(r31)
     /* 00002278: */    addi r3,r31,0x194
     /* 0000227C: */    #stw r30,0x50(r29) #stw r0,0x50(r4)
@@ -2471,7 +2522,12 @@ loc_2268:
     /* 000022A4: */    cmpwi r0,0x0
     /* 000022A8: */    bne- loc_22B4
     /* 000022AC: */    lwz r0,0x164(r31)
-    /* 000022B0: */    b loc_22B8
+    cmpwi r30, 0x0          # Check if p1 number selected members is also 0
+    /* 000022B0: */    bne+ loc_22B8 #b loc_22B8
+    lbz r3, 0xF4(r28)       # \ Store current GameGlobal->gmPlayer2InitData.slotID (as CSS ID) as a default selected CSS ID (AdvSelchrResult->p2CSId)
+    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
+    mr r4, r3               # /
+    b loc_22F8
 loc_22B4:
     /* 000022B4: */    lwz r0,0x23C(r31)
 loc_22B8:
@@ -3158,55 +3214,7 @@ muAdvSelchrBTask__mainStepZombieMain:
 
     nop 
     nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop
-
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-
-    # +45
+    # +2
 
 muAdvSelchrBTask__isSelected:
     /* 00002BAC: */    lwz r0,0xB4(r3)

@@ -1571,8 +1571,8 @@ loc_1648:
     /* 00001680: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     /* 00001684: */    mulli r0,r29,0x14
     /* 00001688: */    lwz r3,0x30(r3)
-    /* 0000168C: */    add r3,r3,r0
-    /* 00001690: */    lwz r0,0x4(r3)
+    /* 0000168C: */    add r4,r3,r0 #add r3,r3,r0
+    /* 00001690: */    lwz r0,0x4(r4) #lwz r0,0x4(r3)
     /* 00001694: */    #cmpwi r0,0x1
     b __unresolved                                             [R_PPC_REL24(31, 7, "loc_muAdvSelmapTask__controllProc_checkIfOverride")]    
 loc_noOverride:

@@ -1,10 +1,12 @@
 
 ## SSEEX: Check for override input to later force open difficulty and CSS menu
 loc_muAdvSelmapTask__controllProc_checkIfOverride:
+
     li r10, 0x0
+    stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
-    stb r10,0x0(r12)
+    stb r10,0x0(r12)        # Set override characters flag to zero
     stb r10,0x1(r12)        # Set override character amount flag to zero
     stb r10,0x2(r12)        # Set override character amount to zero
     stw r0, -0x4(r12)               # Store selected level clear

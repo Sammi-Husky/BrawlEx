@@ -18,8 +18,7 @@
 ## Then after write to bit section of module if level id corresponds and flip bit on based on character id and then save part of section to a file on save
 ## Better yet, do it based on level id where 99Y9XXl where XX decides the character ID to unlock
 ## Ideally could find space in advSaveData somewhere when sd saving becomes a thing
-# TODO: Investigate how mu_adv_selchrb_tbl.dat is used to set characters to pick (maybe can divide into individual files for custom movies)
-# TODO: Investigate movie param files, see if it's used when to play a brstm
+# TODO: Investigate movie param files, see if it's used when to play a brstm (try to make it use tlsts maybe?)
 # TODO: Investigate putting entirely new level markers on the map
 # TODO: Unload and load alt soundbanks based on level id and certain jump flag so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
