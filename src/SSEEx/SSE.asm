@@ -158,7 +158,7 @@ noResetJumpLevelId:
 revertSequenceIndex:
     stw r3, 0x10(r28)   # Revert Sequence index (don't increment since was on custom path)
 
-} # TODO: Check how stocks are defined after selecting characters
+}
 
 ##################################################################
 #  Create movie and param filename based on current jumpLevelID  #
@@ -293,9 +293,9 @@ HOOK @ $80945cc0 # in stLoaderStageAdventureCommon::updateStepId
     li r0, 0x1
 }
 
-#################################################################################################################
-#  Put P1 and P2 Initial Slot IDs at the back of advSaveData->selectedSlotIds Queue in sqAdventure::setSelChar  #
-#################################################################################################################
+###########################################################################################################
+#  Put P1 and P2 Initial Slot IDs at the back of advSaveData->selectedSlotIds in sqAdventure::setSelChar  #
+###########################################################################################################
 
 HOOK @ $806ec368 
 {
