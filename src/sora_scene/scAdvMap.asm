@@ -1615,10 +1615,10 @@ scAdvMap__comerProc:
     /* 0001E2EC: */    li r23,0x0
     /* 0001E2F0: */    cmpwi r0,0x0
     /* 0001E2F4: */    bne- loc_1E308
-    /* 0001E2F8: */    bl __unresolved                          [R_PPC_REL24(31, 1, "loc_2E3C")]
+    /* 0001E2F8: */    bl __unresolved                          [R_PPC_REL24(31, 1, "muAdvComerTask__create")]
     /* 0001E2FC: */    stw r3,0x18(r24)
     /* 0001E300: */    lwz r4,0x38(r24)
-    /* 0001E304: */    bl __unresolved                          [R_PPC_REL24(31, 1, "muAdvComerTask____dt")]
+    /* 0001E304: */    bl __unresolved                          [R_PPC_REL24(31, 1, "muAdvComerTask__createData")]
 loc_1E308:
     /* 0001E308: */    lwz r3,0x18(r24)
     /* 0001E30C: */    lwz r0,0x2C(r3)

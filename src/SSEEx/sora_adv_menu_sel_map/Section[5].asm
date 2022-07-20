@@ -254,7 +254,7 @@ loc_C10:
 loc_C90:
         .4byte 0x00000000         [R_PPC_ADDR32(31, 5, "loc_D10")]
         .4byte 0x00000000
-        .4byte 0x00000000         [R_PPC_ADDR32(31, 1, "loc_3294")]
+        .4byte 0x00000000         [R_PPC_ADDR32(31, 1, "muAdvComerTask__processDefault")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processBegin")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processAnim")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processUpdate")]
@@ -276,7 +276,7 @@ loc_C90:
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processDebug")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__renderDebug")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__init")]
-        .4byte 0x00000000         [R_PPC_ADDR32(31, 1, "muAdvComerTask____ct")]
+        .4byte 0x00000000         [R_PPC_ADDR32(31, 1, "muAdvComerTask____dt")]
 loc_CF4:
         .asciz "muAdvComerTask"
         .balign 4

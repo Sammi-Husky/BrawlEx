@@ -2,6 +2,9 @@
 ## SSEEX: Check for override input to later force open difficulty and CSS menu
 loc_muAdvSelmapTask__controllProc_checkIfOverride:
 
+    li r10, -1             # Set prevSequenceIndex to -1 (so don't accidentially return to an old sequenceIndex)
+    lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
+    stw r10, 0x0(r12)                          [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
     li r10, 0x0
     stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
