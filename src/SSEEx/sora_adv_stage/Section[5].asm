@@ -25901,3 +25901,9 @@ loc_tlstFolderPath:
 loc_tlstFilePath:
         .asciz "%s%08x.tlst"
         .balign 4
+loc_selchrFolderPath:
+        .asciz "/menu/adventure/selchr/"
+        .balign 4
+loc_selchrcFilePath:
+        .asciz "%s%08x.selc"
+        .balign 4

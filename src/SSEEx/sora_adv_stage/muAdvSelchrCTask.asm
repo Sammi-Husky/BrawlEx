@@ -20,9 +20,10 @@
 .set Data8F8_0xD4, Data8F8_0xD0 + 0x4
 .set Data8F8_0xD8, Data8F8_0xD4 + 0x4
 
-.set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4 + 0x1 + maxNumberOfFighters # original size + number of new muObjects + byte for og number of characters to select + number of characters for sub character selection 
+.set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4 + 0x1 + maxNumberOfFighters + 0x1  # original size + number of new muObjects + byte for og number of characters to select + number of characters for sub character selection + byte for numStocks
 .set muAdvSelchrCTask_desiredNumMembersToSelect, 0xC60 + 3*addedMembers*4
 .set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
+.set muAdvSelchrCTask_numStocks, muAdvSelchrCTask_SubFighterCSSIdArray + maxNumberOfFighters
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
@@ -264,7 +265,7 @@ loc_initializeFighterCSSIdArray:
     stbx r9,r6,r9   # \ Current sub id is just the main id at the start hence storing and incrementing from 0 to maxNumberOfFighters
     addi r9,r9,1    # /
     bdnz loc_initializeFighterCSSIdArray
-    
+
     /* 0003E170: */    lwz r31,0xC(r1)
     /* 0003E174: */    lwz r30,0x8(r1)
     /* 0003E178: */    lwz r0,0x14(r1)
@@ -715,10 +716,10 @@ loc_3E66C:
     /* 0003E6A0: */    addi r1,r1,0x30
     /* 0003E6A4: */    blr
 muAdvSelchrCTask__setMenuData:
-    /* 0003E6A8: */    stwu r1,-0x64(r1)
+    /* 0003E6A8: */    stwu r1,-0x180(r1) #stwu r1,-0x64(r1)
     /* 0003E6AC: */    mflr r0
-    /* 0003E6B0: */    stw r0,0x68(r1)
-    /* 0003E6B4: */    addi r11,r1,0x64
+    /* 0003E6B0: */    stw r0,0x184(r1) #stw r0,0x68(r1)
+    /* 0003E6B4: */    addi r11,r1,0x180 #addi r11,r1,0x64
     /* 0003E6B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_14")]
     /* 0003E6C0: */    li r31,0x0
     /* 0003E6C4: */    stb r31,0xA(r1)
@@ -727,10 +728,51 @@ muAdvSelchrCTask__setMenuData:
     /* 0003E6C8: */    mr r29,r3
     /* 0003E6D0: */    mr r30,r4
 
-    ## SSEEX: Check for input to override and have all characters available
- loc_checkIfOverride:
     lis r12,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     lbz r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+
+    ## SSEEX: Check for .selc file if jumpLevelId is not 0x0 (which signifies custom cutscene followed by custom level)
+    li r10, 0xFF                              # \ Default number of stocks (0xFF) signifies no .selc file
+    stb r10, muAdvSelchrCTask_numStocks(r29)  # /
+    lis r6,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r6,0x0(r6)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r6, 0x30(r6)          # | Get GameGlobal->advSaveData->jumpLevelId
+    lwz r6, 0x62C(r6)         # | (if it's 0 then skip)
+    cmpwi r6, 0x0             # |
+    beq+ loc_checkIfOverride  # /
+
+    addi r3, r1, 0x3B
+    lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrcFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_selchrcFilePath")]
+    lis r5,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrFolderPath")]
+    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_selchrFolderPath")]
+    #crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    addi r5, r1, 0x60          
+    addi r3, r1, 0xB
+	addi r4, r1, 0x3B	
+    li r6, 0x0
+	li r7, 0x0	
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIORequest__setReadParam1")]
+    addi r3, r1, 0xB
+    li r6,0	
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
+    cmpwi r3, 0x0
+    bne+ loc_checkIfOverride  
+    lbz r10, 0x61(r1)                           # \ 
+    cmplwi r10, 0xA                             # | Set num stocks from selc file (if it's valid)
+    bgt- loc_checkIfOverride                    # |
+    stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
+    lbz r11, 0x60(r1)                           # \ Set num of members to select from selc file
+    stw r11, 0x6FC(r29)                         # /
+    cmpwi r14, 0x3          # \ Check if current override setting should make all characters visible
+    beq- loc_singleTeam     # /
+    # TODO: Check if 0x62(r1) is 2 which signifies just use unlocks
+    li r14, 0x5
+    b loc_singleTeam
+
+    ## SSEEX: Check for input to override and have all characters available
+ loc_checkIfOverride:
     cmpwi r14, 0x3          # \ Check if current override setting should make all characters visible
     beq- loc_singleTeam     # /
     lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
@@ -748,6 +790,7 @@ loc_checkForOverrideInput:          # |
     b loc_overrideCheckFinished        
 loc_teamMemberOverride:
     li r14, 0x3                     # Set unlock override so that anytime CSS pops up during stage characters remain present  
+    lis r12,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     stb r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     b loc_singleTeam
 loc_overrideCheckFinished:
@@ -1179,6 +1222,17 @@ loc_addFightersToTeamMenu:
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] # memcpy rel css data section to team member 1 section
 loc_skipAddFightersToTeamMenu:
 
+    ## SSEEX: Get members from selc file if r14 is 0x5
+    # TODO: Handle case where unlocks matter
+    # TODO: Handle multiple teams
+    cmpwi r14, 0x5
+    bne+ loc_dontGetMembersFromSelc
+    lbz r5, 0x64(r1)    # \ Get number of members for team1
+    stw r5, 0xe4(r29)   # / 
+    addi r4, r1, 0x6C   # \ Copy team 1 members from selc to team1 menuData in muAdvSelchrCTask
+    addi r3, r29, 0x44  # /
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] 
+loc_dontGetMembersFromSelc:
 #loc_3EBCC:
     /* 0003EBCC: */    lbz r0,muAdvSelchrCTask_0xC2D(r29)
     /* 0003EBD0: */    cmplwi r0,0x2
@@ -1210,11 +1264,11 @@ loc_3EC0C:
     /* 0003EC28: */    stw r0,0xE4(r29)
     /* 0003EC2C: */    stw r0,0x6F8(r29)
 loc_3EC30:
-    /* 0003EC30: */    addi r11,r1,0x64
+    /* 0003EC30: */    addi r11,r1,0x180 #addi r11,r1,0x64
     /* 0003EC34: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_14")]
-    /* 0003EC38: */    lwz r0,0x68(r1)
+    /* 0003EC38: */    lwz r0,0x184(r1) #lwz r0,0x68(r1)
     /* 0003EC3C: */    mtlr r0
-    /* 0003EC40: */    addi r1,r1,0x64
+    /* 0003EC40: */    addi r1,r1,0x180 #addi r1,r1,0x64
     /* 0003EC44: */    blr
 muAdvSelchrCTask__normalizeCharKind:
     /* 0003EC48: */    subi r0,r3,0x1B
@@ -2953,58 +3007,19 @@ loc_4010C:
     nop
     nop
     nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
     
     nop 
     nop 
     nop 
     nop 
     nop 
-    nop 
-    nop 
-    nop 
-    nop 
+    nop
+    nop
+    nop
+    nop
     nop
     
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    
-    # +205
+    # +170
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -4497,16 +4512,16 @@ loc_41458:
     /* 00041470: */    addi r1,r1,0x120
     /* 00041474: */    blr
 muAdvSelchrCTask__storeResult:
-    /* 00041478: */    stwu r1,-0x40(r1)
+    /* 00041478: */    stwu r1,-0x44(r1) #stwu r1,-0x40(r1)
     /* 0004147C: */    mflr r0
-    /* 00041480: */    stw r0,0x44(r1)
-    /* 00041484: */    addi r11,r1,0x40
-    /* 00041488: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_25")]
-    /* 0004148C: */    lwz r0,muAdvSelchrCTask_0xC3C(r3)
+    /* 00041480: */    stw r0,0x48(r1) #stw r0,0x44(r1)
+    /* 00041484: */    addi r11,r1,0x44 #addi r11,r1,0x40
+    /* 00041488: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_20")]
     /* 00041490: */    mr r28,r3
-    /* 00041494: */    cmpwi r0,0x0
+    /* 0004148C: */    lwz r20,muAdvSelchrCTask_0xC3C(r3) #lwz r0,muAdvSelchrCTask_0xC3C(r3)
+    /* 00041494: */    cmpwi r20,0x0 #cmpwi r0,0x0
     /* 00041498: */    beq- loc_4181C
-    /* 0004149C: */    mr r3,r0
+    /* 0004149C: */    mr r3,r20 #mr r3,r0
     /* 000414A0: */    li r4,0x0
     /* 000414A4: */    li r5,0x68
     /* 000414A8: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
@@ -4601,6 +4616,25 @@ loc_415CC:
     /* 000415D8: */    li r27,0x0
     /* 000415DC: */    mulli r31,r0,0xAC
     /* 000415E0: */    add r26,r28,r31
+    
+    /* 00041670: */    addi r3,r28,muAdvSelchrCTask_0xAC0 #addi r30,r28,muAdvSelchrCTask_0xAC0
+    /* 00041674: */    #mr r3, r30
+    /* 00041688: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
+    /* 0004168C: */    rlwinm r0,r3,1,31,31
+    /* 00041690: */    xori r24,r0,0x1
+    /* 00041660: */    lwz r23,muAdvSelchrCTask_0xAB8(r28) #lwz r0,muAdvSelchrCTask_0xAB8(r28)
+    li r21, 0x0                             # \
+    mr r22, r23                             # |
+    lwz r0, muAdvSelchrCTask_0xC08(r28)     # |
+    stw r0,0x5C(r20)                        # |
+    cmpwi r0,0x0                            # |
+    beq- loc_41660                          # |
+    li r21, 0x1                             # |
+    addi r22, r22, 0x1                      # | Add p2 at end of circularQueue for selected fighters 
+    lwz r0, muAdvSelchrCTask_0xB68(r28)     # | (if p2 is present and has a selected fighter)
+    mulli r9, r23, 0x4                      # |
+    add r9, r9, r28                         # |
+    stw r0,muAdvSelchrCTask_0xA18(r9)       # /
     /* 000415E4: */    b loc_41660
 loc_415E8:
     /* 000415E8: */    lwz r0,muAdvSelchrCTask_0xA18(r30)
@@ -4632,51 +4666,51 @@ loc_415E8:
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersCSSIds")]
     stbx r3, r12, r25
 loc_41630:
-    /* 00041630: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041630: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
     /* 00041634: */    cmpwi r3,0x1B
-    /* 00041638: */    stwx r3,r4,r27
+    /* 00041638: */    stwx r3,r20,r27 #stwx r3,r4,r27
     /* 0004163C: */    bne- loc_41644
     /* 00041640: */    mr r3,r29
 loc_41644:
     /* 00041644: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeMuSelchkind2GmCharacterKind")]
-    /* 00041648: */    lwz r0,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041648: */    #lwz r0,muAdvSelchrCTask_0xC3C(r28)
     /* 0004164C: */    addi r30,r30,0x4
     /* 00041650: */    addi r25,r25,0x1
-    /* 00041654: */    add r4,r0,r27
+    /* 00041654: */    add r4,r20,r27 #add r4,r0,r27
     /* 00041658: */    addi r27,r27,0x4
     /* 0004165C: */    stw r3,0x28(r4)
 loc_41660:
-    /* 00041660: */    lwz r0,muAdvSelchrCTask_0xAB8(r28)
-    divwu r9,r25,r0         # \
-    mullw r9,r9,r0          # | if (currentCount % numFighters == 0) i.e. check if all fighters have been looped through
+    divwu r9,r25,r22        # \
+    mullw r9,r9,r22         # | if (currentCount % numFighters == 0) i.e. check if all fighters have been looped through
     cmpw r25,r9             # |
     bne+ loc_notMultiple    # /
     /* 000415D0: */    mr r30,r28       # Reset to repeat so that loc_overrideCharactersCSSIds can fill up (e.g. 07 09 07 09 07 09...)
 loc_notMultiple:
     /* 00041664: */    cmpwi r25, 0xA #cmpw r25,r0
     /* 00041668: */    blt+ loc_415E8
-    /* 0004166C: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041670: */    addi r30,r28,muAdvSelchrCTask_0xAC0
-    /* 00041674: */    mr r3,r30
+    /* 0004166C: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
     lbz r10, muAdvSelchrCTask_desiredNumMembersToSelect(r28)       # \
-    cmpw r10, r0                                                   # | If original num members to select is less, then store as numSelectedFighters
+    cmpw r10, r23                                                  # | If original num members to select is less, then store as numSelectedFighters
     bgt+ loc_dontStoreDesiredNumMembersToSelect                    # | (so that same amount of lives is preserved)
-    mr r0, r10                                                     # /
+    mr r23, r10                                                    # /
 loc_dontStoreDesiredNumMembersToSelect:
     lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersAmount")]
-    stb r0, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersAmount")]
-    /* 00041678: */    stw r0,0x50(r4)
-    /* 0004167C: */    lwz r0,muAdvSelchrCTask_0xC08(r28)
-    /* 00041680: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041684: */    stw r0,0x5C(r4)
-    /* 00041688: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
-    /* 0004168C: */    rlwinm r0,r3,1,31,31
-    /* 00041690: */    xori r0,r0,0x1
-    /* 00041694: */    cmpwi r0,0x0
+    stb r23, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersAmount")]
+    lbz r12, muAdvSelchrCTask_numStocks(r28)    # \
+    cmplwi r12, 0xA                             # | Check if number of stocks defined is 10 or less (10 being max characters in selection result)
+    bgt+ loc_stocksNotDefined                   # /
+    sub r23, r12, r21           # Subtract if p2 had a pick
+loc_stocksNotDefined:
+    
+    /* 00041678: */    #stw r23,0x50(r4) #stw r0,0x50(r4)
+    /* 0004167C: */    #lwz r0,muAdvSelchrCTask_0xC08(r28)
+    /* 00041680: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041684: */    #stw r0,0x5C(r4)
+    /* 00041694: */    cmpwi r24, 0x0 #cmpwi r0,0x0
     /* 00041698: */    beq- loc_41734
-    /* 0004169C: */    lwz r0,muAdvSelchrCTask_0xC08(r28)
+    /* 0004169C: */    #lwz r0,muAdvSelchrCTask_0xC08(r28)
     /* 000416A0: */    add r3,r28,r31
-    /* 000416A4: */    cmpwi r0,0x0
+    /* 000416A4: */    cmpwi r21,0x0 #cmpwi r0,0x0
     /* 000416A8: */    bne- loc_416B4
     /* 000416AC: */    lwz r0,muAdvSelchrCTask_0xA18(r28)
     /* 000416B0: */    b loc_416B8
@@ -4708,8 +4742,8 @@ loc_416F0:
     /* 000416F4: */    #bne- loc_416FC
     /* 000416F8: */    #lwz r0,muAdvSelchrCTask_0xC38(r28)
 loc_416FC:
-    /* 000416FC: */    lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041700: */    stw r3,0x54(r4) #stw r0,0x54(r3)
+    /* 000416FC: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041700: */    stw r3,0x54(r20) #stw r0,0x54(r3)
     lis r12,0x0                                 [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersP2CSSId")]
     addi r12,r12,0x0                            [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersP2CSSId")]
     stb r3,0x0(r12)
@@ -4718,12 +4752,10 @@ loc_416FC:
     bne+ loc_p1AndP2NotSame     # | Increment advSelchrResult->numSelectedFighters by one if p1 and p2 selected the same character
     lwz r10,-0xB(r12)           # | and not in Great Maze 
     cmpwi r10, 0x1e             # | and numSelectedFighters less than 10
-    bge- loc_p1AndP2NotSame     # | (to counteract having one fewer stock)
-    lwz r10,0x50(r4)            # |
-    cmpwi r10, 0xA              # |
+    bge- loc_p1AndP2NotSame     # | (to counteract having one fewer stock)          
+    cmpwi r23, 0xA              # |
     bge- loc_p1AndP2NotSame     # |
-    addi r10, r10, 0x1          # |
-    stw r10,0x50(r4)            # /
+    addi r23, r23, 0x1          # /
 loc_p1AndP2NotSame:
     /* 00041704: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041708: */    #lwz r3,0x54(r3)
@@ -4732,19 +4764,21 @@ loc_p1AndP2NotSame:
     /* 00041714: */    mr r3,r29
 loc_41718:
     /* 00041718: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeMuSelchkind2GmCharacterKind")]
-    /* 0004171C: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041720: */    stw r3,0x58(r4)
-    /* 00041724: */    lwz r0,muAdvSelchrCTask_0xC08(r28)
-    /* 00041728: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
-    /* 0004172C: */    stw r0,0x5C(r3)
+    /* 0004171C: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041720: */    stw r3,0x58(r20) #stw r3,0x58(r4)
+    /* 00041724: */    #lwz r0,muAdvSelchrCTask_0xC08(r28)
+    /* 00041728: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 0004172C: */    #stw r0,0x5C(r3)
     /* 00041730: */    b loc_41740
 loc_41734:
-    /* 00041734: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041734: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041738: */    li r0,0x28
-    /* 0004173C: */    stw r0,0x54(r3)
+    /* 0004173C: */    stw r0,0x54(r20) #stw r0,0x54(r3)
     lis r12,0x0                                 [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersP2CSSId")]
     stb r0,0x0(r12)                             [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersP2CSSId")]
 loc_41740:
+    stw r23,0x50(r20)           
+
     /* 00041740: */    lwz r0,muAdvSelchrCTask_0xABC(r28)
     /* 00041744: */    add r3,r28,r31
     /* 00041748: */    addi r26,r3,0x44
@@ -4772,16 +4806,16 @@ loc_41780:
     /* 00041784: */    #bne- loc_4178C
     /* 00041788: */    #lwz r0,muAdvSelchrCTask_0xC38(r28)
 loc_4178C:
-    /* 0004178C: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041794: */    stw r3,0x60(r4) #stw r0,0x60(r4)
-    /* 00041790: */    mr r3,r30
-    /* 00041798: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
-    /* 0004179C: */    rlwinm r0,r3,1,31,31
-    /* 000417A0: */    xori r0,r0,0x1
-    /* 000417A4: */    cmplwi r0,0x1
+    /* 0004178C: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041794: */    stw r3,0x60(r20) #stw r0,0x60(r4)
+    /* 00041790: */    #mr r3,r30
+    /* 00041798: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
+    /* 0004179C: */    #rlwinm r0,r3,1,31,31
+    /* 000417A0: */    #xori r0,r0,0x1
+    /* 000417A4: */    cmplwi r24,0x1 #cmplwi r0,0x1
     /* 000417A8: */    bne- loc_41810
-    /* 000417AC: */    lwz r0,muAdvSelchrCTask_0xC08(r28)
-    /* 000417B0: */    cmpwi r0,0x0
+    /* 000417AC: */    #lwz r0,muAdvSelchrCTask_0xC08(r28)
+    /* 000417B0: */    cmpwi r21,0x0 #cmpwi r0,0x0
     /* 000417B4: */    bne- loc_417C0
     /* 000417B8: */    lwz r0,muAdvSelchrCTask_0xABC(r28)
     /* 000417BC: */    b loc_417C4
@@ -4811,19 +4845,19 @@ loc_417F8:
     /* 000417FC: */    #bne- loc_41804
     /* 00041800: */    #lwz r0,muAdvSelchrCTask_0xC38(r28)
 loc_41804:
-    /* 00041804: */    lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
-    /* 00041808: */    stw r3,0x64(r4) #stw r0,0x64(r3)
+    /* 00041804: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28) #lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041808: */    stw r3,0x64(r20) #stw r0,0x64(r3)
     /* 0004180C: */    b loc_4181C
 loc_41810:
-    /* 00041810: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 00041810: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041814: */    li r0,0x28
-    /* 00041818: */    stw r0,0x64(r3)
+    /* 00041818: */    stw r0,0x64(r20) #stw r0,0x64(r3)
 loc_4181C:
-    /* 0004181C: */    addi r11,r1,0x40
-    /* 00041820: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_25")]
-    /* 00041824: */    lwz r0,0x44(r1)
+    /* 0004181C: */    addi r11,r1,0x44 #addi r11,r1,0x40
+    /* 00041820: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_20")]
+    /* 00041824: */    lwz r0,0x48(r1) #lwz r0,0x44(r1)
     /* 00041828: */    mtlr r0
-    /* 0004182C: */    addi r1,r1,0x40
+    /* 0004182C: */    addi r1,r1,0x44 #addi r1,r1,0x40
     /* 00041830: */    blr
 muAdvSelchrCTask__reportResult:
     /* 00041834: */    stwu r1,-0x20(r1)

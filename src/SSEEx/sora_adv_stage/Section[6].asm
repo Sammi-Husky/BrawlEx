@@ -2818,3 +2818,5 @@ loc_overrideCharactersCSSIds:
         .byte 0x00
         .byte 0x00
         .byte 0x00
+loc_prevSequenceIndex:
+        .4byte 0xFFFFFFFF

@@ -18,15 +18,25 @@
 ## Then after write to bit section of module if level id corresponds and flip bit on based on character id and then save part of section to a file on save
 ## Better yet, do it based on level id where 99Y9XXl where XX decides the character ID to unlock. (do this in stAdventure::changeStep based on gdorId)
 ## Ideally could find space in advSaveData somewhere when sd saving becomes a thing
-# TODO: Investigate movie param files, see if it's used when to play a brstm (try to make it use tlsts maybe?)
+# TODO: selc files to determine bigger roster of characters/use unlocks with limited lives (should it be based off sequenceIndex again)
+## One parameter is how many characters to select, one should be number of lives, one should be use unlocks. If list of characters starts with FF then use entire roster
+## TODO: Figure out which base characters are unlocked 
+## Make jump Flag1 special goto sequenceIndex flag (4 and above) to goto certain sequenceIndex like one that forces a muAdvSelcTask
+## When jump Flag1 is 1 that means return to previous sequenceIndex (and reset), when it's 0 no goto anything
 # TODO: Investigate putting entirely new level markers on the map
-# TODO: Unload and load alt soundbanks based on level id and certain jump flag so different enemy sfx can be used?
+# TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 
 ######################################################################################################################
-## SSEEX: Flag3 in stepjump entry is used to increment/decrement sequence index
-# Useful if want to end stage at any time
+## SSEEX: Unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
 ######################################################################################################################
+## Flag1 is used to jump to specific sequence indices
+# 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (since it opens up muAdvSelcTask)
+# 1 -> return to original previous sequence index
+## Flag3 is used to increment/decrement sequence index
+
+# Useful if want to put sequenceIndex so that character selection happens after movie or end stage
+
 loc_stAdventure2__changeStep_addSequenceIndex:
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     li r6, 29                   # \
@@ -34,6 +44,26 @@ loc_stAdventure2__changeStep_addSequenceIndex:
     add r5, r3, r0              # |
     lwz r5, 0x1A8(r5)           # /
     lwz r3, 0x10(r5)            # sqAdventure->sequenceIndex
+    lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
+    lwz r9, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+    li r10, -1
+    lbz r0, 0x5(r27)                            # \ Get unused flag1 to determine whether to jump to a specific sequenceIndex
+    cmpwi r0, 0x4                               # |
+    bne+ loc_notjumpToSeqIndexWithSelchrCTask   # | 
+    mr r8, r3                                   # |
+    li r3, 313                                  # | Set to 313
+    cmpw r9, r10                                # |
+    bne+ loc_addOrSubtractSequenceIndex         # / Store prevSequenceIndex if there isn't one that has been stored yet
+    stw r8, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+    b loc_addOrSubtractSequenceIndex
+loc_notjumpToSeqIndexWithSelchrCTask:           # \
+    cmpwi r0, 0x1                               # |
+    bne+ loc_addOrSubtractSequenceIndex         # |
+    cmpw r9, r10                                # | Return to previous sequence index if flag1 is 1 and there is a prevSequenceIndex available
+    beq+ loc_addOrSubtractSequenceIndex         # | and reset prevSequenceIndex
+    mr r3, r9                                   # / 
+    stw r10, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+loc_addOrSubtractSequenceIndex:
     lbz r0, 0x7(r27)            # Get usused flag to use to add/subtract to current sequenceIndex
     extsb r0, r0                # \ 
     #slwi r0, r0, 1              # | Add to sequence index (sequenceIndex + addedSequenceIndex)

@@ -455,6 +455,11 @@ loc_484F0:
     /* 00048508: */    stb r30,0x12C(r29)
 loc_4850C:
     /* 0004850C: */    li r5,0x0
+## SSEEX: Set advSaveData->jumpLevelId to 0 during save point (so that it's zero during muAdvSelChrCTask)
+    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r12,0x30(r12)       # | Set GameGlobal->advSaveData->jumpLevelId to 0
+    stw r5, 0x62C(r12)      # /  
     /* 00048510: */    lis r0,0x4330
     /* 00048514: */    xoris r3,r5,0x8000
     /* 00048518: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_B68")]
@@ -892,15 +897,17 @@ muAdvSavePoint__searchCursor:
     /* 00048B24: */    stwu r1,-0x20(r1)
     /* 00048B28: */    mflr r0
     /* 00048B2C: */    stw r0,0x24(r1)
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_28")]
     /* 00048B30: */    mulli r0,r4,0x24
     /* 00048B34: */    rlwinm r4,r5,3,0,28
-    /* 00048B38: */    stw r31,0x1C(r1)
+    /* 00048B38: */    #stw r31,0x1C(r1)
     /* 00048B3C: */    add r0,r3,r0
-    /* 00048B40: */    stw r30,0x18(r1)
+    /* 00048B40: */    #stw r30,0x18(r1)
     /* 00048B44: */    add r31,r4,r0
-    /* 00048B48: */    stw r29,0x14(r1)
+    /* 00048B48: */    #stw r29,0x14(r1)
     /* 00048B4C: */    mr r29,r5
-    /* 00048B50: */    stw r28,0x10(r1)
+    /* 00048B50: */    #stw r28,0x10(r1)
     /* 00048B54: */    mr r28,r3
     /* 00048B58: */    lwz r5,0x58(r31)
     /* 00048B5C: */    cmpwi r5,0x7
@@ -942,11 +949,13 @@ loc_48BD0:
     /* 00048BDC: */    blt+ loc_48BAC
     /* 00048BE0: */    li r3,0x7
 loc_48BE4:
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_28")]
     /* 00048BE4: */    lwz r0,0x24(r1)
-    /* 00048BE8: */    lwz r31,0x1C(r1)
-    /* 00048BEC: */    lwz r30,0x18(r1)
-    /* 00048BF0: */    lwz r29,0x14(r1)
-    /* 00048BF4: */    lwz r28,0x10(r1)
+    /* 00048BE8: */    #lwz r31,0x1C(r1)
+    /* 00048BEC: */    #lwz r30,0x18(r1)
+    /* 00048BF0: */    #lwz r29,0x14(r1)
+    /* 00048BF4: */    #lwz r28,0x10(r1)
     /* 00048BF8: */    mtlr r0
     /* 00048BFC: */    addi r1,r1,0x20
     /* 00048C00: */    blr

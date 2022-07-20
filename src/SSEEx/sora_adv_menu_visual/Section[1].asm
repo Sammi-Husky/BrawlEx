@@ -9,7 +9,7 @@ muAdvSelchrBTask__create:
     /* 0000001C: */    mr r28,r4
     /* 00000020: */    mr r29,r5
     /* 00000024: */    addi r31,r31,0x0                         [R_PPC_ADDR16_LO(29, 5, "loc_0")]
-    /* 00000028: */    li r3,0x370 #0x36C
+    /* 00000028: */    li r3,0x371 #0x36C
     /* 0000002C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
     /* 00000030: */    cmpwi r3,0x0
     /* 00000034: */    mr r30,r3
@@ -52,7 +52,7 @@ loc_84:
     /* 000000C4: */    addi r4,r31,0x44
 
     ## SSEEX: If jumpLevelID is not 0 then it's a bonus Ex video and thus should skip character selection (TODO: Later have option to select characters based on if there are characters in settingTable or not)
-    lis r6,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lis r6,0x0                              [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r6,0x0(r6)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r6, 0x30(r6)      # | Get GameGlobal->advSaveData->jumpLevelId
     lwz r6, 0x62C(r6)     # | (if it's 0 then skip)
@@ -63,8 +63,8 @@ loc_84:
     addi r3, r1, 0x8
     lis r4,0x0                              [R_PPC_ADDR16_HA(29, 5, "loc_selchrbFilePath")]
     addi r4,r4,0x0                          [R_PPC_ADDR16_LO(29, 5, "loc_selchrbFilePath")]
-    lis r5,0x0                              [R_PPC_ADDR16_HA(29, 5, "loc_selchrbFolderPath")]
-    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(29, 5, "loc_selchrbFolderPath")]
+    lis r5,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrFolderPath")]
+    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_selchrFolderPath")]
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
     addi r4, r1, 0x8
 loc_notExVideo:
@@ -187,6 +187,8 @@ muAdvSelchrBTask____ct:
     /* 00000288: */    stw r31,0x268(r30)
     /* 0000028C: */    stw r31,0x338(r30)
     /* 00000290: */    stw r31,0x33C(r30)
+    li r12, 0xFF
+    stb r12, 0x370(r30)
     /* 00000294: */    lwz r31,0xC(r1)
     /* 00000298: */    lwz r30,0x8(r1)
     /* 0000029C: */    lwz r0,0x14(r1)
@@ -701,12 +703,14 @@ loc_9F4:
     lwz r0, 0x36C(r25)
     cmpwi r0, 0x0
     beq+ loc_normalTable
-    cmpwi r29, 0x0
-    li r28, 0x0
-    li r31, 0x0
-    beq+ loc_exSelbNotFound
-    addi r27, r29, 0x4
-    lbz r31, 0x0(r29)
+    cmpwi r29, 0x0          # \
+    li r28, 0x0             # | Skip if .selb file based on jumpLevelId not found
+    li r31, 0x0             # |
+    beq+ loc_exSelbNotFound # /
+    addi r27, r29, 0x4      # Set pointer to character table from file
+    lbz r31, 0x0(r29)       # Get number of members to select from .selb file
+    lbz r12, 0x1(r29)       # \ Get number of lives from .selb file and store later for storeResult
+    stb r12, 0x370(r25)     # /
     b loc_skipUtRelocate
 loc_normalTable:
     /* 000009F4: */    mr r4,r29
@@ -1075,153 +1079,153 @@ loc_EF8:
     /* 00000F10: */    addi r1,r1,0x70
     /* 00000F14: */    blr
 muAdvSelchrBTask__getNotNumberingPos:
-    /* 00000F18: */    stwu r1,-0x20(r1)
-    /* 00000F1C: */    mflr r0
-    /* 00000F20: */    stw r0,0x24(r1)
-    /* 00000F24: */    addi r11,r1,0x20
-    /* 00000F28: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
-    /* 00000F2C: */    mr r29,r3
-    /* 00000F30: */    addi r30,r3,0xBC
-    /* 00000F34: */    li r28,0x0
-    /* 00000F38: */    li r27,0x0
-    /* 00000F3C: */    li r26,0x1
-    /* 00000F40: */    lis r31,-0x8000
+    /* 00000F18: */    #stwu r1,-0x20(r1)
+    /* 00000F1C: */    #mflr r0
+    /* 00000F20: */    #stw r0,0x24(r1)
+    /* 00000F24: */    #addi r11,r1,0x20
+    /* 00000F28: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
+    /* 00000F2C: */    #mr r29,r3
+    /* 00000F30: */    #addi r30,r3,0xBC
+    /* 00000F34: */    #li r28,0x0
+    /* 00000F38: */    #li r27,0x0
+    /* 00000F3C: */    #li r26,0x1
+    /* 00000F40: */    #lis r31,-0x8000
 loc_F44:
-    /* 00000F44: */    mr r3,r30
-    /* 00000F48: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
-    /* 00000F4C: */    rlwinm r0,r3,1,31,31
-    /* 00000F50: */    xori r0,r0,0x1
-    /* 00000F54: */    cmpwi r0,0x0
-    /* 00000F58: */    beq- loc_1050
-    /* 00000F5C: */    lwz r6,0x18C(r29)
-    /* 00000F60: */    li r3,0x0
-    /* 00000F64: */    cmpwi cr1,r6,0x0
-    /* 00000F68: */    ble- cr1,loc_1050
-    /* 00000F6C: */    cmpwi r6,0x8
-    /* 00000F70: */    subi r4,r6,0x8
-    /* 00000F74: */    ble- loc_101C
-    /* 00000F78: */    li r5,0x0
-    /* 00000F7C: */    blt- cr1,loc_F90
-    /* 00000F80: */    subi r0,r31,0x2
-    /* 00000F84: */    cmpw r6,r0
-    /* 00000F88: */    bgt- loc_F90
-    /* 00000F8C: */    li r5,0x1
+    /* 00000F44: */    #mr r3,r30
+    /* 00000F48: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
+    /* 00000F4C: */    #rlwinm r0,r3,1,31,31
+    /* 00000F50: */    #xori r0,r0,0x1
+    /* 00000F54: */    #cmpwi r0,0x0
+    /* 00000F58: */    #beq- loc_1050
+    /* 00000F5C: */    #lwz r6,0x18C(r29)
+    /* 00000F60: */    #li r3,0x0
+    /* 00000F64: */    #cmpwi cr1,r6,0x0
+    /* 00000F68: */    #ble- cr1,loc_1050
+    /* 00000F6C: */    #cmpwi r6,0x8
+    /* 00000F70: */    #subi r4,r6,0x8
+    /* 00000F74: */    #ble- loc_101C
+    /* 00000F78: */    #li r5,0x0
+    /* 00000F7C: */    #blt- cr1,loc_F90
+    /* 00000F80: */    #subi r0,r31,0x2
+    /* 00000F84: */    #cmpw r6,r0
+    /* 00000F88: */    #bgt- loc_F90
+    /* 00000F8C: */    #li r5,0x1
 loc_F90:
-    /* 00000F90: */    cmpwi r5,0x0
-    /* 00000F94: */    beq- loc_101C
-    /* 00000F98: */    addi r0,r4,0x7
-    /* 00000F9C: */    mr r9,r29
-    /* 00000FA0: */    rlwinm r0,r0,29,3,31
-    /* 00000FA4: */    mtctr r0
-    /* 00000FA8: */    cmpwi r4,0x0
-    /* 00000FAC: */    ble- loc_101C
+    /* 00000F90: */    #cmpwi r5,0x0
+    /* 00000F94: */    #beq- loc_101C
+    /* 00000F98: */    #addi r0,r4,0x7
+    /* 00000F9C: */    #mr r9,r29
+    /* 00000FA0: */    #rlwinm r0,r0,29,3,31
+    /* 00000FA4: */    #mtctr r0
+    /* 00000FA8: */    #cmpwi r4,0x0
+    /* 00000FAC: */    #ble- loc_101C
 loc_FB0:
-    /* 00000FB0: */    lwz r0,0x164(r9)
-    /* 00000FB4: */    addi r3,r3,0x8
-    /* 00000FB8: */    lwz r4,0x168(r9)
-    /* 00000FBC: */    slw r5,r26,r0
-    /* 00000FC0: */    lwz r0,0x16C(r9)
-    /* 00000FC4: */    lwz r7,0x170(r9)
-    /* 00000FC8: */    or r28,r28,r5
-    /* 00000FCC: */    slw r4,r26,r4
-    /* 00000FD0: */    lwz r6,0x174(r9)
-    /* 00000FD4: */    or r28,r28,r4
-    /* 00000FD8: */    slw r8,r26,r0
-    /* 00000FDC: */    lwz r5,0x178(r9)
-    /* 00000FE0: */    or r28,r28,r8
-    /* 00000FE4: */    slw r7,r26,r7
-    /* 00000FE8: */    lwz r4,0x17C(r9)
-    /* 00000FEC: */    lwz r0,0x180(r9)
-    /* 00000FF0: */    slw r6,r26,r6
-    /* 00000FF4: */    or r28,r28,r7
-    /* 00000FF8: */    slw r5,r26,r5
-    /* 00000FFC: */    or r28,r28,r6
-    /* 00001000: */    slw r4,r26,r4
-    /* 00001004: */    or r28,r28,r5
-    /* 00001008: */    slw r0,r26,r0
-    /* 0000100C: */    or r28,r28,r4
-    /* 00001010: */    addi r9,r9,0x20
-    /* 00001014: */    or r28,r28,r0
-    /* 00001018: */    bdnz+ loc_FB0
+    /* 00000FB0: */    #lwz r0,0x164(r9)
+    /* 00000FB4: */    #addi r3,r3,0x8
+    /* 00000FB8: */    #lwz r4,0x168(r9)
+    /* 00000FBC: */    #slw r5,r26,r0
+    /* 00000FC0: */    #lwz r0,0x16C(r9)
+    /* 00000FC4: */    #lwz r7,0x170(r9)
+    /* 00000FC8: */    #or r28,r28,r5
+    /* 00000FCC: */    #slw r4,r26,r4
+    /* 00000FD0: */    #lwz r6,0x174(r9)
+    /* 00000FD4: */    #or r28,r28,r4
+    /* 00000FD8: */    #slw r8,r26,r0
+    /* 00000FDC: */    #lwz r5,0x178(r9)
+    /* 00000FE0: */    #or r28,r28,r8
+    /* 00000FE4: */    #slw r7,r26,r7
+    /* 00000FE8: */    #lwz r4,0x17C(r9)
+    /* 00000FEC: */    #lwz r0,0x180(r9)
+    /* 00000FF0: */    #slw r6,r26,r6
+    /* 00000FF4: */    #or r28,r28,r7
+    /* 00000FF8: */    #slw r5,r26,r5
+    /* 00000FFC: */    #or r28,r28,r6
+    /* 00001000: */    #slw r4,r26,r4
+    /* 00001004: */    #or r28,r28,r5
+    /* 00001008: */    #slw r0,r26,r0
+    /* 0000100C: */    #or r28,r28,r4
+    /* 00001010: */    #addi r9,r9,0x20
+    /* 00001014: */    #or r28,r28,r0
+    /* 00001018: */    #bdnz+ loc_FB0
 loc_101C:
-    /* 0000101C: */    lwz r5,0x18C(r29)
-    /* 00001020: */    rlwinm r0,r3,2,0,29
-    /* 00001024: */    add r4,r29,r0
-    /* 00001028: */    sub r0,r5,r3
-    /* 0000102C: */    mtctr r0
-    /* 00001030: */    cmpw r3,r5
-    /* 00001034: */    bge- loc_1050
+    /* 0000101C: */    #lwz r5,0x18C(r29)
+    /* 00001020: */    #rlwinm r0,r3,2,0,29
+    /* 00001024: */    #add r4,r29,r0
+    /* 00001028: */    #sub r0,r5,r3
+    /* 0000102C: */    #mtctr r0
+    /* 00001030: */    #cmpw r3,r5
+    /* 00001034: */    #bge- loc_1050
 loc_1038:
-    /* 00001038: */    lwz r0,0x164(r4)
-    /* 0000103C: */    addi r4,r4,0x4
-    /* 00001040: */    addi r3,r3,0x1
-    /* 00001044: */    slw r0,r26,r0
-    /* 00001048: */    or r28,r28,r0
-    /* 0000104C: */    bdnz+ loc_1038
+    /* 00001038: */    #lwz r0,0x164(r4)
+    /* 0000103C: */    #addi r4,r4,0x4
+    /* 00001040: */    #addi r3,r3,0x1
+    /* 00001044: */    #slw r0,r26,r0
+    /* 00001048: */    #or r28,r28,r0
+    /* 0000104C: */    #bdnz+ loc_1038
 loc_1050:
-    /* 00001050: */    addi r27,r27,0x1
-    /* 00001054: */    addi r29,r29,0xD8
-    /* 00001058: */    cmpwi r27,0x2
-    /* 0000105C: */    addi r30,r30,0xD8
-    /* 00001060: */    blt+ loc_F44
-    /* 00001064: */    rlwinm. r0,r28,0,31,31
-    /* 00001068: */    bne- loc_1074
-    /* 0000106C: */    li r3,0x0
-    /* 00001070: */    b loc_1108
+    /* 00001050: */    #addi r27,r27,0x1
+    /* 00001054: */    #addi r29,r29,0xD8
+    /* 00001058: */    #cmpwi r27,0x2
+    /* 0000105C: */    #addi r30,r30,0xD8
+    /* 00001060: */    #blt+ loc_F44
+    /* 00001064: */    #rlwinm. r0,r28,0,31,31
+    /* 00001068: */    #bne- loc_1074
+    /* 0000106C: */    #li r3,0x0
+    /* 00001070: */    #b loc_1108
 loc_1074:
-    /* 00001074: */    rlwinm. r0,r28,0,30,30
-    /* 00001078: */    bne- loc_1084
-    /* 0000107C: */    li r3,0x1
-    /* 00001080: */    b loc_1108
+    /* 00001074: */    #rlwinm. r0,r28,0,30,30
+    /* 00001078: */    #bne- loc_1084
+    /* 0000107C: */    #li r3,0x1
+    /* 00001080: */    #b loc_1108
 loc_1084:
-    /* 00001084: */    rlwinm. r0,r28,0,29,29
-    /* 00001088: */    bne- loc_1094
-    /* 0000108C: */    li r3,0x2
-    /* 00001090: */    b loc_1108
+    /* 00001084: */    #rlwinm. r0,r28,0,29,29
+    /* 00001088: */    #bne- loc_1094
+    /* 0000108C: */    #li r3,0x2
+    /* 00001090: */    #b loc_1108
 loc_1094:
-    /* 00001094: */    rlwinm. r0,r28,0,28,28
-    /* 00001098: */    bne- loc_10A4
-    /* 0000109C: */    li r3,0x3
-    /* 000010A0: */    b loc_1108
+    /* 00001094: */    #rlwinm. r0,r28,0,28,28
+    /* 00001098: */    #bne- loc_10A4
+    /* 0000109C: */    #li r3,0x3
+    /* 000010A0: */    #b loc_1108
 loc_10A4:
-    /* 000010A4: */    rlwinm. r0,r28,0,27,27
-    /* 000010A8: */    bne- loc_10B4
-    /* 000010AC: */    li r3,0x4
-    /* 000010B0: */    b loc_1108
+    /* 000010A4: */    #rlwinm. r0,r28,0,27,27
+    /* 000010A8: */    #bne- loc_10B4
+    /* 000010AC: */    #li r3,0x4
+    /* 000010B0: */    #b loc_1108
 loc_10B4:
-    /* 000010B4: */    rlwinm. r0,r28,0,26,26
-    /* 000010B8: */    bne- loc_10C4
-    /* 000010BC: */    li r3,0x5
-    /* 000010C0: */    b loc_1108
+    /* 000010B4: */    #rlwinm. r0,r28,0,26,26
+    /* 000010B8: */    #bne- loc_10C4
+    /* 000010BC: */    #li r3,0x5
+    /* 000010C0: */    #b loc_1108
 loc_10C4:
-    /* 000010C4: */    rlwinm. r0,r28,0,25,25
-    /* 000010C8: */    bne- loc_10D4
-    /* 000010CC: */    li r3,0x6
-    /* 000010D0: */    b loc_1108
+    /* 000010C4: */    #rlwinm. r0,r28,0,25,25
+    /* 000010C8: */    #bne- loc_10D4
+    /* 000010CC: */    #li r3,0x6
+    /* 000010D0: */    #b loc_1108
 loc_10D4:
-    /* 000010D4: */    rlwinm. r0,r28,0,24,24
-    /* 000010D8: */    bne- loc_10E4
-    /* 000010DC: */    li r3,0x7
-    /* 000010E0: */    b loc_1108
+    /* 000010D4: */    #rlwinm. r0,r28,0,24,24
+    /* 000010D8: */    #bne- loc_10E4
+    /* 000010DC: */    #li r3,0x7
+    /* 000010E0: */    #b loc_1108
 loc_10E4:
-    /* 000010E4: */    rlwinm. r0,r28,0,23,23
-    /* 000010E8: */    bne- loc_10F4
-    /* 000010EC: */    li r3,0x8
-    /* 000010F0: */    b loc_1108
+    /* 000010E4: */    #rlwinm. r0,r28,0,23,23
+    /* 000010E8: */    #bne- loc_10F4
+    /* 000010EC: */    #li r3,0x8
+    /* 000010F0: */    #b loc_1108
 loc_10F4:
-    /* 000010F4: */    rlwinm. r0,r28,0,22,22
-    /* 000010F8: */    bne- loc_1104
-    /* 000010FC: */    li r3,0x9
-    /* 00001100: */    b loc_1108
+    /* 000010F4: */    #rlwinm. r0,r28,0,22,22
+    /* 000010F8: */    #bne- loc_1104
+    /* 000010FC: */    #li r3,0x9
+    /* 00001100: */    #b loc_1108
 loc_1104:
-    /* 00001104: */    li r3,-0x1
+    /* 00001104: */    #li r3,-0x1
 loc_1108:
-    /* 00001108: */    addi r11,r1,0x20
-    /* 0000110C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
-    /* 00001110: */    lwz r0,0x24(r1)
-    /* 00001114: */    mtlr r0
-    /* 00001118: */    addi r1,r1,0x20
-    /* 0000111C: */    blr
+    /* 00001108: */    #addi r11,r1,0x20
+    /* 0000110C: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
+    /* 00001110: */    #lwz r0,0x24(r1)
+    /* 00001114: */    #mtlr r0
+    /* 00001118: */    #addi r1,r1,0x20
+    /* 0000111C: */    #blr
 muAdvSelchrBTask__selectMain:
     /* 00001120: */    stwu r1,-0x5D0(r1)
     /* 00001124: */    mflr r0
@@ -2470,11 +2474,23 @@ muAdvSelchrBTask__storeResult:
     /* 00002210: */    mr r3,r29 #mr r3,r0
     /* 00002214: */    li r4,0x0
     /* 00002218: */    li r5,0x68
-    /* 0000221C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    /* 00002220: */    mr r6,r31
+    /* 0000221C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]    
+    /* 00002220: */    #mr r6,r31
     /* 00002224: */    li r8,0x0
     /* 00002228: */    li r7,0x0
     /* 0000222C: */    li r4,0x3E
+    /* 00002268: */    lwz r30,0x18C(r31) #lwz r0,0x18C(r31)
+    li r27, 0x0             # \
+    mr r10, r30             # |
+    lwz r0, 0x264(r31)      # |
+    cmpwi r0,0x0            # |
+    beq- loc_2268           # |
+    li r27, 0x1             # |
+    addi r10, r10, 0x1      # | Add p2 at end of circularQueue for selected fighters 
+    lwz r0, 0x23C(r31)      # | (if p2 is present and has a selected fighter)
+    mulli r9, r30, 0x4      # |
+    add r9, r9, r31         # |
+    stw r0,0x164(r9)        # /
     /* 00002230: */    b loc_2268
 loc_2234:
     /* 00002234: */    lwz r0,0x164(r6)
@@ -2490,14 +2506,13 @@ loc_2234:
     /* 0000225C: */    add r3,r29,r7 #add r3,r0,r7
     /* 00002260: */    addi r7,r7,0x4
     /* 00002264: */    stw r4,0x28(r3)
-
-    divwu r9,r8,r30        # \
-    mullw r9,r9,r30        # | if (currentCount % numFighters == 0) i.e. check if all fighters have been looped through
-    cmpw r8,r9             # |
-    bne+ loc_2268          # /
-    /* 00002220: */    mr r6,r31      # Reset to repeat so that CSS Ids can fill up (e.g. 07 09 07 09 07 09...)
 loc_2268:
-    /* 00002268: */    lwz r30,0x18C(r31) #lwz r0,0x18C(r31)
+    divwu r9,r8,r10        # \
+    mullw r9,r9,r10        # | if (currentCount % numFighters == 0) i.e. check if all fighters have been looped through
+    cmpw r8,r9             # |
+    bne+ loc_notMultiple   # /
+    /* 00002220: */    mr r6,r31      # Reset to repeat so that CSS Ids can fill up (e.g. 07 09 07 09 07 09...)
+loc_notMultiple:
     /* 0000226C: */    cmpwi r8,0xA  #cmpw r8,r30 #cmpw r8,r0
     /* 00002270: */    blt+ loc_2234
     ## SSEEX: Store current character as first default result CSS ID
@@ -2508,18 +2523,18 @@ loc_2268:
     stw r3, 0x0(r29)        # /
 loc_atLeastOneMember:                                      
     /* 00002274: */    #lwz r4,0x348(r31)
-    /* 00002278: */    addi r3,r31,0x194
     /* 0000227C: */    #stw r30,0x50(r29) #stw r0,0x50(r4)
     /* 00002280: */    lwz r0,0x264(r31)
     /* 00002284: */    #lwz r4,0x348(r31)
     /* 00002288: */    stw r0,0x5C(r29) #stw r0,0x5C(r4)
-    /* 0000228C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
+    /* 00002278: */    addi r3,r31,0x194
+    /* 0000228C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]    
     /* 00002290: */    rlwinm r0,r3,1,31,31
     /* 00002294: */    xori r0,r0,0x1
     /* 00002298: */    cmpwi r0,0x0
     /* 0000229C: */    beq- loc_22E0
-    /* 000022A0: */    lwz r0,0x264(r31)
-    /* 000022A4: */    cmpwi r0,0x0
+    /* 000022A0: */    #lwz r0,0x264(r31)
+    /* 000022A4: */    cmpwi r27,0x0 #cmpwi r0,0x0
     /* 000022A8: */    bne- loc_22B4
     /* 000022AC: */    lwz r0,0x164(r31)
     cmpwi r30, 0x0          # Check if p1 number selected members is also 0
@@ -2549,11 +2564,18 @@ loc_22E0:
     /* 000022F0: */    #lwz r3,0x348(r31)
     /* 000022F4: */    #stw r0,0x58(r3)
 loc_22F8:
-    ## SSEEX: Overwrite member selection with selection from Map CSS if overwrite flag is on
-
     li r0,0x3E
     stw r0,0x58(r29) 
-    
+
+    ## SSEEX: Apply number of stocks if it has been defined (by .selb file)
+    lbz r12, 0x370(r31)         # \ 
+    cmplwi r12, 10              # | Check if number of stocks defined is 10 or less (10 being max characters in selection result)
+    bgt+ loc_stocksNotDefined   # /
+    sub r30, r12, r27   # Subtract if p2 had a pick
+loc_stocksNotDefined:
+
+    ## SSEEX: Overwrite member selection with selection from Map CSS if overwrite flag is on
+
     lis r12,0x0                               [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                          [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     lbz r10, 0x0(r12)
@@ -3212,9 +3234,134 @@ muAdvSelchrBTask__mainStepZombieMain:
     /* 00002BA4: */    lwz r3,0xB4(r3)
     /* 00002BA8: */    blr
 
-    nop 
-    nop 
-    # +2
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop   
+    
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    # +115
 
 muAdvSelchrBTask__isSelected:
     /* 00002BAC: */    lwz r0,0xB4(r3)

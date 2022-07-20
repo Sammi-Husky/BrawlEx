@@ -90,9 +90,6 @@ loc_258:
         .4byte 0x00000000
 loc_260:
         .asciz "mo_adv_menu.cpp"
-loc_selchrbFolderPath:
-        .asciz "/menu/adventure/selchr/"
-        .balign 4
 loc_selchrbFilePath:
         .asciz "%s%08x.selb"
         .balign 4
