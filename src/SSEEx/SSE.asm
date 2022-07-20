@@ -200,6 +200,7 @@ HOOK @ $806da740
     stw r12, 0x4(r4)        # |
     lis r25, 0x2573         # | 
     stw r25, 0x8(r4)        # /
+SDTHP_NotFound:
     addi r3, r1, 0x40       # \
     lwz	r5, -0x79A0(r13)    # |
     lwz	r7, -0x7998(r13)    # | sprintf(fileName, %s/%08x.%s, folderPath, jumpLevelId, "thp")
@@ -207,10 +208,20 @@ HOOK @ $806da740
     ori r12, r12, 0x89fc    # | 
     mtctr r12               # | 
     bctrl                   # /
+    addi r3, r1, 0x40       # \
+    lis r12, 0x8001			# |
+	ori r12, r12, 0xF0D0	# | Check if the THP video exists on the SD card
+	mtctr r12				# |
+	bctrl					# |
+    cmpwi r3, 0             # /
+    li r6, 0x0              # \
+    lis r4, 0x8042          # | if non-zero, it gives an error code, set video id so that 00000000.thp (blank thp) is obtained instead
+    ori r4, r4, 0xC090      # |
+    bne+ SDTHP_NotFound	    # / 
     lis r12, 0x8043         # \
     li r4, 0x732E           # |
-    sth r4, -0x3F6C(r12)     # | Change string format back to %s/%s.%s
-    stw r25, -0x3F6A(r12)    # /
+    sth r4, -0x3F6C(r12)    # | Change string format back to %s/%s.%s
+    stw r25, -0x3F6A(r12)   # /
 end:
     li r3, 108     # Original operation
 }
