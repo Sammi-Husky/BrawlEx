@@ -63,8 +63,8 @@ loc_84:
     addi r3, r1, 0x8
     lis r4,0x0                              [R_PPC_ADDR16_HA(29, 5, "loc_selchrbFilePath")]
     addi r4,r4,0x0                          [R_PPC_ADDR16_LO(29, 5, "loc_selchrbFilePath")]
-    lis r5,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrFolderPath")]
-    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_selchrFolderPath")]
+    lis r5,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_menuAdvFolderPath")]
+    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_menuAdvFolderPath")]
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
     addi r4, r1, 0x8
 loc_notExVideo:

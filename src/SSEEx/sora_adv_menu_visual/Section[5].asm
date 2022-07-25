@@ -91,5 +91,5 @@ loc_258:
 loc_260:
         .asciz "mo_adv_menu.cpp"
 loc_selchrbFilePath:
-        .asciz "%s%08x.selb"
+        .asciz "%sselchr/%08x.selb"
         .balign 4

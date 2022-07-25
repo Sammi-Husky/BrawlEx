@@ -357,7 +357,14 @@ loc_333C:
     /* 00003350: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__readRequest")]
     addi r3,r30,muAdvComerTask_comerTexFacePath
     addi r4,r31,string340_comerTexFacePath #0xC
-    lwz r5, muAdvComerTask_comerTexFacePathsIndex(r30)
+    lwz r5, muAdvComerTask_cosmeticId(r30)              # \ 
+    addi r5, r5, 0x10                                   # | 
+    cmplwi r5, 0x24 + 0x10                              # |
+    beq+ loc_isExUnlock                                 # | Check if supposed cosmetic id is 0x24 or 0x2D+ (which signifies if it's an Ex unlock)
+    cmplwi r5, 0x2D + 0x10                              # |
+    bge- loc_isExUnlock                                 # /
+    lwz r5, muAdvComerTask_comerTexFacePathsIndex(r30)  # Use proper index if it's a normal character unlock
+loc_isExUnlock:
     crclr 6
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
     addi r4,r30,muAdvComerTask_comerTexFacePath
@@ -756,14 +763,8 @@ loc_35E4:
     nop
     nop
     nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
 
-    # +190
+    # +184
 
 muAdvComerTask__createData:
     /* 00003608: */    stwu r1,-0x10(r1)

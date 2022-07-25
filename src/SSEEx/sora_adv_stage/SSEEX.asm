@@ -14,10 +14,9 @@
 # TODO: Load second fighter ahead of time (by setting P2's gmPlayerInitData early in sqAdventure::setAdventureCondition just like in co-op)
 
 # TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
-## e.g. 047001 40   047001 36   FFFFFF 35 (with FFFFFF is whether Great Maze has been unlocked)
-## Then after write to bit section of module if level id corresponds and flip bit on based on character id and then save part of section to a file on save
-## Better yet, do it based on level id where 99Y9XXl where XX decides the character ID to unlock. (do this in stAdventure::changeStep based on gdorId)
-## Ideally could find space in advSaveData somewhere when sd saving becomes a thing
+## 00 signifies not unlocked, 01 signifies unlocked but should play the newcomer menu, 02 signfies locked
+## level id 00000000 -> no unlock, level id 00000001 -> always unlocked, level id 00000002 -> unlocked after Great Maze
+## Make it bit flags, compare original bit flag to new bit flag to determine if character has been freshly unlocked
 # TODO: selc files to determine bigger roster of characters/use unlocks with limited lives (should it be based off sequenceIndex again)
 ## One parameter is how many characters to select, one should be number of lives, one should be use unlocks. If list of characters starts with FF then use entire roster
 ## TODO: Figure out which base characters are unlocked 
@@ -26,10 +25,11 @@
 # TODO: Investigate putting entirely new level markers on the map
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
+# TODO: Ex characters in Sticker menu
 
-######################################################################################################################
-## SSEEX: Unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
-######################################################################################################################
+################################################################################################################################
+## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
+################################################################################################################################
 ## Flag1 is used to jump to specific sequence indices
 # 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (since it opens up muAdvSelcTask)
 # 1 -> return to original previous sequence index
@@ -37,7 +37,30 @@
 
 # Useful if want to put sequenceIndex so that character selection happens after movie or end stage
 
-loc_stAdventure2__changeStep_addSequenceIndex:
+loc_stAdventure2__changeStep_SSEEX:
+    ## Check for character unlocks
+    li r10, 201                         # num Ex characters
+    lis r12,0x0                         [R_PPC_ADDR16_HA(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
+    addi r12, r12, 0x0                  [R_PPC_ADDR16_LO(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
+    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    lwz r3, 0x0(r27)            # \ Get stepJumpId
+    li r6, 0x1                  # |
+    mtctr r10                   # |
+loc_checkStepJumpId:            # |
+    lwz r8, 0x0(r12)            # |
+    cmpw r8, r3                 # |
+    bne+ loc_continueLoop       # |
+    lbz r7, 0x0(r11)            # | Loop through each step jump unlock criteria for each character, check if it equals current step jump
+    cmplwi r7, 1                # | If it does (and the character hasn't been unlocked yet), then set unlock flag for that character
+    bgt+ loc_continueLoop       # |
+    stb r6, 0x0(r11)            # |
+loc_continueLoop:               # |
+    addi r12, r12, 0x4          # |
+    addi r11, r11, 0x1          # |
+    bdnz loc_checkStepJumpId    # /
+loc_changeSequenceIndex:  
+    ## Check to change sequence Index
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     li r6, 29                   # \
     rlwinm r0, r6, 2, 0, 29     # | gfSceneManager->sequenceList[29] (get sqAdventure)

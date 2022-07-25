@@ -20,10 +20,10 @@
 .set Data8F8_0xD4, Data8F8_0xD0 + 0x4
 .set Data8F8_0xD8, Data8F8_0xD4 + 0x4
 
-.set muAdvSelchrCTask_size, 0xC60 + 3*addedMembers*4 + 0x1 + maxNumberOfFighters + 0x1  # original size + number of new muObjects + byte for og number of characters to select + number of characters for sub character selection + byte for numStocks
-.set muAdvSelchrCTask_desiredNumMembersToSelect, 0xC60 + 3*addedMembers*4
+.set muAdvSelchrCTask_desiredNumMembersToSelect, muAdvSelchrCTask_0xC5C + 0x4
 .set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
 .set muAdvSelchrCTask_numStocks, muAdvSelchrCTask_SubFighterCSSIdArray + maxNumberOfFighters
+.set muAdvSelchrCTask_size, muAdvSelchrCTask_numStocks + 0x1
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
@@ -528,7 +528,7 @@ loc_checkForMemberAmountOverride:           # |
     andi. r0, r5, 0x0010                    # | Check for Z input in each gfPadStatus
     bne- loc_setMemberAmountTen             # |
     andi. r0, r5, 0x0800                    # | Check for Y input in each gfPadStatus
-    bne- loc_setMemberAmountTwo             # | TODO: Check why if two people pick same character they have one less stock
+    bne- loc_setMemberAmountTwo             # | 
     addi r9, r9, 0x40                       # |
     addi r6, r6, 0x1                        # |
     cmpwi r6, 0x8                           # |
@@ -744,8 +744,8 @@ muAdvSelchrCTask__setMenuData:
     addi r3, r1, 0x3B
     lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrcFilePath")]
     addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_selchrcFilePath")]
-    lis r5,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrFolderPath")]
-    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_selchrFolderPath")]
+    lis r5,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_menuAdvFolderPath")]
+    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_menuAdvFolderPath")]
     #crclr 6
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
     addi r5, r1, 0x60          
@@ -1213,7 +1213,7 @@ loc_notOverride:
     lwz r12,0x30(r12)       # |
     lwz r12, 0x260(r12)     # |  Check if Great Maze has been completed (GameGlobal-advSaveData->greatMaze1ClearDifficulty)
     cmpwi r12, 0x0          # /
-    blt loc_skipAddFightersToTeamMenu
+    blt+ loc_skipAddFightersToTeamMenu
 loc_addFightersToTeamMenu:
     add r6, r5, r3       # Add number of additional team members to get total team members
     stw r6, 0xe4(r29)      # Store team member count

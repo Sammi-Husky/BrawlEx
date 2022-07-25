@@ -925,6 +925,7 @@ muAdvSelmapTask__processDefault:
     /* 00000D90: */    mflr r0
     /* 00000D94: */    stw r0,0x14(r1)
     /* 00000D98: */    stw r31,0xC(r1)
+    stw r30, 0x8(r1)
     /* 00000D9C: */    mr r31,r3
     /* 00000DA0: */    lwz r5,0x4A4(r3)
     /* 00000DA4: */    lwz r0,0x4A8(r3)
@@ -955,9 +956,11 @@ loc_DD8:
     /* 00000E00: */    bctrl
     /* 00000E04: */    stw r3,0x4A4(r31)
 loc_E08:
-    /* 00000E08: */    addi r3,r31,0x64
-    /* 00000E0C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__main")]
-    /* 00000E10: */    addi r3,r31,0x10C
+    b __unresolved                                             [R_PPC_REL24(31, 7, "loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks")]  
+loc_noUnlocks:
+    /* 00000E08: */    #addi r3,r31,0x64
+    /* 00000E0C: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__main")]
+    /* 00000E10: */    #addi r3,r31,0x10C
     /* 00000E14: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__main")]
     /* 00000E18: */    lwz r3,0x5D8(r31)
     /* 00000E1C: */    bl __unresolved                          [R_PPC_REL24(1, 1, "scResourceLoader__isLoaded")]
@@ -987,6 +990,7 @@ loc_E3C:
 loc_E78:
     /* 00000E78: */    lwz r0,0x14(r1)
     /* 00000E7C: */    lwz r31,0xC(r1)
+    lwz r30, 0x8(r1)
     /* 00000E80: */    mtlr r0
     /* 00000E84: */    addi r1,r1,0x10
     /* 00000E88: */    blr

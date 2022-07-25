@@ -6,6 +6,10 @@
 loc_muAdvNameTask__create_patchSoraModules:
     mr r3,r31                                # Original operation
     
+    li r10, -1                      # Initialize prevSequenceIndex as -1
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
+    stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+
     lis r10, 0x4800
 
     ### Fix Increment Fighter Respawn Index for Ex Characters

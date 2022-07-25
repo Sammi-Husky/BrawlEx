@@ -25890,20 +25890,23 @@ loc_18550:
         .4byte 0x2E637070
         .4byte 0x00000000
 loc_adsjFolderPath:
-        .asciz "/stage/adventure/stepjump/"
+        .asciz "/stage/adventure/"
         .balign 4
 loc_adsjFilePath:
-        .asciz "%s%08x.adsj"
+        .asciz "%sstepjump/%08x.adsj"
         .balign 4
 loc_tlstFolderPath:
-        .asciz "/sound/tracklist/adventure/"
+        .asciz "/sound/tracklist/"
         .balign 4
 loc_tlstFilePath:
-        .asciz "%s%08x.tlst"
+        .asciz "%sadventure/%08x.tlst"
         .balign 4
-loc_selchrFolderPath:
-        .asciz "/menu/adventure/selchr/"
+loc_menuAdvFolderPath:
+        .asciz "/menu/adventure/"
         .balign 4
 loc_selchrcFilePath:
-        .asciz "%s%08x.selc"
+        .asciz "%sselchr/%08x.selc"
+        .balign 4
+loc_saveFilePath:
+        .asciz "%sExSaves/AdvEx%02d.sav"
         .balign 4
