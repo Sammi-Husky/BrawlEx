@@ -26,6 +26,7 @@
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
+# TODO: Stamina battles?
 
 ################################################################################################################################
 ## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex

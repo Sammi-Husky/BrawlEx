@@ -1195,32 +1195,36 @@ loc_3EBC8:
     ## SSEEX: Add Ex team members
 loc_addExTeamMembers:
     stw r31,0x6F8(r29)     # Original operation
-    lis r12,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_NumAddedTeamMembers")]
-    lbz r5,0x0(r12)        [R_PPC_ADDR16_LO(40, 8, "loc_NumAddedTeamMembers")] # Get Number of additional team members 
-    
-    lwz r3, 0xe4(r29)      # Get current team members
     lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
     addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
-    
-    cmpwi r14, 0x3         # Check if unlock override
-    bne- loc_notOverride 
-    addi r5, r5, 0x1     
-    subi r4, r4, 0x1     # Add Sonic since for some reason not included when overriding save
-    b loc_addFightersToTeamMenu
-loc_notOverride:
-    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r12,0x30(r12)       # |
-    lwz r12, 0x260(r12)     # |  Check if Great Maze has been completed (GameGlobal-advSaveData->greatMaze1ClearDifficulty)
-    cmpwi r12, 0x0          # /
-    blt+ loc_skipAddFightersToTeamMenu
-loc_addFightersToTeamMenu:
-    add r6, r5, r3       # Add number of additional team members to get total team members
-    stw r6, 0xe4(r29)      # Store team member count
-    addi r7, r3, 0x44      # Add to array offset
-    add r3, r7, r29
-    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] # memcpy rel css data section to team member 1 section
-loc_skipAddFightersToTeamMenu:
+    lbz r10,-0x2(r4)      # Get Number of potential additional team members 
+    lwz r3, 0xe4(r29)     # Get current number of team members
+    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    addi r7, r29, 0x44     # Get to beginning of team member array
+    mtctr r10 
+
+    cmpwi r14, 0x3       # Check if unlock override
+    bne- loc_addFightersToTeam 
+    lbz r5, -0x1(r4)     # Add Sonic since for some reason not included when overriding save
+    stbx r5, r7, r3
+    addi r3, r3, 0x1
+loc_addFightersToTeam:              # \ Add team members if unlocked or override is activated
+    lbz r5, 0x0(r4)                 # |
+    cmpwi r14, 0x3                  # | Check if unlock override
+    beq- loc_addFighterToTeamMenu   # |
+    subi r6, r5, 0x2A               # | Check if unlocked
+    lbzx r0, r11, r6                # |
+    cmpwi r0, 0x1                   # |
+    bge- loc_addFighterToTeamMenu   # |
+    b loc_skipAddFighterToTeamMenu  # |
+loc_addFighterToTeamMenu:           # |
+    stbx r5, r7, r3                 # |
+    addi r3, r3, 0x1                # |
+loc_skipAddFighterToTeamMenu:       # |
+    addi r4, r4, 0x1                # |
+    bdnz loc_addFightersToTeam      # /
+    stw r3, 0xe4(r29)      # Store team member count
 
     ## SSEEX: Get members from selc file if r14 is 0x5
     # TODO: Handle case where unlocks matter
@@ -3013,13 +3017,8 @@ loc_4010C:
     nop 
     nop 
     nop 
-    nop
-    nop
-    nop
-    nop
-    nop
     
-    # +170
+    # +165
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
