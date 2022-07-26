@@ -1,4 +1,4 @@
-.set addedMembers, 120
+.set addedMembers, 123
 .set muAdvSelchrCTask_0xC24, 0xC24 + 3*addedMembers*4
 
 globaldestructorchain____register_global_object:

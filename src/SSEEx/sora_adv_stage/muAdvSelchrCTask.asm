@@ -20,6 +20,15 @@
 .set Data8F8_0xD4, Data8F8_0xD0 + 0x4
 .set Data8F8_0xD8, Data8F8_0xD4 + 0x4
 
+.set muAdvSelchrCTask_team0MemberCount, 0xe4 + 0xAC*0 + 3
+.set muAdvSelchrCTask_team1MemberCount, 0xe4 + 0xAC*1 + 3
+.set muAdvSelchrCTask_team2MemberCount, 0xe4 + 0xAC*2 + 3
+.set muAdvSelchrCTask_team3MemberCount, 0xe4 + 0xAC*3 + 3
+.set muAdvSelchrCTask_team4MemberCount, 0xe4 + 0xAC*4 + 3
+.set muAdvSelchrCTask_team5MemberCount, 0xe4 + 0xAC*5 + 3
+.set muAdvSelchrCTask_team6MemberCount, 0xe4 + 0xAC*6 + 3
+.set muAdvSelchrCTask_team7MemberCount, 0xe4 + 0xAC*7 + 3
+
 .set muAdvSelchrCTask_desiredNumMembersToSelect, muAdvSelchrCTask_0xC5C + 0x4
 .set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
 .set muAdvSelchrCTask_numStocks, muAdvSelchrCTask_SubFighterCSSIdArray + maxNumberOfFighters
@@ -132,7 +141,7 @@ muAdvSelchrCTask____ct:
     /* 0003DF7C: */    stw r6,muAdvSelchrCTask_0xC5C(r30)
     /* 0003DF80: */    stb r0,0x2C(r30)
     /* 0003DF84: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    /* 0003DF88: */    li r0,0x11 + 3*testAddedMembers/8 + 1
+    /* 0003DF88: */    li r0,0x11 + 3*addedMembers/8 + 1
     /* 0003DF8C: */    mr r3,r30
     /* 0003DF90: */    stw r31,0x700(r30)
     /* 0003DF94: */    li r4,0x0
@@ -379,7 +388,7 @@ loc_3E2DC:
 loc_3E300:
     /* 0003E300: */    addi r30,r30,0x1
     /* 0003E304: */    addi r31,r31,0x4
-    /* 0003E308: */    cmpwi r30,0x89 + 3*testAddedMembers # 3*addedMembers
+    /* 0003E308: */    cmpwi r30,0x89 + 3*addedMembers
     /* 0003E30C: */    blt+ loc_3E2DC
     /* 0003E310: */    lwz r3,muAdvSelchrCTask_0x964(r28)
     /* 0003E314: */    cmpwi r3,0x0
@@ -990,7 +999,7 @@ loc_3E950:
     /* 0003E958: */    bne- loc_3E970
     /* 0003E95C: */    cmpwi r15,0x0
     /* 0003E960: */    ble- loc_3E970
-    /* 0003E964: */    stw r15,0xE4(r21)
+    /* 0003E964: */    stb r15,muAdvSelchrCTask_team0MemberCount(r21) #stw r15,0xE4(r21)
     /* 0003E968: */    addi r21,r21,0xAC
     /* 0003E96C: */    addi r31,r31,0x1
 loc_3E970:
@@ -1006,7 +1015,7 @@ loc_3E970:
     /* 0003E994: */    mulli r0,r31,0xAC
     /* 0003E998: */    addi r31,r31,0x1
     /* 0003E99C: */    add r3,r29,r0
-    /* 0003E9A0: */    stw r15,0xE4(r3)
+    /* 0003E9A0: */    stb r15,muAdvSelchrCTask_team0MemberCount(r3) #stw r15,0xE4(r3)
 loc_3E9A4:
     /* 0003E9A4: */    #stw r31,0x6F8(r29)
     #mr r25, r19
@@ -1186,7 +1195,7 @@ loc_3EBAC:
 loc_3EBB8:
     /* 0003EBB8: */    cmpwi r16,0x0
     /* 0003EBBC: */    ble- loc_3EBC8
-    /* 0003EBC0: */    stw r16,0xE4(r29)
+    /* 0003EBC0: */    stb r16,muAdvSelchrCTask_team0MemberCount(r29) #stw r16,0xE4(r29)
     /* 0003EBC4: */    li r31,0x1
 loc_3EBC8:
     #b loc_muAdvSelchrCTask__setMenuData_addExTeamMembers
@@ -1198,7 +1207,7 @@ loc_addExTeamMembers:
     lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
     addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
     lbz r10,-0x2(r4)      # Get Number of potential additional team members 
-    lwz r3, 0xe4(r29)     # Get current number of team members
+    lbz r3,muAdvSelchrCTask_team0MemberCount(r29) #lwz r3, 0xe4(r29)     # Get current number of team members
     lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
     addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
     addi r7, r29, 0x44     # Get to beginning of team member array
@@ -1224,7 +1233,7 @@ loc_addFighterToTeamMenu:           # |
 loc_skipAddFighterToTeamMenu:       # |
     addi r4, r4, 0x1                # |
     bdnz loc_addFightersToTeam      # /
-    stw r3, 0xe4(r29)      # Store team member count
+    stb r3,muAdvSelchrCTask_team0MemberCount(r29) #stw r3, 0xe4(r29)      # Store team member count
 
     ## SSEEX: Get members from selc file if r14 is 0x5
     # TODO: Handle case where unlocks matter
@@ -1232,7 +1241,7 @@ loc_skipAddFighterToTeamMenu:       # |
     cmpwi r14, 0x5
     bne+ loc_dontGetMembersFromSelc
     lbz r5, 0x64(r1)    # \ Get number of members for team1
-    stw r5, 0xe4(r29)   # / 
+    stb r5,muAdvSelchrCTask_team0MemberCount(r29) #stw r5, 0xe4(r29)   # / 
     addi r4, r1, 0x6C   # \ Copy team 1 members from selc to team1 menuData in muAdvSelchrCTask
     addi r3, r29, 0x44  # /
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] 
@@ -1265,7 +1274,7 @@ loc_3EC0C:
     /* 0003EC1C: */    li r0,0x1
     /* 0003EC20: */    stw r3,0x40(r29)
     /* 0003EC24: */    stw r3,0x44(r29)
-    /* 0003EC28: */    stw r0,0xE4(r29)
+    /* 0003EC28: */    stb r0,muAdvSelchrCTask_team0MemberCount(r29) #stw r0,0xE4(r29)
     /* 0003EC2C: */    stw r0,0x6F8(r29)
 loc_3EC30:
     /* 0003EC30: */    addi r11,r1,0x180 #addi r11,r1,0x64
@@ -1399,7 +1408,7 @@ loc_3EDE0:
     /* 0003EDE8: */    li r9,0x0
     /* 0003EDEC: */    b loc_3EE3C
 loc_3EDF0:
-    /* 0003EDF0: */    lwz r0,0xE4(r6)
+    /* 0003EDF0: */    lbz r0,muAdvSelchrCTask_team0MemberCount(r6) #lwz r0,0xE4(r6)
     /* 0003EDF4: */    mr r8,r6
     /* 0003EDF8: */    li r10,0x0
     /* 0003EDFC: */    mtctr r0
@@ -1544,7 +1553,7 @@ loc_3EF58:
     addi r24,r24,0x1                                  # Then increment by 1
     /* 0003EFB4: */    addi r20,r20,0x1
 loc_3EFB8:
-    /* 0003EFB8: */    lwz r0,0xE4(r26)
+    /* 0003EFB8: */    lbz r0,muAdvSelchrCTask_team0MemberCount(r26) #lwz r0,0xE4(r26)
     /* 0003EFBC: */    cmpw r20,r0
     /* 0003EFC0: */    blt+ loc_3EF18
     /* 0003EFC4: */    addi r27,r27,0x4
@@ -1585,7 +1594,7 @@ muMenu__getStockFrameNo:
 muAdvSelchrCTask__getNumTeamMember:
     /* 0003F048: */    mulli r0,r4,0xAC
     /* 0003F04C: */    add r3,r3,r0
-    /* 0003F050: */    lwz r3,0xE4(r3)
+    /* 0003F050: */    lbz r3,muAdvSelchrCTask_team0MemberCount(r3) #lwz r3,0xE4(r3)
     /* 0003F054: */    blr
 muAdvSelchrCTask__getFaceObj:
     /* 0003F058: */    mulli r0,r4,0xAC
@@ -1848,7 +1857,7 @@ loc_3F3E4:
     /* 0003F3EC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameMatCol")]
     /* 0003F3F0: */    addi r24,r24,0x1
     /* 0003F3F4: */    addi r23,r23,0x4
-    /* 0003F3F8: */    cmpwi r24,0x28 + testAddedMembers # addedMembers
+    /* 0003F3F8: */    cmpwi r24,0x28 + addedMembers
     /* 0003F3FC: */    blt+ loc_3F3E4
     /* 0003F400: */    mr r3,r27
     /* 0003F404: */    bl muAdvSelchrCTask__attachMemberToTeamPanel
@@ -1941,9 +1950,9 @@ loc_3F528:
 loc_3F54C:
     /* 0003F54C: */    cmpwi r28,0x0
     /* 0003F550: */    lwz r24,0xA8(r30)
-    /* 0003F554: */    li r3,0x60 + 2*testAddedMembers # 2*addedMembers
+    /* 0003F554: */    li r3,0x60 + 2*addedMembers
     /* 0003F558: */    bne- loc_3F560
-    /* 0003F55C: */    li r3,0x38 + testAddedMembers # addedNumbers
+    /* 0003F55C: */    li r3,0x38 + addedMembers
 loc_3F560:
     /* 0003F560: */    addi r0,r29,0x1
     /* 0003F564: */    add r3,r29,r3
@@ -2059,7 +2068,7 @@ muAdvSelchrCTask__getNumTeamLine:
     lis r9, 0x0                                                 [R_PPC_ADDR16_HA(40, 8, "loc_NumberOfMembersPerRow")]                    
     lbz r9, 0x0(r9)                                             [R_PPC_ADDR16_LO(40, 8, "loc_NumberOfMembersPerRow")]
     add r3, r3, r4
-    lwz r5, 0xE4(r3)
+    lbz r5,muAdvSelchrCTask_team0MemberCount(r3) #lwz r5, 0xE4(r3)
     subi r8, r9, 0x1
     add r10, r5, r8
     divw r9, r10, r9
@@ -3024,7 +3033,7 @@ muAdvSelchrCTask__moveCharCursor:
     /* 00040128: */    mflr r0
     /* 0004012C: */    cmpwi r4,0x0
     /* 00040130: */    stw r0,0x24(r1)
-    /* 00040134: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 00040134: */    li r0,0x37 + addedMembers
     /* 00040138: */    stw r31,0x1C(r1)
     /* 0004013C: */    stw r30,0x18(r1)
     /* 00040140: */    stw r29,0x14(r1)
@@ -3035,7 +3044,7 @@ muAdvSelchrCTask__moveCharCursor:
     /* 00040154: */    add r4,r3,r4
     /* 00040158: */    lwz r31,muAdvSelchrCTask_0x934(r4)
     /* 0004015C: */    bne- loc_40164
-    /* 00040160: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 00040160: */    li r0,0x36 + addedMembers
 loc_40164:
     /* 00040164: */    rlwinm r0,r0,2,0,29
     /* 00040168: */    lwz r12,0x0(r31)
@@ -3071,11 +3080,11 @@ muAdvSelchrCTask__dispNumber:
     /* 000401DC: */    stw r31,0x2C(r1)
     /* 000401E0: */    stw r30,0x28(r1)
     /* 000401E4: */    mr r30,r5
-    /* 000401E8: */    li r5,0x60 + 2*testAddedMembers # 2*addedNumbers
+    /* 000401E8: */    li r5,0x60 + 2*addedMembers
     /* 000401EC: */    stw r29,0x24(r1)
     /* 000401F0: */    mr r29,r3
     /* 000401F4: */    bne- loc_401FC
-    /* 000401F8: */    li r5,0x38 + testAddedMembers # addedNumbers
+    /* 000401F8: */    li r5,0x38 + addedMembers
 loc_401FC:
     /* 000401FC: */    xoris r4,r6,0x8000
     /* 00040200: */    lis r0,0x4330
@@ -3117,9 +3126,9 @@ loc_401FC:
 muAdvSelchrCTask__removeNumber:
     /* 00040290: */    cmpwi r4,0x0
     /* 00040294: */    mr r7,r3
-    /* 00040298: */    li r0,0x60 + 2*testAddedMembers # 2*addedMembers
+    /* 00040298: */    li r0,0x60 + 2*addedMembers
     /* 0004029C: */    bne- loc_402A4
-    /* 000402A0: */    li r0,0x38 + testAddedMembers # addedNumbers
+    /* 000402A0: */    li r0,0x38 + addedMembers
 loc_402A4:
     /* 000402A4: */    lwz r6,muAdvSelchrCTask_0xC1C(r3)
     /* 000402A8: */    add r4,r0,r5
@@ -3325,7 +3334,7 @@ loc_40524:
     /* 00040524: */    lwz r0,muAdvSelchrCTask_0xC1C(r26)
     /* 00040528: */    mulli r0,r0,0xAC
     /* 0004052C: */    add r3,r26,r0
-    /* 00040530: */    lwz r0,0xE4(r3)
+    /* 00040530: */    lbz r0,muAdvSelchrCTask_team0MemberCount(r3) #lwz r0,0xE4(r3)
     /* 00040534: */    cmpw r27,r0
     /* 00040538: */    blt+ loc_404A4
     /* 0004053C: */    addi r11,r1,0x20
@@ -3348,7 +3357,7 @@ muAdvSelchrCTask__findNextCharCursorPos:
     /* 0004057C: */    mulli r0,r0,0xAC
     /* 00040580: */    mr r31,r29
     /* 00040584: */    add r3,r3,r0
-    /* 00040588: */    lwz r30,0xE4(r3)
+    /* 00040588: */    lbz r30,muAdvSelchrCTask_team0MemberCount(r3) #lwz r30,0xE4(r3)
 loc_4058C:
     /* 0004058C: */    addi r31,r31,0x1
     /* 00040590: */    cmpw r31,r30
@@ -5804,7 +5813,7 @@ loc_42528:
     /* 00042554: */    lwz r4,0x6FC(r27)
     /* 00042558: */    mulli r0,r0,0xAC
     /* 0004255C: */    add r3,r27,r0
-    /* 00042560: */    lwz r3,0xE4(r3)
+    /* 00042560: */    lbz r3,muAdvSelchrCTask_team0MemberCount(r3) #lwz r3,0xE4(r3)
     /* 00042564: */    cmpw r4,r3
     /* 00042568: */    bge- loc_42570
     /* 0004256C: */    mr r3,r4
@@ -5839,13 +5848,13 @@ loc_425C8:
     /* 000425D4: */    blt- loc_42620
     /* 000425D8: */    lwz r3,muAdvSelchrCTask_0xC1C(r27)
     /* 000425DC: */    cmpwi r28,0x0
-    /* 000425E0: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 000425E0: */    li r0,0x37 + addedMembers
     /* 000425E4: */    addi r3,r3,0x2
     /* 000425E8: */    rlwinm r3,r3,2,0,29
     /* 000425EC: */    add r3,r27,r3
     /* 000425F0: */    lwz r3,muAdvSelchrCTask_0x934(r3)
     /* 000425F4: */    bne- loc_425FC
-    /* 000425F8: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 000425F8: */    li r0,0x36 + addedMembers
 loc_425FC:
     /* 000425FC: */    rlwinm r0,r0,2,0,29
     /* 00042600: */    lwz r12,0x0(r3)
@@ -5860,13 +5869,13 @@ loc_42620:
     /* 00042620: */    lwz r3,muAdvSelchrCTask_0xC1C(r27)
     /* 00042624: */    cmpwi r28,0x0
     /* 00042628: */    lwz r25,muAdvSelchrCTask_0xABC(r30)
-    /* 0004262C: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 0004262C: */    li r0,0x37 + addedMembers
     /* 00042630: */    addi r3,r3,0x2
     /* 00042634: */    rlwinm r3,r3,2,0,29
     /* 00042638: */    add r3,r27,r3
     /* 0004263C: */    lwz r24,muAdvSelchrCTask_0x934(r3)
     /* 00042640: */    bne- loc_42648
-    /* 00042644: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 00042644: */    li r0,0x36 + addedMembers
 loc_42648:
     /* 00042648: */    rlwinm r0,r0,2,0,29
     /* 0004264C: */    lwz r12,0x0(r24)
@@ -5984,7 +5993,7 @@ loc_427F4:
     /* 000427F4: */    lwz r0,muAdvSelchrCTask_0xC1C(r26)
     /* 000427F8: */    mulli r0,r0,0xAC
     /* 000427FC: */    add r3,r26,r0
-    /* 00042800: */    lwz r0,0xE4(r3)
+    /* 00042800: */    lbz r0,muAdvSelchrCTask_team0MemberCount(r3) #lwz r0,0xE4(r3)
     /* 00042804: */    cmpw r0,r27
     /* 00042808: */    ble- loc_42B34
     /* 0004280C: */    mr r3,r26
@@ -5999,13 +6008,13 @@ loc_427F4:
 loc_42830:
     /* 00042830: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 00042834: */    cmpwi r27,0x0
-    /* 00042838: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 00042838: */    li r0,0x37 + addedMembers
     /* 0004283C: */    addi r3,r3,0x2
     /* 00042840: */    rlwinm r3,r3,2,0,29
     /* 00042844: */    add r3,r26,r3
     /* 00042848: */    lwz r3,muAdvSelchrCTask_0x934(r3)
     /* 0004284C: */    bne- loc_42854
-    /* 00042850: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 00042850: */    li r0,0x36 + addedMembers
 loc_42854:
     /* 00042854: */    rlwinm r0,r0,2,0,29
     /* 00042858: */    lwz r12,0x0(r3)
@@ -6018,9 +6027,9 @@ loc_42854:
     /* 00042874: */    li r25,0x0
 loc_42878:
     /* 00042878: */    cmpwi r27,0x0
-    /* 0004287C: */    li r0,0x60 + 2*testAddedMembers # 2*addedMembers
+    /* 0004287C: */    li r0,0x60 + 2*addedMembers
     /* 00042880: */    bne- loc_42888
-    /* 00042884: */    li r0,0x38 + testAddedMembers # addedNumbers
+    /* 00042884: */    li r0,0x38 + addedMembers
 loc_42888:
     /* 00042888: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 0004288C: */    add r0,r25,r0
@@ -6037,7 +6046,7 @@ loc_42888:
     /* 000428B8: */    mtctr r12
     /* 000428BC: */    bctrl
     /* 000428C0: */    addi r25,r25,0x1
-    /* 000428C4: */    cmpwi r25,0x28 + testAddedMembers # addedNumbers
+    /* 000428C4: */    cmpwi r25,0x28 + addedMembers
     /* 000428C8: */    blt+ loc_42878
     /* 000428CC: */    addi r27,r27,0x1
     /* 000428D0: */    cmpwi r27,0x2
@@ -6086,9 +6095,9 @@ loc_42954:
     /* 00042974: */    rlwinm r0,r0,2,0,29
     /* 00042978: */    add r3,r26,r0
     /* 0004297C: */    lwz r3,muAdvSelchrCTask_0x934(r3)
-    /* 00042980: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 00042980: */    li r0,0x37 + addedMembers
     /* 00042984: */    bne- cr1,loc_4298C
-    /* 00042988: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 00042988: */    li r0,0x36 + addedMembers
 loc_4298C:
     /* 0004298C: */    rlwinm r0,r0,2,0,29
     /* 00042990: */    lwz r12,0x0(r3)
@@ -6106,9 +6115,9 @@ loc_429B0:
     /* 000429BC: */    rlwinm r0,r0,2,0,29
     /* 000429C0: */    add r3,r26,r0
     /* 000429C4: */    lwz r24,muAdvSelchrCTask_0x934(r3)
-    /* 000429C8: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 000429C8: */    li r0,0x37 + addedMembers
     /* 000429CC: */    bne- cr1,loc_429D4
-    /* 000429D0: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 000429D0: */    li r0,0x36 + addedMembers
 loc_429D4:
     /* 000429D4: */    rlwinm r0,r0,2,0,29
     /* 000429D8: */    lwz r12,0x0(r24)
@@ -6151,13 +6160,13 @@ loc_42A4C:
     /* 00042A64: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 00042A68: */    cmpwi r27,0x0
     /* 00042A6C: */    lwz r23,muAdvSelchrCTask_0xABC(r29)
-    /* 00042A70: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 00042A70: */    li r0,0x37 + addedMembers
     /* 00042A74: */    addi r3,r3,0x2
     /* 00042A78: */    rlwinm r3,r3,2,0,29
     /* 00042A7C: */    add r3,r26,r3
     /* 00042A80: */    lwz r24,muAdvSelchrCTask_0x934(r3)
     /* 00042A84: */    bne- loc_42A8C
-    /* 00042A88: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 00042A88: */    li r0,0x36 + addedMembers
 loc_42A8C:
     /* 00042A8C: */    rlwinm r0,r0,2,0,29
     /* 00042A90: */    lwz r12,0x0(r24)
@@ -6181,13 +6190,13 @@ loc_42A8C:
 loc_42AD8:
     /* 00042AD8: */    lwz r3,muAdvSelchrCTask_0xC1C(r26)
     /* 00042ADC: */    cmpwi r27,0x0
-    /* 00042AE0: */    li r0,0x37 + testAddedMembers # addedMembers
+    /* 00042AE0: */    li r0,0x37 + addedMembers
     /* 00042AE4: */    addi r3,r3,0x2
     /* 00042AE8: */    rlwinm r3,r3,2,0,29
     /* 00042AEC: */    add r3,r26,r3
     /* 00042AF0: */    lwz r3,muAdvSelchrCTask_0x934(r3)
     /* 00042AF4: */    bne- loc_42AFC
-    /* 00042AF8: */    li r0,0x36 + testAddedMembers # addedMembers
+    /* 00042AF8: */    li r0,0x36 + addedMembers
 loc_42AFC:
     /* 00042AFC: */    rlwinm r0,r0,2,0,29
     /* 00042B00: */    lwz r12,0x0(r3)

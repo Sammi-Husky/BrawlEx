@@ -1,5 +1,5 @@
 
-# TODO: 242 spaces (can save some space by making teamMemberCount a byte instead of uint)
+# TODO: 242 spaces
 
 # TODO: Impossible mode, 1 stock if holding X at map level selection
 # TODO: Keep track of completion time for speedrunning (check if can use the space in FFFFFFFF in each level's struct), and high score (last field in level's struct maybe or use part of clear percentage since it uses full word for no reason) (although high scores can be farmed from infinite respawns)

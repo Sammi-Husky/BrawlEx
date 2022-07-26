@@ -164,8 +164,12 @@ loc_AddedTeamMemberCSSIds:
         .byte 0x00      # 157
         .byte 0x00      # 158
         .byte 0x00      # 159
+        .byte 0x00      # 160
+        .byte 0x00      # 161
+        .byte 0x00      # 162
 loc_NumberOfMembersPerRow:
         .byte 0x7
+        .byte 0xFF      # PAD
 loc_subCharacterCSSIds:
         .byte 0x00      # 00 - Mario
         .byte 0x01      # 01 - Donkey Kong

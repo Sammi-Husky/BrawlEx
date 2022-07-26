@@ -1,12 +1,11 @@
-.set testAddedMembers, 120
-.set addedMembers, 120
+.set addedMembers, 123
 .set maxNumberOfFighters, 40 + addedMembers
 
-.set muAdvSelchrCTask_0x7E4, 0x7E4 + testAddedMembers*4
-.set muAdvSelchrCTask_0x7E8, 0x7E8 + testAddedMembers*4
-.set muAdvSelchrCTask_0x7EC, 0x7EC + testAddedMembers*4
-.set muAdvSelchrCTask_0x7F0, 0x7F0 + testAddedMembers*4
-.set muAdvSelchrCTask_0x890, 0x890 + 2*testAddedMembers*4
+.set muAdvSelchrCTask_0x7E4, 0x7E4 + addedMembers*4
+.set muAdvSelchrCTask_0x7E8, 0x7E8 + addedMembers*4
+.set muAdvSelchrCTask_0x7EC, 0x7EC + addedMembers*4
+.set muAdvSelchrCTask_0x7F0, 0x7F0 + addedMembers*4
+.set muAdvSelchrCTask_0x890, 0x890 + 2*addedMembers*4
 
 .set muAdvSelchrCTask_0x930, 0x930 + 3*addedMembers*4
 .set muAdvSelchrCTask_0x934, 0x934 + 3*addedMembers*4

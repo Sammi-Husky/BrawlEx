@@ -1,8 +1,3 @@
-## TODO: Put macros in a singular asm file
-
-.set addedMembers, 120
-.set muAdvSelchrCTask_0xC24, 0xC24 + 3*addedMembers*4
-
 muAdvNameTask__create:
     /* 00000000: */    stwu r1,-0x10(r1)
     /* 00000004: */    mflr r0
