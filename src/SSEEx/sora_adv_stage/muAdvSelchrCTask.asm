@@ -32,7 +32,8 @@
 .set muAdvSelchrCTask_desiredNumMembersToSelect, muAdvSelchrCTask_0xC5C + 0x4
 .set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
 .set muAdvSelchrCTask_numStocks, muAdvSelchrCTask_SubFighterCSSIdArray + maxNumberOfFighters
-.set muAdvSelchrCTask_size, muAdvSelchrCTask_numStocks + 0x1
+.set muAdvSelchrCTask_useTeamSublevel, muAdvSelchrCTask_numStocks + 0x1
+.set muAdvSelchrCTask_size, muAdvSelchrCTask_useTeamSublevel + 0x1
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
@@ -264,6 +265,7 @@ loc_3DFA8:
     /* 0003E164: */    stw r4,muAdvSelchrCTask_0xC0C(r30)
     /* 0003E168: */    stw r4,muAdvSelchrCTask_0xC10(r30)
     /* 0003E16C: */    stw r4,muAdvSelchrCTask_0xC14(r30)
+    #stw r4, muAdvSelchrCTask_useTeamSublevel(r30)
 
     ## SSEEX: Initialize array to keep track of sub fighter CSS id
     addi r6, r30, muAdvSelchrCTask_SubFighterCSSIdArray
@@ -725,10 +727,10 @@ loc_3E66C:
     /* 0003E6A0: */    addi r1,r1,0x30
     /* 0003E6A4: */    blr
 muAdvSelchrCTask__setMenuData:
-    /* 0003E6A8: */    stwu r1,-0x180(r1) #stwu r1,-0x64(r1)
+    /* 0003E6A8: */    stwu r1,-0x1B0(r1) #stwu r1,-0x64(r1)
     /* 0003E6AC: */    mflr r0
-    /* 0003E6B0: */    stw r0,0x184(r1) #stw r0,0x68(r1)
-    /* 0003E6B4: */    addi r11,r1,0x180 #addi r11,r1,0x64
+    /* 0003E6B0: */    stw r0,0x1B4(r1) #stw r0,0x68(r1)
+    /* 0003E6B4: */    addi r11,r1,0x1B0 #addi r11,r1,0x64
     /* 0003E6B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_14")]
     /* 0003E6C0: */    li r31,0x0
     /* 0003E6C4: */    stb r31,0xA(r1)
@@ -736,6 +738,11 @@ muAdvSelchrCTask__setMenuData:
     /* 0003E6D8: */    stb r31,0x8(r1)
     /* 0003E6C8: */    mr r29,r3
     /* 0003E6D0: */    mr r30,r4
+
+    addi r3, r1, 0x60   # \
+    li r4, 0x0          # | Clear base fighter unlock array
+    li r5, 0x28         # /
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
 
     lis r12,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     lbz r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
@@ -757,7 +764,7 @@ muAdvSelchrCTask__setMenuData:
     addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_menuAdvFolderPath")]
     #crclr 6
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
-    addi r5, r1, 0x60          
+    addi r5, r1, 0x88          
     addi r3, r1, 0xB
 	addi r4, r1, 0x3B	
     li r6, 0x0
@@ -767,18 +774,20 @@ muAdvSelchrCTask__setMenuData:
     li r6,0	
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
     cmpwi r3, 0x0
-    bne+ loc_checkIfOverride  
-    lbz r10, 0x61(r1)                           # \ 
+    bne+ loc_checkIfOverride                    
+    lbz r10, 0x89(r1)                           # \ 
     cmplwi r10, 0xA                             # | Set num stocks from selc file (if it's valid)
     bgt- loc_checkIfOverride                    # |
     stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
-    lbz r11, 0x60(r1)                           # \ Set num of members to select from selc file
+    lbz r11, 0x88(r1)                           # \ Set num of members to select from selc file
     stw r11, 0x6FC(r29)                         # /
     cmpwi r14, 0x3          # \ Check if current override setting should make all characters visible
     beq- loc_singleTeam     # /
-    # TODO: Check if 0x62(r1) is 2 which signifies just use unlocks
-    li r14, 0x5
-    b loc_singleTeam
+    lbz r11, 0x8A(r1)       # \
+    cmpwi r11, 0x0          # | 0x0 signifies just use unlocks 
+    beq- loc_singleTeam     # | 0x1 signifies use selc data but unlocks matter                  
+    addi r14, r11, 0x4      # | 0x2 signifies use selc data
+    b loc_singleTeam        # /
 
     ## SSEEX: Check for input to override and have all characters available
  loc_checkIfOverride:
@@ -986,6 +995,19 @@ loc_3E918:
     /* 0003E934: */    beq- loc_3E944
     /* 0003E938: */    # stw r3,0x44(r19)
     /* 0003E93C: */    # addi r19,r19,0x4
+    ## SSEEX: Temp store if CSS Id has been unlocked for later (so can be used when defining menuData from selc file)
+    li r10, 0x1
+    addi r12, r1, 0x60
+    stbx r10, r12, r3
+    cmpwi r3, 0x3       # \
+    bne+ loc_notSamus   # |
+    stb r10, 0x4(r12)   # |
+loc_notSamus:           # | Have ZSS and Sheik 'unlocked' if Samus and Zelda is available
+    cmpwi r3, 0xE       # |
+    bne+ loc_notZelda   # |
+    stb r10, 0xF(r12)   # |
+loc_notZelda:           # /
+
     stb r3,0x44(r19)                                # SSEEX: Store team member as byte instead of word
     addi r19,r19,0x1                                # Then increment by 1
     /* 0003E940: */    addi r15,r15,0x1
@@ -1018,8 +1040,7 @@ loc_3E970:
     /* 0003E9A0: */    stb r15,muAdvSelchrCTask_team0MemberCount(r3) #stw r15,0xE4(r3)
 loc_3E9A4:
     /* 0003E9A4: */    #stw r31,0x6F8(r29)
-    #mr r25, r19
-    b loc_addExTeamMembers
+    b loc_3EBC8
     /* 0003E9A8: */   # b loc_3EBCC
 loc_singleTeam:
     /* 0003E9AC: */    lis r28,0x0                              [R_PPC_ADDR16_HA(0, 8, "loc_80493E60")]
@@ -1183,6 +1204,19 @@ loc_3EB80:
     /* 0003EB94: */    bl muAdvSelchrCTask__normalizeCharKind
     /* 0003EB98: */    cmpwi r3,0x28
     /* 0003EB9C: */    beq- loc_3EBAC
+    ## SSEEX: Temp store if CSS Id has been unlocked for later (so can be used when defining menuData from selc file)
+    li r10, 0x1
+    addi r12, r1, 0x60
+    stbx r10, r12, r3
+    cmpwi r3, 0x3       # \
+    bne+ loc_notSamus2  # |
+    stb r10, 0x4(r12)   # |
+loc_notSamus2:          # | Have ZSS and Sheik 'unlocked' if Samus and Zelda is available
+    cmpwi r3, 0xE       # |
+    bne+ loc_notZelda2  # |
+    stb r10, 0xF(r12)   # |
+loc_notZelda2:          # /
+
     /* 0003EBA0: */    # stw r3,0x44(r25)
     /* 0003EBA4: */    # addi r25,r25,0x4
     stb r3,0x44(r25)                                        # SSEEX: Store team member as byte instead of word
@@ -1198,75 +1232,105 @@ loc_3EBB8:
     /* 0003EBC0: */    stb r16,muAdvSelchrCTask_team0MemberCount(r29) #stw r16,0xE4(r29)
     /* 0003EBC4: */    li r31,0x1
 loc_3EBC8:
-    #b loc_muAdvSelchrCTask__setMenuData_addExTeamMembers
-    /* 0003EBC8: */   # stw r31,0x6F8(r29)
-
-    ## SSEEX: Add Ex team members
-loc_addExTeamMembers:
-    stw r31,0x6F8(r29)     # Original operation
-    lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
-    addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
-    lbz r10,-0x2(r4)      # Get Number of potential additional team members 
-    lbz r3,muAdvSelchrCTask_team0MemberCount(r29) #lwz r3, 0xe4(r29)     # Get current number of team members
-    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
-    addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
-    addi r7, r29, 0x44     # Get to beginning of team member array
-    mtctr r10 
-
-    cmpwi r14, 0x3       # Check if unlock override
-    bne- loc_addFightersToTeam 
-    lbz r5, -0x1(r4)     # Add Sonic since for some reason not included when overriding save
-    stbx r5, r7, r3
-    addi r3, r3, 0x1
-loc_addFightersToTeam:              # \ Add team members if unlocked or override is activated
-    lbz r5, 0x0(r4)                 # |
-    cmpwi r14, 0x3                  # | Check if unlock override
-    beq- loc_addFighterToTeamMenu   # |
-    subi r6, r5, 0x2A               # | Check if unlocked
-    lbzx r0, r11, r6                # |
-    cmpwi r0, 0x1                   # |
-    bge- loc_addFighterToTeamMenu   # |
-    b loc_skipAddFighterToTeamMenu  # |
-loc_addFighterToTeamMenu:           # |
-    stbx r5, r7, r3                 # |
-    addi r3, r3, 0x1                # |
-loc_skipAddFighterToTeamMenu:       # |
-    addi r4, r4, 0x1                # |
-    bdnz loc_addFightersToTeam      # /
-    stb r3,muAdvSelchrCTask_team0MemberCount(r29) #stw r3, 0xe4(r29)      # Store team member count
-
-    ## SSEEX: Get members from selc file if r14 is 0x5
-    # TODO: Handle case where unlocks matter
-    # TODO: Handle multiple teams
-    cmpwi r14, 0x5
-    bne+ loc_dontGetMembersFromSelc
-    lbz r5, 0x64(r1)    # \ Get number of members for team1
-    stb r5,muAdvSelchrCTask_team0MemberCount(r29) #stw r5, 0xe4(r29)   # / 
-    addi r4, r1, 0x6C   # \ Copy team 1 members from selc to team1 menuData in muAdvSelchrCTask
-    addi r3, r29, 0x44  # /
-    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] 
-loc_dontGetMembersFromSelc:
+    /* 0003EBC8: */    stw r31,0x6F8(r29)
 #loc_3EBCC:
+    /* 0003EBE4: */    li r10,0xE #li r0,0xE
     /* 0003EBCC: */    lbz r0,muAdvSelchrCTask_0xC2D(r29)
     /* 0003EBD0: */    cmplwi r0,0x2
     /* 0003EBD4: */    bne- loc_3EBE4
-    /* 0003EBD8: */    li r0,0xF
-    /* 0003EBDC: */    stw r0,muAdvSelchrCTask_0xC34(r29)
-    /* 0003EBE0: */    b loc_3EBEC
+    /* 0003EBD8: */    li r10,0xF #li r0,0xF
+    /* 0003EBDC: */    #stw r0,muAdvSelchrCTask_0xC34(r29)
+    /* 0003EBE0: */    #b loc_3EBEC
 loc_3EBE4:
-    /* 0003EBE4: */    li r0,0xE
-    /* 0003EBE8: */    stw r0,muAdvSelchrCTask_0xC34(r29)
+    /* 0003EBE8: */    stw r10,muAdvSelchrCTask_0xC34(r29) #stw r0,muAdvSelchrCTask_0xC34(r29)
 loc_3EBEC:
+    /* 0003EC04: */    li r10,0x3 #li r0,0x3
     /* 0003EBEC: */    lbz r0,muAdvSelchrCTask_0xC2E(r29)
     /* 0003EBF0: */    cmplwi r0,0x2
     /* 0003EBF4: */    bne- loc_3EC04
-    /* 0003EBF8: */    li r0,0x4
-    /* 0003EBFC: */    stw r0,muAdvSelchrCTask_0xC38(r29)
-    /* 0003EC00: */    b loc_3EC0C
+    /* 0003EBF8: */    li r10,0x4 #li r0,0x4
+    /* 0003EBFC: */    #stw r0,muAdvSelchrCTask_0xC38(r29)
+    /* 0003EC00: */    #b loc_3EC0C
 loc_3EC04:
-    /* 0003EC04: */    li r0,0x3
-    /* 0003EC08: */    stw r0,muAdvSelchrCTask_0xC38(r29)
+    /* 0003EC08: */    stw r10,muAdvSelchrCTask_0xC38(r29) #stw r0,muAdvSelchrCTask_0xC38(r29)
 loc_3EC0C:
+    ## SSEEX: Add Ex team members
+    addi r30, r1, 0x60      # Get to beginning of normal character save data
+    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    addi r7, r29, 0x44      # Get to beginning of team member array
+    addi r8, r1, 0x90       # Get to beginning of team member sizes from selc file
+    addi r9, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
+    li r12, 0x0             # Keep track of number of teams
+    li r31, 0x0             # Team incrementer
+    
+    addi r4, r1, 0x98       # Team1 menudata from selc file
+loc_loopThroughTeamMembers:
+    lbzx r10, r8, r31      # Get number of members for current team
+    li r3, 0x0              
+    cmpwi r14, 0x5
+    bge- loc_startAddingFighters
+    
+    lbz r3, 0x0(r9) #lwz r3, 0xe4(r29)     # Get current number of team members
+
+    lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
+    addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
+    lbz r10,-0x2(r4)        # Get Number of potential additional team members 
+
+    cmpwi r14, 0x3       # Check if unlock override
+    bne- loc_startAddingFighters 
+    lbz r5, -0x1(r4)     # Add Sonic since for some reason not included when overriding save
+    stbx r5, r7, r3
+    addi r3, r3, 0x1
+loc_startAddingFighters:
+    cmpwi r10, 0x0
+    beq+ loc_teamEmpty
+    mtctr r10 
+loc_addFightersToTeam:                  # \ Add team members if unlocked or override is activated
+    lbz r5, 0x0(r4)                     # |
+    cmpwi r14, 0x3                      # | Check if unlock override
+    beq- loc_addFighterToTeamMenu       # |
+    cmpwi r14, 0x6                      # |
+    beq- loc_addFighterToTeamMenu       # | 
+    lbzx r0, r30, r5                    # | Check if unlocked (base fighter)
+    cmplwi r5, 0x2A                     # |
+    blt+ loc_baseFighter                # |
+    subi r6, r5, 0x2A                   # | 
+    lbzx r0, r11, r6                    # | Check if unlocked (Ex fighter)
+loc_baseFighter:                        # |
+    cmpwi r0, 0x1                       # |
+    bge- loc_addFighterToTeamMenu       # |
+    b loc_skipAddFighterToTeamMenu      # |
+loc_addFighterToTeamMenu:               # |
+    stbx r5, r7, r3                     # | Add to team menu
+    addi r3, r3, 0x1                    # |
+loc_skipAddFighterToTeamMenu:           # |
+    addi r4, r4, 0x1                    # |
+    bdnz loc_addFightersToTeam          # /
+    stb r3,0x0(r9) #stw r3, 0xe4(r29)      # Store team member count
+ loc_teamEmpty:  
+    addi r31, r31, 0x1          # \
+    cmpwi r3, 0x0               # |
+    beq+ loc_noMembersInTeam    # | Keep track of total number of teams 
+    mr r12, r31                 # /
+loc_noMembersInTeam:
+    addi r9, r9, 0xAC               
+    addi r7, r7, 0xAC
+    cmpwi r14, 0x5
+    blt+ loc_finishAddingMembers
+    cmpwi r31, 0x8
+    blt+ loc_loopThroughTeamMembers
+    stw r12,0x6F8(r29)      # Store total number of teams
+loc_finishAddingMembers:
+
+    # TODO: Disable empty team select
+    # TODO: Handle case where unlocks matter
+    # TODO: Handle multiple teams from selc
+    # TODO: Handle c-stick alts from selc (maybe should disable or define in file?) (need to handle ZSS and Pkmn trainer unlock)
+    # TODO: Have case where you absolutely need at least one fighter or else the jumpLevelId will be set to 0x0 and sequenceIndex will reset (as well as a minimum number of fighters clause)
+    # TODO: Have teams increment the jumpLevelId (which changes the sub-levels)
+    # TODO: Random when byte 1 is 3 (although also need number of characters, can use team entries for that, one entry is number of characters per each team, one is total number of characters)
+
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
     /* 0003EC14: */    bgt- loc_3EC30
@@ -1277,11 +1341,11 @@ loc_3EC0C:
     /* 0003EC28: */    stb r0,muAdvSelchrCTask_team0MemberCount(r29) #stw r0,0xE4(r29)
     /* 0003EC2C: */    stw r0,0x6F8(r29)
 loc_3EC30:
-    /* 0003EC30: */    addi r11,r1,0x180 #addi r11,r1,0x64
+    /* 0003EC30: */    addi r11,r1,0x1B0 #addi r11,r1,0x64
     /* 0003EC34: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_14")]
-    /* 0003EC38: */    lwz r0,0x184(r1) #lwz r0,0x68(r1)
+    /* 0003EC38: */    lwz r0,0x1B4(r1) #lwz r0,0x68(r1)
     /* 0003EC3C: */    mtlr r0
-    /* 0003EC40: */    addi r1,r1,0x180 #addi r1,r1,0x64
+    /* 0003EC40: */    addi r1,r1,0x1B0 #addi r1,r1,0x64
     /* 0003EC44: */    blr
 muAdvSelchrCTask__normalizeCharKind:
     /* 0003EC48: */    subi r0,r3,0x1B
@@ -2966,20 +3030,7 @@ loc_4010C:
     nop
     nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
+    nop  
     nop
     nop
     nop
@@ -2988,46 +3039,7 @@ loc_4010C:
     nop
     nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    
-    nop 
-    nop 
-    nop 
-    nop 
-    nop 
-    
-    # +165
+    # +128
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -5719,6 +5731,11 @@ loc_423F8:
     /* 000423F8: */    lwz r3,0x9C(r1)
     /* 000423FC: */    andi. r0,r3,0x1100
     /* 00042400: */    beq- loc_42444
+    mr r3, r28                              # \
+    lwz r4, muAdvSelchrCTask_0xC1C(r28)     # |
+    bl muAdvSelchrCTask__getNumTeamLine     # | Check if team member line has at least 1 member otherwise don't be able to select it
+    cmpwi r3, 0x0                           # |
+    ble+ loc_42444                          # /
     /* 00042404: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
     /* 00042408: */    li r4,0x1
     /* 0004240C: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]

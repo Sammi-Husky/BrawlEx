@@ -3022,3 +3022,6 @@ loc_advExSaveData:
         .byte 0x00      # 0xF0
         .byte 0x00      # 0xF1
         .byte 0x00      # 0xF2
+# TODO: Last level id specifically for gauntlet saves which gets updated upon savepoint
+# When level id is 0x0 in adsj while in a savepoint it will take you to last gauntlet save, otherwise will drop you back in current level
+# Game overs -> Should warp back to last save if in gauntlet represented by a byte here (which gets activated upon entering a savepoint in range). If savepoint ends in Y then end gauntlet

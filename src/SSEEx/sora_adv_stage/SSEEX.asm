@@ -27,6 +27,7 @@
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
 # TODO: Stamina battles?
+# TODO: jump Flag2 -> random 2-16
 
 ################################################################################################################################
 ## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
