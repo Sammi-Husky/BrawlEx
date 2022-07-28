@@ -32,7 +32,8 @@
 .set muAdvSelchrCTask_desiredNumMembersToSelect, muAdvSelchrCTask_0xC5C + 0x4
 .set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
 .set muAdvSelchrCTask_numStocks, muAdvSelchrCTask_SubFighterCSSIdArray + maxNumberOfFighters
-.set muAdvSelchrCTask_useTeamSublevel, muAdvSelchrCTask_numStocks + 0x1
+.set muAdvSelchrCTask_disableSubFighter, muAdvSelchrCTask_numStocks + 0x1
+.set muAdvSelchrCTask_useTeamSublevel, muAdvSelchrCTask_disableSubFighter + 0x1
 .set muAdvSelchrCTask_size, muAdvSelchrCTask_useTeamSublevel + 0x1
 
 muAdvSelchrCTask__create:
@@ -265,7 +266,10 @@ loc_3DFA8:
     /* 0003E164: */    stw r4,muAdvSelchrCTask_0xC0C(r30)
     /* 0003E168: */    stw r4,muAdvSelchrCTask_0xC10(r30)
     /* 0003E16C: */    stw r4,muAdvSelchrCTask_0xC14(r30)
-    #stw r4, muAdvSelchrCTask_useTeamSublevel(r30)
+    stb r4, muAdvSelchrCTask_disableSubFighter(r30)
+    stb r4, muAdvSelchrCTask_useTeamSublevel(r30)
+
+    ## Note: Can reduce code space by replacing with memfill later
 
     ## SSEEX: Initialize array to keep track of sub fighter CSS id
     addi r6, r30, muAdvSelchrCTask_SubFighterCSSIdArray
@@ -781,6 +785,8 @@ muAdvSelchrCTask__setMenuData:
     stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
     lbz r11, 0x88(r1)                           # \ Set num of members to select from selc file
     stw r11, 0x6FC(r29)                         # /
+    lbz r11, 0x8B(r1)                                   # \ Set whether sub fighters (selected from c-stick) is disabled from selc file
+    stb r11, muAdvSelchrCTask_disableSubFighter(r29)    # /
     cmpwi r14, 0x3          # \ Check if current override setting should make all characters visible
     beq- loc_singleTeam     # /
     lbz r11, 0x8A(r1)       # \
@@ -1007,7 +1013,18 @@ loc_notSamus:           # | Have ZSS and Sheik 'unlocked' if Samus and Zelda is 
     bne+ loc_notZelda   # |
     stb r10, 0xF(r12)   # |
 loc_notZelda:           # /
-
+    cmpwi r3, 0x1B
+    bne+ loc_notPkmnTrainer
+    stb r10, 0x1D(r12) # Squirtle unlocked if PT is available
+    lis r11,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r11,0x0(r11)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r11,0x30(r11)           # |
+    lwz r11, 0x10C(r11)         # / get GameGlobal->advSaveData->theRuinsClearDifficulty
+    cmpwi r11, 0x0              # \
+    blt- loc_notPkmnTrainer     # | Ivysaur/Charizard unlocked if The Ruins was completed
+    stb r10, 0x1C(r12)          # |
+    stb r10, 0x1E(r12)          # /
+loc_notPkmnTrainer: 
     stb r3,0x44(r19)                                # SSEEX: Store team member as byte instead of word
     addi r19,r19,0x1                                # Then increment by 1
     /* 0003E940: */    addi r15,r15,0x1
@@ -1216,6 +1233,18 @@ loc_notSamus2:          # | Have ZSS and Sheik 'unlocked' if Samus and Zelda is 
     bne+ loc_notZelda2  # |
     stb r10, 0xF(r12)   # |
 loc_notZelda2:          # /
+    cmpwi r3, 0x1B
+    bne+ loc_notPkmnTrainer2
+    stb r10, 0x1D(r12) # Squirtle unlocked if PT is available
+    lis r11,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r11,0x0(r11)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r11,0x30(r11)           # |
+    lwz r11, 0x10C(r11)         # / get GameGlobal->advSaveData->theRuinsClearDifficulty
+    cmpwi r11, 0x0              # \
+    blt- loc_notPkmnTrainer2    # | Ivysaur/Charizard unlocked if The Ruins was completed
+    stb r10, 0x1C(r12)          # |
+    stb r10, 0x1E(r12)          # /
+loc_notPkmnTrainer2: 
 
     /* 0003EBA0: */    # stw r3,0x44(r25)
     /* 0003EBA4: */    # addi r25,r25,0x4
@@ -1323,10 +1352,6 @@ loc_noMembersInTeam:
     stw r12,0x6F8(r29)      # Store total number of teams
 loc_finishAddingMembers:
 
-    # TODO: Disable empty team select
-    # TODO: Handle case where unlocks matter
-    # TODO: Handle multiple teams from selc
-    # TODO: Handle c-stick alts from selc (maybe should disable or define in file?) (need to handle ZSS and Pkmn trainer unlock)
     # TODO: Have case where you absolutely need at least one fighter or else the jumpLevelId will be set to 0x0 and sequenceIndex will reset (as well as a minimum number of fighters clause)
     # TODO: Have teams increment the jumpLevelId (which changes the sub-levels)
     # TODO: Random when byte 1 is 3 (although also need number of characters, can use team entries for that, one entry is number of characters per each team, one is total number of characters)
@@ -2992,54 +3017,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop
-    nop
-    nop
-    nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop  
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +128
+    # +86
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -4041,6 +4020,9 @@ loc_40DA0:
     /* 00040DCC: */    #cmpwi r3,0x3
     /* 00040DD0: */    #bne- loc_40F24
 loc_40DD4:
+    lbz r10, muAdvSelchrCTask_disableSubFighter(r18)
+    cmpwi r10, 0x1
+    beq+ loc_40F24
     /* 00040DD4: */    mr r3,r18
     /* 00040DD8: */    mr r4,r19
     /* 00040DDC: */    li r17,0x0
@@ -4076,9 +4058,24 @@ loc_40E30:
     cmpw r3, r21            # Check if sub id is the same as main id
     mr r5, r21
     bne+ loc_updateSubFighterCSSId
-    lis r12,0x0                               [R_PPC_ADDR16_HA(40, 8, "loc_subCharacterCSSIds")]
-    addi r12,r12,0x0                          [R_PPC_ADDR16_LO(40, 8, "loc_subCharacterCSSIds")]
-    lbzx r5, r12, r21       # Load alt id from data section
+    lis r12,0x0                         [R_PPC_ADDR16_HA(40, 8, "loc_subCharacterCSSIds")]
+    addi r12,r12,0x0                    [R_PPC_ADDR16_LO(40, 8, "loc_subCharacterCSSIds")]
+    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r11,r11,0x0                    [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    lis r10,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    lbz r10,0x0(r10)                    [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+
+    lbzx r6, r12, r21       # Get alt id from data section
+    cmpwi r10, 0x3 
+    beq- loc_subFighterUnlocked
+    cmpwi r6, 0x2A          # Only be concerned about Ex fighters
+    blt- loc_subFighterUnlocked
+    subi r8, r6, 0x2A               # \
+    lbzx r7, r11, r8                # | 
+    cmpwi r7, 0x1                   # | Check if unlocked
+    blt+ loc_updateSubFighterCSSId  # /
+loc_subFighterUnlocked:
+    mr r5, r6
 loc_updateSubFighterCSSId:
     stbx r5, r4, r21
     

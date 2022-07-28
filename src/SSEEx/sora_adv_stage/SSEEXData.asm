@@ -219,14 +219,14 @@ loc_subCharacterCSSIds:
         .byte 0x2D      # 45 - Roy
         .byte 0x2E      # 46 - Mewtwo
         .byte 0x2F      # 47 - Knuckles
-        .byte 0x30      # 48
+        .byte 0x30      # 48 - Giga Bowser
         .byte 0x31      # 49
         .byte 0x32      # 50 - Ridley
         .byte 0x33      # 51
         .byte 0x34      # 52
-        .byte 0x35      # 53
+        .byte 0x35      # 53 - Warioman
         .byte 0x36      # 54
-        .byte 0x37      # 55
+        .byte 0x37      # 55 - Sopo
         .byte 0x38      # 56
         .byte 0x39      # 57
         .byte 0x3A      # 58
@@ -422,14 +422,14 @@ loc_stepJumpIdCSSIdUnlockCriteria:
         .4byte 0x28900104       # 0x2D - Roy
         .4byte 0x00000000       # 0x2E - Mewtwo
         .4byte 0x00000001       # 0x2F - Knuckles
-        .4byte 0x00000000       # 0x30
+        .4byte 0x00000002       # 0x30 - Giga Bowser
         .4byte 0x00000000       # 0x31
         .4byte 0x00000002       # 0x32 - Ridley
         .4byte 0x00000000       # 0x33
         .4byte 0x00000000       # 0x34
-        .4byte 0x00000000       # 0x35
+        .4byte 0x00000000       # 0x35 - Warioman
         .4byte 0x00000000       # 0x36
-        .4byte 0x00000000       # 0x37
+        .4byte 0x00000000       # 0x37 - Sopo
         .4byte 0x00000000       # 0x38
         .4byte 0x00000000       # 0x39
         .4byte 0x00000000       # 0x3A
