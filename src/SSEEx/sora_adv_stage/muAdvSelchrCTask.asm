@@ -787,6 +787,8 @@ muAdvSelchrCTask__setMenuData:
     stw r11, 0x6FC(r29)                         # /
     lbz r11, 0x8B(r1)                                   # \ Set whether sub fighters (selected from c-stick) is disabled from selc file
     stb r11, muAdvSelchrCTask_disableSubFighter(r29)    # /
+    lbz r11, 0x8C(r1)                                   # \ Set whether to use selected team to determine sub level
+    stb r11, muAdvSelchrCTask_useTeamSublevel(r29)      # /
     cmpwi r14, 0x3          # \ Check if current override setting should make all characters visible
     beq- loc_singleTeam     # /
     lbz r11, 0x8A(r1)       # \
@@ -1355,7 +1357,7 @@ loc_finishAddingMembers:
     # TODO: Have case where you absolutely need at least one fighter or else the jumpLevelId will be set to 0x0 and sequenceIndex will reset (as well as a minimum number of fighters clause)
     # TODO: Have teams increment the jumpLevelId (which changes the sub-levels)
     # TODO: Random when byte 1 is 3 (although also need number of characters, can use team entries for that, one entry is number of characters per each team, one is total number of characters)
-
+    ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
     /* 0003EC14: */    bgt- loc_3EC30
@@ -3000,25 +3002,7 @@ loc_4010C:
     nop
     nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +86
+    # +70
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -4628,10 +4612,27 @@ loc_415BC:
     /* 000415C4: */    addi r3,r1,0x8
     /* 000415C8: */    lwzx r29,r3,r0
 loc_415CC:
-    /* 000415CC: */    lwz r0,muAdvSelchrCTask_0xC1C(r28)
+    /* 000415CC: */    lwz r10,muAdvSelchrCTask_0xC1C(r28) #lwz r0,muAdvSelchrCTask_0xC1C(r28)
+    ## SSEEX: Add team number to jumpLevelId if setting is set in selc (so can have different levels depending on team picked)
+    lbz r11, muAdvSelchrCTask_useTeamSublevel(r28)
+    cmpwi r11, 0x1
+    bne+ loc_dontAddToJumpLevelId
+    lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r12,0x0(r12)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r12, 0x30(r12)          # | Get GameGlobal->advSaveData->jumpLevelId
+    lwz r9, 0x62C(r12)          # / (if it's 0 then skip)
+    add r9, r9, r10             # \ 
+    stw r9, 0x62C(r12)          # / Add team number to jumpLevelId  (Note: Could increment door id too instead and then gets handled by adsj)
+    stw r9, 0x620(r12)          # Update currentLevelId
+    stw r9, 0x624(r12)          # Update activeLevelId
+    lwz r9, 0x628(r12)          # \
+    rlwinm r9,r9,0,24,31        # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
+    stw r9, 0x628(r12)          # /
+loc_dontAddToJumpLevelId:
+
     /* 000415D4: */    li r25,0x0
     /* 000415D8: */    li r27,0x0
-    /* 000415DC: */    mulli r31,r0,0xAC
+    /* 000415DC: */    mulli r31,r10,0xAC #mulli r31,r0,0xAC
     /* 000415E0: */    add r26,r28,r31
     
     /* 00041670: */    addi r3,r28,muAdvSelchrCTask_0xAC0 #addi r30,r28,muAdvSelchrCTask_0xAC0
