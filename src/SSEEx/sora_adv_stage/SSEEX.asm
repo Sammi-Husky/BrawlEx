@@ -28,6 +28,7 @@
 # TODO: Ex characters in Sticker menu
 # TODO: Stamina battles?
 # TODO: jump Flag2 -> random 2-16
+# TODO: In adsj jumpLevelId, if it's a single integer then that's the new door index
 
 ################################################################################################################################
 ## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex

@@ -754,6 +754,8 @@ muAdvSelchrCTask__setMenuData:
     ## SSEEX: Check for .selc file if jumpLevelId is not 0x0 (which signifies custom cutscene followed by custom level)
     li r10, 0xFF                              # \ Default number of stocks (0xFF) signifies no .selc file
     stb r10, muAdvSelchrCTask_numStocks(r29)  # /
+    li r10, 0x0         # \ Set random (or number of characters able to select for random) to 0
+    stb r10, 0x8D(r1)   # /
     lis r6,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r6,0x0(r6)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r6, 0x30(r6)          # | Get GameGlobal->advSaveData->jumpLevelId
@@ -779,9 +781,7 @@ muAdvSelchrCTask__setMenuData:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
     cmpwi r3, 0x0
     bne+ loc_checkIfOverride                    
-    lbz r10, 0x89(r1)                           # \ 
-    cmplwi r10, 0xA                             # | Set num stocks from selc file (if it's valid)
-    bgt- loc_checkIfOverride                    # |
+    lbz r10, 0x89(r1)                           # \ Set num stocks from selc file (if it's valid)
     stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
     lbz r11, 0x88(r1)                           # \ Set num of members to select from selc file
     stw r11, 0x6FC(r29)                         # /
@@ -1287,76 +1287,85 @@ loc_3EC04:
 loc_3EC0C:
     ## SSEEX: Add Ex team members
     addi r30, r1, 0x60      # Get to beginning of normal character save data
-    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
-    addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
-    addi r7, r29, 0x44      # Get to beginning of team member array
-    addi r8, r1, 0x90       # Get to beginning of team member sizes from selc file
-    addi r9, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
-    li r12, 0x0             # Keep track of number of teams
+    lis r28,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r28, r28, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    addi r27, r29, 0x44      # Get to beginning of team member array
+    addi r26, r1, 0x90       # Get to beginning of team member sizes from selc file
+    addi r25, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
+    li r24, 0x0             # Keep track of number of teams
     li r31, 0x0             # Team incrementer
+    li r21, 0x0             # Available member incrementer 
     
-    addi r4, r1, 0x98       # Team1 menudata from selc file
+    addi r22, r1, 0x98       # Team1 menudata from selc file
 loc_loopThroughTeamMembers:
-    lbzx r10, r8, r31      # Get number of members for current team
-    li r3, 0x0              
+    li r19, 0x0             # Team member incrementer 
+    lbzx r20, r26, r31      # Get number of members for current team
+    li r23, 0x0              
     cmpwi r14, 0x5
     bge- loc_startAddingFighters
     
-    lbz r3, 0x0(r9) #lwz r3, 0xe4(r29)     # Get current number of team members
+    lbz r23, 0x0(r25) #lwz r23, 0xe4(r29)     # Get current number of team members
 
-    lis r4,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
-    addi r4,r4,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
-    lbz r10,-0x2(r4)        # Get Number of potential additional team members 
+    lis r22,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
+    addi r22,r22,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
+    lbz r20,-0x2(r22)        # Get Number of potential additional team members 
 
     cmpwi r14, 0x3       # Check if unlock override
     bne- loc_startAddingFighters 
-    lbz r5, -0x1(r4)     # Add Sonic since for some reason not included when overriding save
-    stbx r5, r7, r3
-    addi r3, r3, 0x1
+    lbz r4, -0x1(r22)     # Add Sonic since for some reason not included when overriding save
+    stbx r4, r27, r23
+    addi r23, r23, 0x1
 loc_startAddingFighters:
-    cmpwi r10, 0x0
+    cmpwi r20, 0x0
     beq+ loc_teamEmpty
-    mtctr r10 
 loc_addFightersToTeam:                  # \ Add team members if unlocked or override is activated
-    lbz r5, 0x0(r4)                     # |
+    lbzx r4, r22, r21                   # |
+    lbz r3, 0x8D(r1)                    # |
+    cmpwi r3, 0x0                       # | Randomize if number of characters available for random is > 0
+    beq+ loc_notRandom                  # |
+    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
+    lbzx r4, r22, r3                    # |
+loc_notRandom:                          # |
     cmpwi r14, 0x3                      # | Check if unlock override
     beq- loc_addFighterToTeamMenu       # |
     cmpwi r14, 0x6                      # |
     beq- loc_addFighterToTeamMenu       # | 
-    lbzx r0, r30, r5                    # | Check if unlocked (base fighter)
-    cmplwi r5, 0x2A                     # |
+    lbzx r0, r30, r4                    # | Check if unlocked (base fighter)
+    cmplwi r4, 0x2A                     # |
     blt+ loc_baseFighter                # |
-    subi r6, r5, 0x2A                   # | 
-    lbzx r0, r11, r6                    # | Check if unlocked (Ex fighter)
+    subi r6, r4, 0x2A                   # | 
+    lbzx r0, r28, r6                    # | Check if unlocked (Ex fighter)
 loc_baseFighter:                        # |
     cmpwi r0, 0x1                       # |
     bge- loc_addFighterToTeamMenu       # |
     b loc_skipAddFighterToTeamMenu      # |
 loc_addFighterToTeamMenu:               # |
-    stbx r5, r7, r3                     # | Add to team menu
-    addi r3, r3, 0x1                    # |
+    stbx r4, r27, r23                   # | Add to team menu
+    addi r23, r23, 0x1                  # |
 loc_skipAddFighterToTeamMenu:           # |
-    addi r4, r4, 0x1                    # |
-    bdnz loc_addFightersToTeam          # /
-    stb r3,0x0(r9) #stw r3, 0xe4(r29)      # Store team member count
+    addi r21, r21, 0x1                  # |
+    addi r19, r19, 0x1                  # |
+    cmpw r19, r20                       # |
+    blt+ loc_addFightersToTeam          # /
+    stb r23,0x0(r25) #stw r23, 0xe4(r29)      # Store team member count
  loc_teamEmpty:  
     addi r31, r31, 0x1          # \
-    cmpwi r3, 0x0               # |
+    cmpwi r23, 0x0               # |
     beq+ loc_noMembersInTeam    # | Keep track of total number of teams 
-    mr r12, r31                 # /
+    mr r24, r31                 # /
 loc_noMembersInTeam:
-    addi r9, r9, 0xAC               
-    addi r7, r7, 0xAC
+    addi r25, r25, 0xAC               
+    addi r27, r27, 0xAC
     cmpwi r14, 0x5
     blt+ loc_finishAddingMembers
     cmpwi r31, 0x8
     blt+ loc_loopThroughTeamMembers
-    stw r12,0x6F8(r29)      # Store total number of teams
+    stw r24,0x6F8(r29)      # Store total number of teams
 loc_finishAddingMembers:
 
-    # TODO: Have case where you absolutely need at least one fighter or else the jumpLevelId will be set to 0x0 and sequenceIndex will reset (as well as a minimum number of fighters clause)
-    # TODO: Have teams increment the jumpLevelId (which changes the sub-levels)
-    # TODO: Random when byte 1 is 3 (although also need number of characters, can use team entries for that, one entry is number of characters per each team, one is total number of characters)
+    # TODO: For sub-level based on team number, keep track of number so can add to the SongId so can have different songs based on selection
+    # TODO: Have case where you absolutely need at least one fighter or else the jumpLevelId will be set to 0x0 and sequenceIndex will reset (as well as a minimum number of fighters clause (maybe per team too?))
+    # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -2993,16 +3002,8 @@ loc_4010C:
 
     nop
     nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
 
-    # +70
+    # +62
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
