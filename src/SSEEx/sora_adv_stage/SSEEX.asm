@@ -5,6 +5,7 @@
 # TODO: Keep track of completion time for speedrunning (check if can use the space in FFFFFFFF in each level's struct), and high score (last field in level's struct maybe or use part of clear percentage since it uses full word for no reason) (although high scores can be farmed from infinite respawns)
 ## Maybe do it Sonic style and display score as a combo of speed and score, also try to display speed at Level Clear
 ## Use getGameFrameDelta
+## Show time on HUD
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
 # TODO: Investigate Lucas up throw on enemy crash
@@ -29,6 +30,7 @@
 # TODO: Stamina battles?
 # TODO: jump Flag2 -> random 2-16
 # TODO: In adsj jumpLevelId, if it's a single integer then that's the new door index
+# TODO: Disable checkpoints for a NG+
 
 ################################################################################################################################
 ## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex

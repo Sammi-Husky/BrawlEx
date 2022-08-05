@@ -756,6 +756,7 @@ muAdvSelchrCTask__setMenuData:
     stb r10, muAdvSelchrCTask_numStocks(r29)  # /
     li r10, 0x0         # \ Set random (or number of characters able to select for random) to 0
     stb r10, 0x8D(r1)   # /
+    stb r10, 0x8E(r1)   # Set minimum number of characters to be unlocked
     lis r6,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r6,0x0(r6)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r6, 0x30(r6)          # | Get GameGlobal->advSaveData->jumpLevelId
@@ -781,7 +782,7 @@ muAdvSelchrCTask__setMenuData:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
     cmpwi r3, 0x0
     bne+ loc_checkIfOverride                    
-    lbz r10, 0x89(r1)                           # \ Set num stocks from selc file (if it's valid)
+    lbz r10, 0x89(r1)                           # \ Set num stocks from selc file
     stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
     lbz r11, 0x88(r1)                           # \ Set num of members to select from selc file
     stw r11, 0x6FC(r29)                         # /
@@ -1363,10 +1364,54 @@ loc_noMembersInTeam:
     stw r24,0x6F8(r29)      # Store total number of teams
 loc_finishAddingMembers:
 
+    ## Check if minumum number of unlocks is satisfied (otherwise go back to original SSE path)
+    li r7, 0x0                                          # \
+    lwz r10, 0x6F8(r29)                                 # |
+    addi r9, r29, muAdvSelchrCTask_team0MemberCount     # |
+    mtctr r10                                           # |
+    b loc_startLoopThroughTeams                         # |
+loc_addNumTeamMembers:                                  # | Get total number of team members from each team
+    lbz r8, 0x0(r9)                                     # |
+    addi r7, r7, r8                                     # |
+    addi r9, r9, 0xAC                                   # |
+loc_startLoopThroughTeams:                              # |
+    bdnz loc_addNumTeamMembers                          # /
+    lbz r6, 0x8E(r1)                # \
+    cmpw r7, r6                     # | Check total nubmer of team members >= min num characters to be unlocked
+    bge+ loc_minUnlocksSatisfied    # /
+    li r20, -1
+    lis r21,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
+    lwz r19, 0x0(r21)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+    cmpw r19, r20
+    beq+ loc_minUnlocksSatisfied 
+    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
+    lis r4,0x0                                  [R_PPC_ADDR16_HA(1, 5, "loc_7BA0")]
+    addi r4, r4, 0x0                            [R_PPC_ADDR16_LO(1, 5, "loc_7BA0")]
+    bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__searchSequence")]
+    stw r19, 0x10(r3)           # reset sqAdventure->sequenceIndex to prevSequenceIndex (before it was set to a sequenceIndex with muAdvSelchrBTask)
+    stw r20, 0x0(r21)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+    li r10, 0x0
+    lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r12,0x0(r12)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r12, 0x30(r12)          # | Set GameGlobal->advSaveData->jumpLevelId to 0 to go back to original SSE path
+    stw r10, 0x62C(r12)         # / 
+    stb r10, muAdvSelchrCTask_useTeamSublevel(r29)
+    # TODO: At start use current character as very first value in case nothing is unlocked
+    
+    #stw r10, 0x6FC(r29)
+    #stb r10, muAdvSelchrCTask_team0MemberCount(r29) 
+    #li r10, 0x1
+    #stw r10, 0x6F8(r29) 
+loc_minUnlocksSatisfied:
+
     # TODO: For sub-level based on team number, keep track of number so can add to the SongId so can have different songs based on selection
     # TODO: Have case where you absolutely need at least one fighter or else the jumpLevelId will be set to 0x0 and sequenceIndex will reset (as well as a minimum number of fighters clause (maybe per team too?))
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
+    # TODO: Add current characters to selectable characters, or add them to list in storeResult
+    # TODO: Be able to select new characters but keep same amount of lives
+    # TODO: Mode where once you select they are gone from being able to be selected next time 
+
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
     /* 0003EC14: */    bgt- loc_3EC30
@@ -2977,7 +3022,18 @@ loc_4010C:
     nop
     nop
     nop
-    
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
     nop
     nop
     nop
@@ -3002,8 +3058,23 @@ loc_4010C:
 
     nop
     nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
 
-    # +62
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    # +64
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -3258,68 +3329,69 @@ loc_40468:
     /* 00040478: */    addi r1,r1,0x20
     /* 0004047C: */    blr
 muAdvSelchrCTask__getNumFreeChar:
-    /* 00040480: */    stwu r1,-0x20(r1)
-    /* 00040484: */    mflr r0
-    /* 00040488: */    stw r0,0x24(r1)
-    /* 0004048C: */    addi r11,r1,0x20
-    /* 00040490: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
-    /* 00040494: */    mr r26,r3
-    /* 00040498: */    li r28,0x0
-    /* 0004049C: */    li r27,0x0
-    /* 000404A0: */    b loc_40524
+    # SSEEX: Commented out for more space since it's now unused
+    /* 00040480: */    #stwu r1,-0x20(r1)
+    /* 00040484: */    #mflr r0
+    /* 00040488: */    #stw r0,0x24(r1)
+    /* 0004048C: */    #addi r11,r1,0x20
+    /* 00040490: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
+    /* 00040494: */    #mr r26,r3
+    /* 00040498: */    #li r28,0x0
+    /* 0004049C: */    #li r27,0x0
+    /* 000404A0: */    #b loc_40524
 loc_404A4:
-    /* 000404A4: */    addi r31,r26,muAdvSelchrCTask_0x970
-    /* 000404A8: */    li r30,0x0
-    /* 000404AC: */    mr r29,r31
+    /* 000404A4: */    #addi r31,r26,muAdvSelchrCTask_0x970
+    /* 000404A8: */    #li r30,0x0
+    /* 000404AC: */    #mr r29,r31
 loc_404B0:
-    /* 000404B0: */    mr r3,r29
-    /* 000404B4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
-    /* 000404B8: */    rlwinm r0,r3,1,31,31
-    /* 000404BC: */    xori r0,r0,0x1
-    /* 000404C0: */    cmpwi r0,0x0
-    /* 000404C4: */    beq- loc_404FC
-    /* 000404C8: */    lwz r0,0x148(r31)
-    /* 000404CC: */    mr r4,r31
-    /* 000404D0: */    li r3,0x0
-    /* 000404D4: */    mtctr r0
-    /* 000404D8: */    cmpwi r0,0x0
-    /* 000404DC: */    ble- loc_404FC
+    /* 000404B0: */    #mr r3,r29
+    /* 000404B4: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
+    /* 000404B8: */    #rlwinm r0,r3,1,31,31
+    /* 000404BC: */    #xori r0,r0,0x1
+    /* 000404C0: */    #cmpwi r0,0x0
+    /* 000404C4: */    #beq- loc_404FC
+    /* 000404C8: */    #lwz r0,0x148(r31)
+    /* 000404CC: */    #mr r4,r31
+    /* 000404D0: */    #li r3,0x0
+    /* 000404D4: */    #mtctr r0
+    /* 000404D8: */    #cmpwi r0,0x0
+    /* 000404DC: */    #ble- loc_404FC
 loc_404E0:
-    /* 000404E0: */    lwz r0,0xA8(r4)
-    /* 000404E4: */    cmpw r27,r0
-    /* 000404E8: */    bne- loc_404F0
-    /* 000404EC: */    b loc_40514
+    /* 000404E0: */    #lwz r0,0xA8(r4)
+    /* 000404E4: */    #cmpw r27,r0
+    /* 000404E8: */    #bne- loc_404F0
+    /* 000404EC: */    #b loc_40514
 loc_404F0:
-    /* 000404F0: */    addi r4,r4,0x4
-    /* 000404F4: */    addi r3,r3,0x1
-    /* 000404F8: */    bdnz+ loc_404E0
+    /* 000404F0: */    #addi r4,r4,0x4
+    /* 000404F4: */    #addi r3,r3,0x1
+    /* 000404F8: */    #bdnz+ loc_404E0
 loc_404FC:
-    /* 000404FC: */    addi r30,r30,0x1
-    /* 00040500: */    addi r31,r31,0x150
-    /* 00040504: */    cmpwi r30,0x2
-    /* 00040508: */    addi r29,r29,0x150
-    /* 0004050C: */    blt+ loc_404B0
-    /* 00040510: */    li r3,-0x1
+    /* 000404FC: */    #addi r30,r30,0x1
+    /* 00040500: */    #addi r31,r31,0x150
+    /* 00040504: */    #cmpwi r30,0x2
+    /* 00040508: */    #addi r29,r29,0x150
+    /* 0004050C: */    #blt+ loc_404B0
+    /* 00040510: */    #li r3,-0x1
 loc_40514:
-    /* 00040514: */    cmpwi r3,-0x1
-    /* 00040518: */    bne- loc_40520
-    /* 0004051C: */    addi r28,r28,0x1
+    /* 00040514: */    #cmpwi r3,-0x1
+    /* 00040518: */    #bne- loc_40520
+    /* 0004051C: */    #addi r28,r28,0x1
 loc_40520:
-    /* 00040520: */    addi r27,r27,0x1
+    /* 00040520: */    #addi r27,r27,0x1
 loc_40524:
-    /* 00040524: */    lwz r0,muAdvSelchrCTask_0xC1C(r26)
-    /* 00040528: */    mulli r0,r0,0xAC
-    /* 0004052C: */    add r3,r26,r0
-    /* 00040530: */    lbz r0,muAdvSelchrCTask_team0MemberCount(r3) #lwz r0,0xE4(r3)
-    /* 00040534: */    cmpw r27,r0
-    /* 00040538: */    blt+ loc_404A4
-    /* 0004053C: */    addi r11,r1,0x20
-    /* 00040540: */    mr r3,r28
-    /* 00040544: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
-    /* 00040548: */    lwz r0,0x24(r1)
-    /* 0004054C: */    mtlr r0
-    /* 00040550: */    addi r1,r1,0x20
-    /* 00040554: */    blr
+    /* 00040524: */    #lwz r0,muAdvSelchrCTask_0xC1C(r26)
+    /* 00040528: */    #mulli r0,r0,0xAC
+    /* 0004052C: */    #add r3,r26,r0
+    /* 00040530: */    #lbz r0,muAdvSelchrCTask_team0MemberCount(r3) #lwz r0,0xE4(r3)
+    /* 00040534: */    #cmpw r27,r0
+    /* 00040538: */    #blt+ loc_404A4
+    /* 0004053C: */    #addi r11,r1,0x20
+    /* 00040540: */    #mr r3,r28
+    /* 00040544: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
+    /* 00040548: */    #lwz r0,0x24(r1)
+    /* 0004054C: */    #mtlr r0
+    /* 00040550: */    #addi r1,r1,0x20
+    /* 00040554: */    #blr
 muAdvSelchrCTask__findNextCharCursorPos:
     /* 00040558: */    stwu r1,-0x30(r1)
     /* 0004055C: */    mflr r0
