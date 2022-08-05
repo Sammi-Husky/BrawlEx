@@ -1,5 +1,4 @@
-.set addedMembers, 123
-.set maxNumberOfFighters, 40 + addedMembers
+.set addedMembers, 123 + 10 # amount being able to be added in a singular team + members that can potentially be brought back
 
 .set muAdvSelchrCTask_0x7E4, 0x7E4 + addedMembers*4
 .set muAdvSelchrCTask_0x7E8, 0x7E8 + addedMembers*4

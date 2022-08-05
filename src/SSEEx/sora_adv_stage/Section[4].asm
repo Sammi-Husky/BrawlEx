@@ -1,4 +1,4 @@
-.set addedMembers, 123
+.set addedMembers, 123 + 10 # amount being able to be added in a singular team + members that can potentially be brought back
 
 loc_0:
         .4byte 0x00010203

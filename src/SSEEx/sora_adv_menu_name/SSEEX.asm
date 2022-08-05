@@ -1,6 +1,6 @@
 ## TODO: Put macros in a singular asm file
 
-.set addedMembers, 123
+.set addedMembers, 123 + 10 # amount being able to be added in a singular team + members that can potentially be brought back
 .set muAdvSelchrCTask_0xC24, 0xC24 + 3*addedMembers*4
 
 loc_muAdvNameTask__create_patchSoraModules:
