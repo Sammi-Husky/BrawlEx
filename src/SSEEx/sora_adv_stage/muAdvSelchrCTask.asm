@@ -269,7 +269,7 @@ loc_3DFA8:
     stb r4, muAdvSelchrCTask_disableSubFighter(r30)
     stb r4, muAdvSelchrCTask_useTeamSublevel(r30)
 
-    ## Note: Can reduce code space by replacing with memfill later
+    ## TODO: Can reduce code space by replacing with memfill later
 
     ## SSEEX: Initialize array to keep track of sub fighter CSS id
     addi r6, r30, muAdvSelchrCTask_SubFighterCSSIdArray
@@ -757,12 +757,12 @@ muAdvSelchrCTask__setMenuData:
     li r10, 0x0         # \ Set random (or number of characters able to select for random) to 0
     stb r10, 0x8D(r1)   # /
     stb r10, 0x8E(r1)   # Set minimum number of characters to be unlocked
-    lis r6,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    lwz r6,0x0(r6)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r6, 0x30(r6)          # | Get GameGlobal->advSaveData->jumpLevelId
-    lwz r6, 0x62C(r6)         # | (if it's 0 then skip)
-    cmpwi r6, 0x0             # |
-    beq+ loc_checkIfOverride  # /
+    lis r19,0x0                         [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r19,0x0(r19)                    [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r20, 0x30(r19)          # | Get GameGlobal->advSaveData->jumpLevelId
+    lwz r6, 0x62C(r20)          # | (if it's 0 then skip)
+    cmpwi r6, 0x0               # |
+    beq+ loc_checkIfOverride    # /
 
     addi r3, r1, 0x3B
     lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrcFilePath")]
@@ -786,6 +786,44 @@ muAdvSelchrCTask__setMenuData:
     stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
     lbz r11, 0x88(r1)                           # \ Set num of members to select from selc file
     stw r11, 0x6FC(r29)                         # /
+    lbz r7, 0x5FA(r20)      # \ 
+    addi r7, r7, 0x1        # | Get previous num stocks  
+    lwz r5, 0x8(r19)        # |        
+    lbz r5, 0xF5(r5)        # | Check if p2 is alive by checking if GameGlobal->gmPlayer2InitData.initState == 0
+    cmpwi r5, 0x0           # |               
+    bne+ loc_p2NotAlive     # | GameGlobal->AdvSaveData->numReserveStock + 1 (P1) + 1 (P2 if they are alive)
+    addi r7, r7, 0x1        # |
+loc_p2NotAlive:             # /
+    cmpwi r7, 0xA                   # \
+    ble+ loc_isLessThanMaxStocks    # | max(0xA, previous stock count)
+    li r7, 0xA                      # |
+loc_isLessThanMaxStocks:            # /
+    cmpwi r10, 0xFE                             # \
+    bne+ loc_noKeepPrevStockCount               # | if numStocks from selc = -2, set numStocks to previous stock count
+    stb r7, muAdvSelchrCTask_numStocks(r29)     # |
+    cmpwi r11, 0x0                              # |
+    bne+ loc_noKeepPrevStockCount               # | if there is no set numFightersToSelect, set it to previous stock count
+    stw r7, 0x6FC(r29)                          # |
+loc_noKeepPrevStockCount:                       # /
+    add r7, r7, r11            # \
+    cmpwi r7, 0xA               # | 
+    ble+ loc_isUnderMaxStocks   # | max(0xA, numFightersToSelect + previous stock count)
+    li r7, 0xA                  # |
+loc_isUnderMaxStocks:           # /
+    cmpwi r10, 0xFD                                 # \
+    bne+ loc_noAddPrevStockCountToCharacterCount    # | if numStocks from selc = -3, set numStocks to previous stock count + numFightersToSelect
+    stb r7, muAdvSelchrCTask_numStocks(r29)         # |
+loc_noAddPrevStockCountToCharacterCount:            # /
+    cmpwi r10, 0xFC                                 # \
+    bne+ loc_noAddCharacterCountToPrevStockCount    # | if numStocks from selc = -4, set numFightersToSelect to previous stock count + numFightersToSelect
+    stw r7, 0x6FC(r29)                              # |
+loc_noAddCharacterCountToPrevStockCount:            # /
+    cmpwi r10, 0xFB                                 # \
+    bne+ loc_noAddToBoth                            # | if numStocks from selc = -5, set numFightersToSelect and numStocks to previous stock count + numFightersToSelect
+    stw r7, 0x6FC(r29)                              # | (difference is if there isn't enough characters to select, stock count will still be used)
+    stb r7, muAdvSelchrCTask_numStocks(r29)         # |
+loc_noAddToBoth:                                    # /
+
     lbz r11, 0x8B(r1)                                   # \ Set whether sub fighters (selected from c-stick) is disabled from selc file
     stb r11, muAdvSelchrCTask_disableSubFighter(r29)    # /
     lbz r11, 0x8C(r1)                                   # \ Set whether to use selected team to determine sub level
@@ -1296,6 +1334,8 @@ loc_3EC0C:
     li r24, 0x0             # Keep track of number of teams
     li r31, 0x0             # Team incrementer
     li r21, 0x0             # Available member incrementer 
+
+    lbz r17, 0x8D(r1)                    # Get RosterMode
     
     addi r22, r1, 0x98       # Team1 menudata from selc file
 loc_loopThroughTeamMembers:
@@ -1313,19 +1353,20 @@ loc_loopThroughTeamMembers:
 
     cmpwi r14, 0x3       # Check if unlock override
     bne- loc_startAddingFighters 
-    lbz r4, -0x1(r22)     # Add Sonic since for some reason not included when overriding save
-    stbx r4, r27, r23
-    addi r23, r23, 0x1
+    lbz r4, -0x1(r22)       # \ Add Sonic since for some reason not included when overriding save
+    stbx r4, r27, r23       # |
+    addi r23, r23, 0x1      # /
 loc_startAddingFighters:
     cmpwi r20, 0x0
     beq+ loc_teamEmpty
 loc_addFightersToTeam:                  # \ Add team members if unlocked or override is activated
     lbzx r4, r22, r21                   # |
-    lbz r3, 0x8D(r1)                    # |
-    cmpwi r3, 0x0                       # | Randomize if number of characters available for random is > 0
-    beq+ loc_notRandom                  # |
+    cmpwi r17, 0x1                      # | Check if RosterMode == Randomize
+    bne+ loc_notRandom                  # |
+    lwz r3, 0x13(r1)                    # | 
+    subi r3, r3, 0x10                   # | Get roster size for randomization from gfFileIOHandle.length - 0x10 (offset to roster data)
     bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
-    lbzx r4, r22, r3                    # |
+    lbzx r4, r22, r3                    # | Get random character from selc roster based on returned index
 loc_notRandom:                          # |
     cmpwi r14, 0x3                      # | Check if unlock override
     beq- loc_addFighterToTeamMenu       # |
@@ -1409,6 +1450,7 @@ loc_minUnlocksSatisfied:
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: Add current characters to selectable characters, or add them to list in storeResult
+    ## When replenish is activated, set unlock flag to 3 to siginify don't add again to roster, should probably memcopy Ex unlock array to where base character unlock array is in stack
     # TODO: Be able to select new characters but keep same amount of lives
     # TODO: Mode where once you select they are gone from being able to be selected next time 
 
@@ -3038,43 +3080,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +64
+    # +44
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
