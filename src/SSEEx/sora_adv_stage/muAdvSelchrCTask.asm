@@ -168,109 +168,120 @@ loc_3DFA8:
     /* 0003DFD8: */    li r4,0x0
     /* 0003DFDC: */    add r3,r30,r0
     /* 0003DFE0: */    stw r4,0x710(r3)
-    /* 0003DFE4: */    stw r4,muAdvSelchrCTask_0x934(r30)
-    /* 0003DFE8: */    stw r4,muAdvSelchrCTask_0x938(r30)
-    /* 0003DFEC: */    stw r4,muAdvSelchrCTask_0x93C(r30)
-    /* 0003DFF0: */    stw r4,muAdvSelchrCTask_0x940(r30)
-    /* 0003DFF4: */    stw r4,muAdvSelchrCTask_0x944(r30)
-    /* 0003DFF8: */    stw r4,muAdvSelchrCTask_0x948(r30)
-    /* 0003DFFC: */    stw r4,muAdvSelchrCTask_0x94C(r30)
-    /* 0003E000: */    stw r4,muAdvSelchrCTask_0x950(r30)
-    /* 0003E004: */    stw r4,muAdvSelchrCTask_0x954(r30)
-    /* 0003E008: */    stw r4,muAdvSelchrCTask_0x958(r30)
-    /* 0003E00C: */    stw r4,muAdvSelchrCTask_0x95C(r30)
-    /* 0003E010: */    stw r4,muAdvSelchrCTask_0x960(r30)
-    /* 0003E014: */    stw r4,muAdvSelchrCTask_0xA18(r30)
-    /* 0003E018: */    stw r4,muAdvSelchrCTask_0xA1C(r30)
-    /* 0003E01C: */    stw r4,muAdvSelchrCTask_0xA20(r30)
-    /* 0003E020: */    stw r4,muAdvSelchrCTask_0xA24(r30)
-    /* 0003E024: */    stw r4,muAdvSelchrCTask_0xA28(r30)
-    /* 0003E028: */    stw r4,muAdvSelchrCTask_0xA2C(r30)
-    /* 0003E02C: */    stw r4,muAdvSelchrCTask_0xA30(r30)
-    /* 0003E030: */    stw r4,muAdvSelchrCTask_0xA34(r30)
-    /* 0003E034: */    stw r4,muAdvSelchrCTask_0xA38(r30)
-    /* 0003E038: */    stw r4,muAdvSelchrCTask_0xA3C(r30)
-    /* 0003E03C: */    stw r4,muAdvSelchrCTask_0xA40(r30)
-    /* 0003E040: */    stw r4,muAdvSelchrCTask_0xA44(r30)
-    /* 0003E044: */    stw r4,muAdvSelchrCTask_0xA48(r30)
-    /* 0003E048: */    stw r4,muAdvSelchrCTask_0xA4C(r30)
-    /* 0003E04C: */    stw r4,muAdvSelchrCTask_0xA50(r30)
-    /* 0003E050: */    stw r4,muAdvSelchrCTask_0xA54(r30)
-    /* 0003E054: */    stw r4,muAdvSelchrCTask_0xA58(r30)
-    /* 0003E058: */    stw r4,muAdvSelchrCTask_0xA5C(r30)
-    /* 0003E05C: */    stw r4,muAdvSelchrCTask_0xA60(r30)
-    /* 0003E060: */    stw r4,muAdvSelchrCTask_0xA64(r30)
-    /* 0003E064: */    stw r4,muAdvSelchrCTask_0xA68(r30)
-    /* 0003E068: */    stw r4,muAdvSelchrCTask_0xA6C(r30)
-    /* 0003E06C: */    stw r4,muAdvSelchrCTask_0xA70(r30)
-    /* 0003E070: */    stw r4,muAdvSelchrCTask_0xA74(r30)
-    /* 0003E074: */    stw r4,muAdvSelchrCTask_0xA78(r30)
-    /* 0003E078: */    stw r4,muAdvSelchrCTask_0xA7C(r30)
-    /* 0003E07C: */    stw r4,muAdvSelchrCTask_0xA80(r30)
-    /* 0003E080: */    stw r4,muAdvSelchrCTask_0xA84(r30)
-    /* 0003E084: */    stw r4,muAdvSelchrCTask_0xA88(r30)
-    /* 0003E088: */    stw r4,muAdvSelchrCTask_0xA8C(r30)
-    /* 0003E08C: */    stw r4,muAdvSelchrCTask_0xA90(r30)
-    /* 0003E090: */    stw r4,muAdvSelchrCTask_0xA94(r30)
-    /* 0003E094: */    stw r4,muAdvSelchrCTask_0xA98(r30)
-    /* 0003E098: */    stw r4,muAdvSelchrCTask_0xA9C(r30)
-    /* 0003E09C: */    stw r4,muAdvSelchrCTask_0xAA0(r30)
-    /* 0003E0A0: */    stw r4,muAdvSelchrCTask_0xAA4(r30)
-    /* 0003E0A4: */    stw r4,muAdvSelchrCTask_0xAA8(r30)
-    /* 0003E0A8: */    stw r4,muAdvSelchrCTask_0xAAC(r30)
-    /* 0003E0AC: */    stw r4,muAdvSelchrCTask_0xAB0(r30)
-    /* 0003E0B0: */    stw r4,muAdvSelchrCTask_0xAB4(r30)
-    /* 0003E0B4: */    stw r4,muAdvSelchrCTask_0xAB8(r30)
-    /* 0003E0B8: */    stw r4,muAdvSelchrCTask_0xABC(r30)
-    /* 0003E0BC: */    stw r4,muAdvSelchrCTask_0xB68(r30)
-    /* 0003E0C0: */    mr r3,r30
-    /* 0003E0C4: */    stw r4,muAdvSelchrCTask_0xB6C(r30)
-    /* 0003E0C8: */    stw r4,muAdvSelchrCTask_0xB70(r30)
-    /* 0003E0CC: */    stw r4,muAdvSelchrCTask_0xB74(r30)
-    /* 0003E0D0: */    stw r4,muAdvSelchrCTask_0xB78(r30)
-    /* 0003E0D4: */    stw r4,muAdvSelchrCTask_0xB7C(r30)
-    /* 0003E0D8: */    stw r4,muAdvSelchrCTask_0xB80(r30)
-    /* 0003E0DC: */    stw r4,muAdvSelchrCTask_0xB84(r30)
-    /* 0003E0E0: */    stw r4,muAdvSelchrCTask_0xB88(r30)
-    /* 0003E0E4: */    stw r4,muAdvSelchrCTask_0xB8C(r30)
-    /* 0003E0E8: */    stw r4,muAdvSelchrCTask_0xB90(r30)
-    /* 0003E0EC: */    stw r4,muAdvSelchrCTask_0xB94(r30)
-    /* 0003E0F0: */    stw r4,muAdvSelchrCTask_0xB98(r30)
-    /* 0003E0F4: */    stw r4,muAdvSelchrCTask_0xB9C(r30)
-    /* 0003E0F8: */    stw r4,muAdvSelchrCTask_0xBA0(r30)
-    /* 0003E0FC: */    stw r4,muAdvSelchrCTask_0xBA4(r30)
-    /* 0003E100: */    stw r4,muAdvSelchrCTask_0xBA8(r30)
-    /* 0003E104: */    stw r4,muAdvSelchrCTask_0xBAC(r30)
-    /* 0003E108: */    stw r4,muAdvSelchrCTask_0xBB0(r30)
-    /* 0003E10C: */    stw r4,muAdvSelchrCTask_0xBB4(r30)
-    /* 0003E110: */    stw r4,muAdvSelchrCTask_0xBB8(r30)
-    /* 0003E114: */    stw r4,muAdvSelchrCTask_0xBBC(r30)
-    /* 0003E118: */    stw r4,muAdvSelchrCTask_0xBC0(r30)
-    /* 0003E11C: */    stw r4,muAdvSelchrCTask_0xBC4(r30)
-    /* 0003E120: */    stw r4,muAdvSelchrCTask_0xBC8(r30)
-    /* 0003E124: */    stw r4,muAdvSelchrCTask_0xBCC(r30)
-    /* 0003E128: */    stw r4,muAdvSelchrCTask_0xBD0(r30)
-    /* 0003E12C: */    stw r4,muAdvSelchrCTask_0xBD4(r30)
-    /* 0003E130: */    stw r4,muAdvSelchrCTask_0xBD8(r30)
-    /* 0003E134: */    stw r4,muAdvSelchrCTask_0xBDC(r30)
-    /* 0003E138: */    stw r4,muAdvSelchrCTask_0xBE0(r30)
-    /* 0003E13C: */    stw r4,muAdvSelchrCTask_0xBE4(r30)
-    /* 0003E140: */    stw r4,muAdvSelchrCTask_0xBE8(r30)
-    /* 0003E144: */    stw r4,muAdvSelchrCTask_0xBEC(r30)
-    /* 0003E148: */    stw r4,muAdvSelchrCTask_0xBF0(r30)
-    /* 0003E14C: */    stw r4,muAdvSelchrCTask_0xBF4(r30)
-    /* 0003E150: */    stw r4,muAdvSelchrCTask_0xBF8(r30)
-    /* 0003E154: */    stw r4,muAdvSelchrCTask_0xBFC(r30)
-    /* 0003E158: */    stw r4,muAdvSelchrCTask_0xC00(r30)
-    /* 0003E15C: */    stw r4,muAdvSelchrCTask_0xC04(r30)
-    /* 0003E160: */    stw r4,muAdvSelchrCTask_0xC08(r30)
-    /* 0003E164: */    stw r4,muAdvSelchrCTask_0xC0C(r30)
-    /* 0003E168: */    stw r4,muAdvSelchrCTask_0xC10(r30)
-    /* 0003E16C: */    stw r4,muAdvSelchrCTask_0xC14(r30)
+
     stb r4, muAdvSelchrCTask_disableSubFighter(r30)
     stb r4, muAdvSelchrCTask_useTeamSublevel(r30)
 
-    ## TODO: Can reduce code space by replacing with memfill later
+    ## Reduce code space by replacing with memfill
+    addi r3, r30, muAdvSelchrCTask_0x934
+    li r5, muAdvSelchrCTask_0x964 - muAdvSelchrCTask_0x934         
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
+    /* 0003DFE4: */    #stw r4,muAdvSelchrCTask_0x934(r30)
+    /* 0003DFE8: */    #stw r4,muAdvSelchrCTask_0x938(r30)
+    /* 0003DFEC: */    #stw r4,muAdvSelchrCTask_0x93C(r30)
+    /* 0003DFF0: */    #stw r4,muAdvSelchrCTask_0x940(r30)
+    /* 0003DFF4: */    #stw r4,muAdvSelchrCTask_0x944(r30)
+    /* 0003DFF8: */    #stw r4,muAdvSelchrCTask_0x948(r30)
+    /* 0003DFFC: */    #stw r4,muAdvSelchrCTask_0x94C(r30)
+    /* 0003E000: */    #stw r4,muAdvSelchrCTask_0x950(r30)
+    /* 0003E004: */    #stw r4,muAdvSelchrCTask_0x954(r30)
+    /* 0003E008: */    #stw r4,muAdvSelchrCTask_0x958(r30)
+    /* 0003E00C: */    #stw r4,muAdvSelchrCTask_0x95C(r30)
+    /* 0003E010: */    #stw r4,muAdvSelchrCTask_0x960(r30)
+    addi r3, r30, muAdvSelchrCTask_0xA18
+    li r4, 0x0          
+    li r5, muAdvSelchrCTask_0xAC0 - muAdvSelchrCTask_0xA18         
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
+    /* 0003E014: */    #stw r4,muAdvSelchrCTask_0xA18(r30)
+    /* 0003E018: */    #stw r4,muAdvSelchrCTask_0xA1C(r30)
+    /* 0003E01C: */    #stw r4,muAdvSelchrCTask_0xA20(r30)
+    /* 0003E020: */    #stw r4,muAdvSelchrCTask_0xA24(r30)
+    /* 0003E024: */    #stw r4,muAdvSelchrCTask_0xA28(r30)
+    /* 0003E028: */    #stw r4,muAdvSelchrCTask_0xA2C(r30)
+    /* 0003E02C: */    #stw r4,muAdvSelchrCTask_0xA30(r30)
+    /* 0003E030: */    #stw r4,muAdvSelchrCTask_0xA34(r30)
+    /* 0003E034: */    #stw r4,muAdvSelchrCTask_0xA38(r30)
+    /* 0003E038: */    #stw r4,muAdvSelchrCTask_0xA3C(r30)
+    /* 0003E03C: */    #stw r4,muAdvSelchrCTask_0xA40(r30)
+    /* 0003E040: */    #stw r4,muAdvSelchrCTask_0xA44(r30)
+    /* 0003E044: */    #stw r4,muAdvSelchrCTask_0xA48(r30)
+    /* 0003E048: */    #stw r4,muAdvSelchrCTask_0xA4C(r30)
+    /* 0003E04C: */    #stw r4,muAdvSelchrCTask_0xA50(r30)
+    /* 0003E050: */    #stw r4,muAdvSelchrCTask_0xA54(r30)
+    /* 0003E054: */    #stw r4,muAdvSelchrCTask_0xA58(r30)
+    /* 0003E058: */    #stw r4,muAdvSelchrCTask_0xA5C(r30)
+    /* 0003E05C: */    #stw r4,muAdvSelchrCTask_0xA60(r30)
+    /* 0003E060: */    #stw r4,muAdvSelchrCTask_0xA64(r30)
+    /* 0003E064: */    #stw r4,muAdvSelchrCTask_0xA68(r30)
+    /* 0003E068: */    #stw r4,muAdvSelchrCTask_0xA6C(r30)
+    /* 0003E06C: */    #stw r4,muAdvSelchrCTask_0xA70(r30)
+    /* 0003E070: */    #stw r4,muAdvSelchrCTask_0xA74(r30)
+    /* 0003E074: */    #stw r4,muAdvSelchrCTask_0xA78(r30)
+    /* 0003E078: */    #stw r4,muAdvSelchrCTask_0xA7C(r30)
+    /* 0003E07C: */    #stw r4,muAdvSelchrCTask_0xA80(r30)
+    /* 0003E080: */    #stw r4,muAdvSelchrCTask_0xA84(r30)
+    /* 0003E084: */    #stw r4,muAdvSelchrCTask_0xA88(r30)
+    /* 0003E088: */    #stw r4,muAdvSelchrCTask_0xA8C(r30)
+    /* 0003E08C: */    #stw r4,muAdvSelchrCTask_0xA90(r30)
+    /* 0003E090: */    #stw r4,muAdvSelchrCTask_0xA94(r30)
+    /* 0003E094: */    #stw r4,muAdvSelchrCTask_0xA98(r30)
+    /* 0003E098: */    #stw r4,muAdvSelchrCTask_0xA9C(r30)
+    /* 0003E09C: */    #stw r4,muAdvSelchrCTask_0xAA0(r30)
+    /* 0003E0A0: */    #stw r4,muAdvSelchrCTask_0xAA4(r30)
+    /* 0003E0A4: */    #stw r4,muAdvSelchrCTask_0xAA8(r30)
+    /* 0003E0A8: */    #stw r4,muAdvSelchrCTask_0xAAC(r30)
+    /* 0003E0AC: */    #stw r4,muAdvSelchrCTask_0xAB0(r30)
+    /* 0003E0B0: */    #stw r4,muAdvSelchrCTask_0xAB4(r30)
+    /* 0003E0B4: */    #stw r4,muAdvSelchrCTask_0xAB8(r30)
+    /* 0003E0B8: */    #stw r4,muAdvSelchrCTask_0xABC(r30)
+    addi r3, r30, muAdvSelchrCTask_0xB68
+    li r4, 0x0          
+    li r5, muAdvSelchrCTask_0xC18 - muAdvSelchrCTask_0xB68         
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
+    /* 0003E0BC: */    #stw r4,muAdvSelchrCTask_0xB68(r30)
+    /* 0003E0C4: */    #stw r4,muAdvSelchrCTask_0xB6C(r30)
+    /* 0003E0C8: */    #stw r4,muAdvSelchrCTask_0xB70(r30)
+    /* 0003E0CC: */    #stw r4,muAdvSelchrCTask_0xB74(r30)
+    /* 0003E0D0: */    #stw r4,muAdvSelchrCTask_0xB78(r30)
+    /* 0003E0D4: */    #stw r4,muAdvSelchrCTask_0xB7C(r30)
+    /* 0003E0D8: */    #stw r4,muAdvSelchrCTask_0xB80(r30)
+    /* 0003E0DC: */    #stw r4,muAdvSelchrCTask_0xB84(r30)
+    /* 0003E0E0: */    #stw r4,muAdvSelchrCTask_0xB88(r30)
+    /* 0003E0E4: */    #stw r4,muAdvSelchrCTask_0xB8C(r30)
+    /* 0003E0E8: */    #stw r4,muAdvSelchrCTask_0xB90(r30)
+    /* 0003E0EC: */    #stw r4,muAdvSelchrCTask_0xB94(r30)
+    /* 0003E0F0: */    #stw r4,muAdvSelchrCTask_0xB98(r30)
+    /* 0003E0F4: */    #stw r4,muAdvSelchrCTask_0xB9C(r30)
+    /* 0003E0F8: */    #stw r4,muAdvSelchrCTask_0xBA0(r30)
+    /* 0003E0FC: */    #stw r4,muAdvSelchrCTask_0xBA4(r30)
+    /* 0003E100: */    #stw r4,muAdvSelchrCTask_0xBA8(r30)
+    /* 0003E104: */    #stw r4,muAdvSelchrCTask_0xBAC(r30)
+    /* 0003E108: */    #stw r4,muAdvSelchrCTask_0xBB0(r30)
+    /* 0003E10C: */    #stw r4,muAdvSelchrCTask_0xBB4(r30)
+    /* 0003E110: */    #stw r4,muAdvSelchrCTask_0xBB8(r30)
+    /* 0003E114: */    #stw r4,muAdvSelchrCTask_0xBBC(r30)
+    /* 0003E118: */    #stw r4,muAdvSelchrCTask_0xBC0(r30)
+    /* 0003E11C: */    #stw r4,muAdvSelchrCTask_0xBC4(r30)
+    /* 0003E120: */    #stw r4,muAdvSelchrCTask_0xBC8(r30)
+    /* 0003E124: */    #stw r4,muAdvSelchrCTask_0xBCC(r30)
+    /* 0003E128: */    #stw r4,muAdvSelchrCTask_0xBD0(r30)
+    /* 0003E12C: */    #stw r4,muAdvSelchrCTask_0xBD4(r30)
+    /* 0003E130: */    #stw r4,muAdvSelchrCTask_0xBD8(r30)
+    /* 0003E134: */    #stw r4,muAdvSelchrCTask_0xBDC(r30)
+    /* 0003E138: */    #stw r4,muAdvSelchrCTask_0xBE0(r30)
+    /* 0003E13C: */    #stw r4,muAdvSelchrCTask_0xBE4(r30)
+    /* 0003E140: */    #stw r4,muAdvSelchrCTask_0xBE8(r30)
+    /* 0003E144: */    #stw r4,muAdvSelchrCTask_0xBEC(r30)
+    /* 0003E148: */    #stw r4,muAdvSelchrCTask_0xBF0(r30)
+    /* 0003E14C: */    #stw r4,muAdvSelchrCTask_0xBF4(r30)
+    /* 0003E150: */    #stw r4,muAdvSelchrCTask_0xBF8(r30)
+    /* 0003E154: */    #stw r4,muAdvSelchrCTask_0xBFC(r30)
+    /* 0003E158: */    #stw r4,muAdvSelchrCTask_0xC00(r30)
+    /* 0003E15C: */    #stw r4,muAdvSelchrCTask_0xC04(r30)
+    /* 0003E160: */    #stw r4,muAdvSelchrCTask_0xC08(r30)
+    /* 0003E164: */    #stw r4,muAdvSelchrCTask_0xC0C(r30)
+    /* 0003E168: */    #stw r4,muAdvSelchrCTask_0xC10(r30)
+    /* 0003E16C: */    #stw r4,muAdvSelchrCTask_0xC14(r30)
 
     ## SSEEX: Initialize array to keep track of sub fighter CSS id
     addi r6, r30, muAdvSelchrCTask_SubFighterCSSIdArray
@@ -282,6 +293,7 @@ loc_initializeFighterCSSIdArray:
     addi r9,r9,1    # /
     bdnz loc_initializeFighterCSSIdArray
 
+    /* 0003E0C0: */    mr r3,r30
     /* 0003E170: */    lwz r31,0xC(r1)
     /* 0003E174: */    lwz r30,0x8(r1)
     /* 0003E178: */    lwz r0,0x14(r1)
@@ -760,9 +772,10 @@ muAdvSelchrCTask__setMenuData:
     ## SSEEX: Check for .selc file if jumpLevelId is not 0x0 (which signifies custom cutscene followed by custom level)
     li r10, 0xFF                              # \ Default number of stocks (0xFF) signifies no .selc file
     stb r10, muAdvSelchrCTask_numStocks(r29)  # /
-    li r10, 0x0         # \ Set rRoster to 0
-    stb r10, 0x157(r1)  # /
+    stb r10, 0x157(r1)  # Set rosterMode to None
+    li r10, 0x0
     stb r10, 0x158(r1)  # Set minimum number of characters to be unlocked
+    stb r10, 0x159(r1)  # Set bring back survived fighters to false
     lis r19,0x0                         [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r19,0x0(r19)                    [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r20, 0x30(r19)          # | Get GameGlobal->advSaveData->jumpLevelId
@@ -795,7 +808,7 @@ muAdvSelchrCTask__setMenuData:
     lbz r7, 0x5FA(r20)      # \ 
     addi r7, r7, 0x1        # | Get previous num stocks  
     lwz r5, 0x8(r19)        # |        
-    lbz r5, 0xF5(r5)        # | Check if p2 is alive by checking if GameGlobal->gmPlayer2InitData.initState == 0
+    lbz r5, 0xF5(r5)        # | Check if p2 is alive by checking if GameGlobal->gmGlobalModeMelee->gmPlayer2InitData.initState == 0
     cmpwi r5, 0x0           # |               
     bne+ loc_p2NotAlive     # | GameGlobal->AdvSaveData->numReserveStock + 1 (P1) + 1 (P2 if they are alive)
     addi r7, r7, 0x1        # |
@@ -1331,16 +1344,24 @@ loc_3EC04:
     /* 0003EC08: */    stw r10,muAdvSelchrCTask_0xC38(r29) #stw r0,muAdvSelchrCTask_0xC38(r29)
 loc_3EC0C:
     ## SSEEX: Add Ex team members
+    lbz r17, 0x157(r1)               # Get RosterMode 
+    lis r24,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_smashdownCSSData")]
+    addi r24, r24, 0x0              [R_PPC_ADDR16_LO(40, 6, "loc_smashdownCSSData")]
+    cmpwi r17, 0x0
+    bne+ loc_noResetSmashdown
+    mr r3, r24              # \
+    li r4, 0x0              # | memfill with 0 to reset Smashdown roster
+    li r5, 0xF3             # /
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
+loc_noResetSmashdown:
+
     addi r30, r1, 0x60      # Get to beginning of normal character save data
     addi r27, r29, 0x44      # Get to beginning of team member array
     addi r26, r1, 0x15A      # Get to beginning of team member sizes from selc file
     addi r25, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
-    li r24, 0x0             # Keep track of number of teams
     li r31, 0x0             # Team incrementer
     li r21, 0x0             # Available member incrementer 
 
-    lbz r17, 0x157(r1)               # Get RosterMode
-    
     addi r22, r1, 0x162     # Beginning of Roster data from selc file
 loc_loopThroughTeamMembers:
     li r19, 0x0             # Team member incrementer 
@@ -1374,6 +1395,12 @@ loc_addFightersToTeam:                  # \ Add team members if unlocked or over
 loc_notRandom:                          # |
     cmpwi r14, 0x3                      # | Check if unlock override
     beq- loc_addFighterToTeamMenu       # |
+    cmpwi r17, 0x2                      # |
+    bne- loc_notSmashdown               # |
+    lbzx r0, r24, r4                    # | Don't add if Smashdown mode and character has been used before
+    cmpwi r0, 0x1                       # |
+    beq+ loc_skipAddFighterToTeamMenu   # |
+loc_notSmashdown:                       # |
     cmpwi r14, 0x6                      # |
     beq- loc_addFighterToTeamMenu       # | 
     lbzx r0, r30, r4                    # | Check if unlocked
@@ -1381,7 +1408,7 @@ loc_notRandom:                          # |
     bge- loc_addFighterToTeamMenu       # |
     b loc_skipAddFighterToTeamMenu      # |
 loc_addFighterToTeamMenu:               # |
-    stbx r4, r27, r23                   # | Add to team menu
+    stbx r4, r27, r23                   # | Add to team
     li r10, 0x3                         # |
     stbx r10, r30, r4                   # | Set unlock flag to 3 which means that character has been added
     addi r23, r23, 0x1                  # |
@@ -1392,54 +1419,112 @@ loc_skipAddFighterToTeamMenu:           # |
     blt+ loc_addFightersToTeam          # /
     stb r23,0x0(r25) #stw r23, 0xe4(r29)      # Store team member count
  loc_teamEmpty:  
-    addi r31, r31, 0x1          # \
-    cmpwi r23, 0x0               # |
-    beq+ loc_noMembersInTeam    # | Keep track of total number of teams 
-    mr r24, r31                 # /
-loc_noMembersInTeam:
+    addi r31, r31, 0x1          
     addi r25, r25, 0xAC               
     addi r27, r27, 0xAC
     cmpwi r14, 0x5
     blt+ loc_finishAddingMembers
     cmpwi r31, 0x8
     blt+ loc_loopThroughTeamMembers
-    stw r24,0x6F8(r29)      # Store total number of teams
 loc_finishAddingMembers:
 
-    ## Check to add back surviving members
+    ## Preparing to re-add surviving members
+    lis r22,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r22,0x0(r22)                     [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r21, 0x8(r22)           # Get GameGlobal->gmGlobalModeMelee
+    li r23, 0x0                 # Keep track of number of surviving members 
+    addi r24, r1, 0x15A         # Store surviving members CSS Ids
 
-    ## Check if minumum number of unlocks is satisfied (otherwise go back to original SSE path)
-    li r7, 0x0                                          # \
-    lwz r10, 0x6F8(r29)                                 # |
-    addi r9, r29, muAdvSelchrCTask_team0MemberCount     # |
-    mtctr r10                                           # |
-    b loc_startLoopThroughTeams                         # |
-loc_addNumTeamMembers:                                  # | Get total number of team members from each team
-    lbz r8, 0x0(r9)                                     # |
-    addi r7, r7, r8                                     # |
-    addi r9, r9, 0xAC                                   # |
-loc_startLoopThroughTeams:                              # |
-    bdnz loc_addNumTeamMembers                          # /
+    lbz r3, 0x98(r21)       # \ gmGlobalModeMelee->gmPlayer1InitData.slotID 
+    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
+    stbx r3, r24, r23       # | Add P1 CSSID to survival array
+    addi r23, r23, 0x1      # /   
+    lbz r3, 0xF5(r21)       # \
+    cmpwi r3, 0x0           # | Check if P2 is alive by checking gmGlobalModeMelee->gmPlayer2InitData.initState == 0
+    bne+ loc_notP2Alive     # /
+    lbz r3, 0xF4(r21)       # \ gmGlobalModeMelee->gmPlayer2InitData.slotID 
+    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
+    stbx r3, r24, r23       # | Add P2 CSSID to survival array
+    addi r23, r23, 0x1      # /  
+loc_notP2Alive:
+    lwz r18, 0x30(r22)      # Get GameGlobal->AdvSaveData
+    lbz r17, 0x5FA(r18)     # Get advSaveData->numReserveStocks
+    lbz r16, 0x2B4(r18)     # Get advSaveData->numSelectedFighters
+    addi r19, r18, 0x2B9    # Go to start of prev advSaveData->selectedSlotIds
+    lbz r15, 0x2B5(r18)     # Get advSaveData->nextRespawnFighterIndex
+    b loc_startLoopThroughPrevSelectedMembers
+loc_loopThroughPrevSelectedMembers:
+    subi r17, r17, 0x1
+    lbzx r3, r19, r15       # \ Get next prev selected slotId
+    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
+    stbx r3, r24, r23       # | Add CSS Id to survival array
+    addi r23, r23, 0x1      # /
+    addi r15, r15, 0x1                              # \
+    cmpwi r15, r16                                  # | add 1 to nextRespawnFighterIndex
+    blt+ loc_startLoopThroughPrevSelectedMembers    # | if >= numSelectedFighters, restart from 0 to circle back to start of selectedSlotIds
+    li r15, 0x0                                     # /
+loc_startLoopThroughPrevSelectedMembers:
+    cmpwi r17, 0x0
+    bgt+ loc_loopThroughPrevSelectedMembers
+    
+    ## Count total number of members as well as check to add surviving members
+    lbz r0, 0x159(r1)                   # Get add back surviving members bool
+    li r11, 0x0                         # Team incrementer
+    li r5, 0x0                          # Keep track of total number of teams
+    li r7, 0x0                          # Keep track of total number of members  
+    li r6, 0x0                          # Keep track of current number of surviving members added      
+    li r4, 0x0                          # Surviving members incrementer                           
+    addi r9, r29, muAdvSelchrCTask_team0MemberCount   # Get to beginning of team member array  
+    addi r10, r29, 0x44                               # Get to beginning of team member sizes 
+loc_addNumTeamMembers:                                  
+    lbz r8, 0x0(r9)                                    
+    cmpwi r0, 0x1                       # \ Check if add back surviving members is true
+    bne+ loc_skipAddSurvivingMembers    # /
+loc_addSurvivingMembers:
+    cmpw r4, r23                        # \ Check if all surviving members have been added
+    bge+ loc_skipAddSurvivingMembers    # /
+    cmpwi r8, 163                       # \ Check if team is full
+    bge+ loc_skipAddSurvivingMembers    # /
+    lbzx r3, r24, r4                # Get surviving member
+    addi r4, r4, 0x1
+    lbzx r12, r30, r3               # \
+    cmpwi r12, 0x3                  # | Check if character has been added before
+    beq+ loc_addSurvivingMembers    # /
+    stbx r3, r10, r8                # Add to team
+    addi r8, r8, 0x1                # \ Update team member count
+    stb r8, 0x0(r9)                 # /
+    li r12, 0x3                     # \ Set unlock flag to 3 which means that character has been added before
+    stbx r12, r30, r3               # /
+    b loc_addSurvivingMembers
+loc_skipAddSurvivingMembers:
+    cmpwi r8, 0x0               # |
+    beq+ loc_noMembersInTeam    # | Keep track of total number of teams 
+    mr r5, r11                  # |
+    addi r5, r5, 0x1            # /
+loc_noMembersInTeam:
+    addi r7, r7, r8             # Add num in team to total number of members
+    addi r11, r11, 0x1
+    addi r9, r9, 0xAC                                  
+    addi r10, r10, 0xAC                                   
+    cmpwi r11, 0x8
+    blt+ loc_addNumTeamMembers 
+    # TODO:If no members add surviving members to team 1 regardless by memcopying to team1 and updating numTeams and team 1 members
+    stw r5,0x6F8(r29)      # Store total number of teams
+
+    ## Check if minumum number of unlocks is satisfied (otherwise go back to an alternate path)
     lbz r6, 0x158(r1)               # \
     cmpw r7, r6                     # | Check total number of team members >= min num characters to be unlocked
     bge+ loc_minUnlocksSatisfied    # /
-    # TODO: Instead just make sublevel end in y
-    li r20, -1
-    lis r21,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
-    lwz r19, 0x0(r21)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
-    cmpw r19, r20
-    beq+ loc_minUnlocksSatisfied 
-    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
-    lis r4,0x0                                  [R_PPC_ADDR16_HA(1, 5, "loc_7BA0")]
-    addi r4, r4, 0x0                            [R_PPC_ADDR16_LO(1, 5, "loc_7BA0")]
-    bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__searchSequence")]
-    stw r19, 0x10(r3)           # reset sqAdventure->sequenceIndex to prevSequenceIndex (before it was set to a sequenceIndex with muAdvSelchrBTask)
-    stw r20, 0x0(r21)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
-    li r10, 0x0
-    lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    lwz r12,0x0(r12)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r12, 0x30(r12)          # | Set GameGlobal->advSaveData->jumpLevelId to 0 to go back to original SSE path
-    stw r10, 0x62C(r12)         # / 
+    lwz r10, 0x62C(r18)         # Get advSaveData->jumpLevelId
+    rlwinm r10, r10,0,0,23      # \
+    addi r10, r10, 0x19         # | 
+    stw r10, 0x62C(r18)         # | Set jumpLevelId to (jumpLevelId & 0xFFFFFF00) + 0x19 i.e. make sublevel id 0x19 (y)
+    stw r10, 0x620(r18)         # Update currentLevelId
+    stw r10, 0x624(r18)         # Update activeLevelId
+    lwz r10, 0x628(r18)         # \
+    rlwinm r10,r10,0,24,31      # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
+    stw r10, 0x628(r18)         # /
+    li r10, 0x0                 
     stb r10, muAdvSelchrCTask_useTeamSublevel(r29)
     
     #stw r10, 0x6FC(r29)
@@ -1449,13 +1534,11 @@ loc_startLoopThroughTeams:                              # |
 loc_minUnlocksSatisfied:
 
     # TODO: For sub-level based on team number, keep track of number so can add to the SongId so can have different songs based on selection
-    # TODO: Have case where you absolutely need at least one fighter or else the jumpLevelId will be set to 0x0 and sequenceIndex will reset (as well as a minimum number of fighters clause (maybe per team too?))
-    ## At start use current character as very first value in case nothing is unlocked
+    ## Also implement for selb
+    ## Also have case to send to different level if p2 or difficulty
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
-    # TODO: Add current characters to selectable characters, or add them to list in storeResult
-    ## When replenish is activated, set unlock flag to 3 to siginify don't add again to roster, should probably memcopy Ex unlock array to where base character unlock array is in stack
-    # TODO: Mode where once you select they are gone from being able to be selected next time 
+    # TODO: Mode where once you select they are gone from being able to be selected next time (smashdown)
 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -3046,6 +3129,7 @@ loc_4010C:
     /* 00040118: */    mtlr r0
     /* 0004011C: */    addi r1,r1,0x60
     /* 00040120: */    blr
+    
     nop
     nop
     nop
@@ -3082,8 +3166,33 @@ loc_4010C:
     nop
     nop
     nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
 
-    # +43
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+
+    # +56
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

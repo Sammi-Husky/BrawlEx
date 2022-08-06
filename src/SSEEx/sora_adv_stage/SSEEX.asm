@@ -17,11 +17,7 @@
 # TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
 ## 00 signifies not unlocked, 01 signifies unlocked but should play the newcomer menu, 02 signfies locked
 ## level id 00000000 -> no unlock, level id 00000001 -> always unlocked, level id 00000002 -> unlocked after Great Maze
-## Make it bit flags, compare original bit flag to new bit flag to determine if character has been freshly unlocked
-# TODO: selc files to determine bigger roster of characters/use unlocks with limited lives (should it be based off sequenceIndex again)
-## One parameter is how many characters to select, one should be number of lives, one should be use unlocks. If list of characters starts with FF then use entire roster
-## TODO: Figure out which base characters are unlocked 
-## Make jump Flag1 special goto sequenceIndex flag (4 and above) to goto certain sequenceIndex like one that forces a muAdvSelcTask
+# TODO: Make jump Flag1 special goto sequenceIndex flag (4 and above) to goto certain sequenceIndex like one that forces a muAdvSelcTask
 ## When jump Flag1 is 1 that means return to previous sequenceIndex (and reset), when it's 0 no goto anything
 # TODO: Investigate putting entirely new level markers on the map
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?

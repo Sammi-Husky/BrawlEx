@@ -1,6 +1,5 @@
 ## SSEEX: Check for unlocks
 
-# TODO: Make map screen in not faded state by following comerProc
 loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks:
     bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     lis r4,0x0                                  [R_PPC_ADDR16_HA(1, 5, "loc_6048")]
@@ -15,7 +14,7 @@ loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks:
     addi r12, r12, 0x0                  [R_PPC_ADDR16_LO(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
     lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
     addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
-    lis r8,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lis r8,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r8,0x0(r8)                         [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r8,0x30(r8)       # |
     lwz r8, 0x260(r8)     # /  get GameGlobal-advSaveData->greatMaze1ClearDifficulty

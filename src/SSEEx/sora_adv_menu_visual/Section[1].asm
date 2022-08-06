@@ -2518,7 +2518,7 @@ loc_notMultiple:
     ## SSEEX: Store current character as first default result CSS ID
     cmpwi r30, 0x0
     bgt+ loc_atLeastOneMember
-    lbz r3, 0x98(r28)       # \ Store current GameGlobal->gmPlayer1InitData.slotID (as CSS ID) as a default selected CSS ID (AdvSelchrResult->cssIDs[0])
+    lbz r3, 0x98(r28)       # \ Store current GameGlobal->gmGlobalModeMelee->gmPlayer1InitData.slotID (as CSS ID) as a default selected CSS ID (AdvSelchrResult->cssIDs[0])
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stw r3, 0x0(r29)        # /
 loc_atLeastOneMember:                                      
@@ -2539,7 +2539,7 @@ loc_atLeastOneMember:
     /* 000022AC: */    lwz r0,0x164(r31)
     cmpwi r30, 0x0          # Check if p1 number selected members is also 0
     /* 000022B0: */    bne+ loc_22B8 #b loc_22B8
-    lbz r3, 0xF4(r28)       # \ Store current GameGlobal->gmPlayer2InitData.slotID (as CSS ID) as a default selected CSS ID (AdvSelchrResult->p2CSId)
+    lbz r3, 0xF4(r28)       # \ Store current GameGlobal->gmGlobalModeMelee->gmPlayer2InitData.slotID (as CSS ID) as a default selected CSS ID (AdvSelchrResult->p2CSId)
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     mr r4, r3               # /
     b loc_22F8
