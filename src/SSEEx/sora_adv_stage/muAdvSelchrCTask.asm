@@ -34,8 +34,9 @@
 .set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
 .set muAdvSelchrCTask_numStocks, muAdvSelchrCTask_SubFighterCSSIdArray + maxNumberOfFighters
 .set muAdvSelchrCTask_disableSubFighter, muAdvSelchrCTask_numStocks + 0x1
-.set muAdvSelchrCTask_useTeamSublevel, muAdvSelchrCTask_disableSubFighter + 0x1
-.set muAdvSelchrCTask_size, muAdvSelchrCTask_useTeamSublevel + 0x1
+.set muAdvSelchrCTask_sublevelChanger, muAdvSelchrCTask_disableSubFighter + 0x1
+.set muAdvSelchrCTask_rosterMode, muAdvSelchrCTask_sublevelChanger + 0x1
+.set muAdvSelchrCTask_size, muAdvSelchrCTask_rosterMode + 0x1
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
@@ -170,7 +171,7 @@ loc_3DFA8:
     /* 0003DFE0: */    stw r4,0x710(r3)
 
     stb r4, muAdvSelchrCTask_disableSubFighter(r30)
-    stb r4, muAdvSelchrCTask_useTeamSublevel(r30)
+    stb r4, muAdvSelchrCTask_sublevelChanger(r30)
 
     ## Reduce code space by replacing with memfill
     addi r3, r30, muAdvSelchrCTask_0x934
@@ -760,7 +761,7 @@ muAdvSelchrCTask__setMenuData:
     li r4, 0x0          # | Clear base fighter unlock array
     li r5, 0x28         # /
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    addi r3, r1, 0x88   # \
+    addi r3, r1, 0x8A   # \
     lis r4,0x0                          [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
     addi r4, r4, 0x0                    [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
     li r5, 0xC9         # | memcopy Ex unlock array to this temp fighter unlock array
@@ -772,10 +773,10 @@ muAdvSelchrCTask__setMenuData:
     ## SSEEX: Check for .selc file if jumpLevelId is not 0x0 (which signifies custom cutscene followed by custom level)
     li r10, 0xFF                              # \ Default number of stocks (0xFF) signifies no .selc file
     stb r10, muAdvSelchrCTask_numStocks(r29)  # /
-    stb r10, 0x157(r1)  # Set rosterMode to None
+    stb r10, muAdvSelchrCTask_rosterMode(r29) # Set rosterMode to None
     li r10, 0x0
-    stb r10, 0x158(r1)  # Set minimum number of characters to be unlocked
-    stb r10, 0x159(r1)  # Set bring back survived fighters to false
+    stb r10, 0x15A(r1)  # Set minimum number of characters to be unlocked
+    stb r10, 0x15B(r1)  # Set bring back survived fighters to false
     lis r19,0x0                         [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r19,0x0(r19)                    [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r20, 0x30(r19)          # | Get GameGlobal->advSaveData->jumpLevelId
@@ -790,7 +791,7 @@ muAdvSelchrCTask__setMenuData:
     addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_menuAdvFolderPath")]
     #crclr 6
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
-    addi r5, r1, 0x152          
+    addi r5, r1, 0x154          
     addi r3, r1, 0xB
 	addi r4, r1, 0x3B	
     li r6, 0x0
@@ -801,9 +802,11 @@ muAdvSelchrCTask__setMenuData:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
     cmpwi r3, 0x0
     bne+ loc_checkIfOverride                    
-    lbz r10, 0x153(r1)                          # \ Set num stocks from selc file
+    lbz r10, 0x159(r1)                          # \ Set roster mode from selc file
+    stb r10, muAdvSelchrCTask_rosterMode(r29)   # /
+    lbz r10, 0x155(r1)                          # \ Set num stocks from selc file
     stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
-    lbz r11, 0x152(r1)                          # \ Set num of members to select from selc file
+    lbz r11, 0x154(r1)                          # \ Set num of members to select from selc file
     stw r11, 0x6FC(r29)                         # /
     lbz r7, 0x5FA(r20)      # \ 
     addi r7, r7, 0x1        # | Get previous num stocks  
@@ -843,13 +846,13 @@ loc_noAddCharacterCountToPrevStockCount:            # /
     stb r7, muAdvSelchrCTask_numStocks(r29)         # |
 loc_noAddToBoth:                                    # /
 
-    lbz r11, 0x155(r1)                                  # \ Set whether sub fighters (selected from c-stick) is disabled from selc file
+    lbz r11, 0x157(r1)                                  # \ Set whether sub fighters (selected from c-stick) is disabled from selc file
     stb r11, muAdvSelchrCTask_disableSubFighter(r29)    # /
-    lbz r11, 0x156(r1)                                  # \ Set whether to use selected team to determine sub level
-    stb r11, muAdvSelchrCTask_useTeamSublevel(r29)      # /
+    lbz r11, 0x158(r1)                                  # \ Set whether to change sub-level based on selection
+    stb r11, muAdvSelchrCTask_sublevelChanger(r29)      # /
     cmpwi r14, 0x3          # \ Check if current override setting should make all characters visible
     beq- loc_singleTeam     # /
-    lbz r11, 0x154(r1)      # \
+    lbz r11, 0x156(r1)      # \
     cmpwi r11, 0x0          # | 0x0 signifies just use unlocks 
     beq- loc_singleTeam     # | 0x1 signifies use selc data but unlocks matter                  
     addi r14, r11, 0x4      # | 0x2 signifies use selc data
@@ -1344,12 +1347,12 @@ loc_3EC04:
     /* 0003EC08: */    stw r10,muAdvSelchrCTask_0xC38(r29) #stw r0,muAdvSelchrCTask_0xC38(r29)
 loc_3EC0C:
     ## SSEEX: Add Ex team members
-    lbz r17, 0x157(r1)               # Get RosterMode 
-    lis r24,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_smashdownCSSData")]
-    addi r24, r24, 0x0              [R_PPC_ADDR16_LO(40, 6, "loc_smashdownCSSData")]
+    lbz r17, muAdvSelchrCTask_rosterMode(r29)               # Get RosterMode 
+    lis r28,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_smashdownCSSData")]
+    addi r28, r28, 0x0              [R_PPC_ADDR16_LO(40, 6, "loc_smashdownCSSData")]
     cmpwi r17, 0x0
     bne+ loc_noResetSmashdown
-    mr r3, r24              # \
+    mr r3, r28              # \
     li r4, 0x0              # | memfill with 0 to reset Smashdown roster
     li r5, 0xF3             # /
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
@@ -1357,12 +1360,12 @@ loc_noResetSmashdown:
 
     addi r30, r1, 0x60      # Get to beginning of normal character save data
     addi r27, r29, 0x44      # Get to beginning of team member array
-    addi r26, r1, 0x15A      # Get to beginning of team member sizes from selc file
+    addi r26, r1, 0x15C      # Get to beginning of team member sizes from selc file
     addi r25, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
     li r31, 0x0             # Team incrementer
     li r21, 0x0             # Available member incrementer 
 
-    addi r22, r1, 0x162     # Beginning of Roster data from selc file
+    addi r22, r1, 0x164     # Beginning of Roster data from selc file
 loc_loopThroughTeamMembers:
     li r19, 0x0             # Team member incrementer 
     lbzx r20, r26, r31      # Get number of members for current team
@@ -1397,7 +1400,7 @@ loc_notRandom:                          # |
     beq- loc_addFighterToTeamMenu       # |
     cmpwi r17, 0x2                      # |
     bne- loc_notSmashdown               # |
-    lbzx r0, r24, r4                    # | Don't add if Smashdown mode and character has been used before
+    lbzx r0, r28, r4                    # | Don't add if Smashdown mode and character has been used before
     cmpwi r0, 0x1                       # |
     beq+ loc_skipAddFighterToTeamMenu   # |
 loc_notSmashdown:                       # |
@@ -1433,11 +1436,13 @@ loc_finishAddingMembers:
     lwz r22,0x0(r22)                     [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r21, 0x8(r22)           # Get GameGlobal->gmGlobalModeMelee
     li r23, 0x0                 # Keep track of number of surviving members 
-    addi r24, r1, 0x15A         # Store surviving members CSS Ids
+    addi r24, r1, 0x15C         # Store surviving members CSS Ids
+    li r25, 0x0
 
     lbz r3, 0x98(r21)       # \ gmGlobalModeMelee->gmPlayer1InitData.slotID 
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add P1 CSSID to survival array
+    stbx r25, r28, r3       # | Reset Smashdown flag
     addi r23, r23, 0x1      # /   
     lbz r3, 0xF5(r21)       # \
     cmpwi r3, 0x0           # | Check if P2 is alive by checking gmGlobalModeMelee->gmPlayer2InitData.initState == 0
@@ -1445,6 +1450,7 @@ loc_finishAddingMembers:
     lbz r3, 0xF4(r21)       # \ gmGlobalModeMelee->gmPlayer2InitData.slotID 
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add P2 CSSID to survival array
+    stbx r25, r28, r3       # | Reset Smashdown flag
     addi r23, r23, 0x1      # /  
 loc_notP2Alive:
     lwz r18, 0x30(r22)      # Get GameGlobal->AdvSaveData
@@ -1458,6 +1464,7 @@ loc_loopThroughPrevSelectedMembers:
     lbzx r3, r19, r15       # \ Get next prev selected slotId
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add CSS Id to survival array
+    stbx r25, r28, r3       # | Reset Smashdown flag
     addi r23, r23, 0x1      # /
     addi r15, r15, 0x1                              # \
     cmpwi r15, r16                                  # | add 1 to nextRespawnFighterIndex
@@ -1468,7 +1475,7 @@ loc_startLoopThroughPrevSelectedMembers:
     bgt+ loc_loopThroughPrevSelectedMembers
     
     ## Count total number of members as well as check to add surviving members
-    lbz r0, 0x159(r1)                   # Get add back surviving members bool
+    lbz r0, 0x15B(r1)                   # Get add back surviving members bool
     li r11, 0x0                         # Team incrementer
     li r5, 0x0                          # Keep track of total number of teams
     li r7, 0x0                          # Keep track of total number of members  
@@ -1512,7 +1519,7 @@ loc_noMembersInTeam:
     stw r5,0x6F8(r29)      # Store total number of teams
 
     ## Check if minumum number of unlocks is satisfied (otherwise go back to an alternate path)
-    lbz r6, 0x158(r1)               # \
+    lbz r6, 0x15A(r1)               # \
     cmpw r7, r6                     # | Check total number of team members >= min num characters to be unlocked
     bge+ loc_minUnlocksSatisfied    # /
     lwz r10, 0x62C(r18)         # Get advSaveData->jumpLevelId
@@ -1525,7 +1532,7 @@ loc_noMembersInTeam:
     rlwinm r10,r10,0,24,31      # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
     stw r10, 0x628(r18)         # /
     li r10, 0x0                 
-    stb r10, muAdvSelchrCTask_useTeamSublevel(r29)
+    stb r10, muAdvSelchrCTask_sublevelChanger(r29)
     
     #stw r10, 0x6FC(r29)
     #stb r10, muAdvSelchrCTask_team0MemberCount(r29) 
@@ -1539,6 +1546,7 @@ loc_minUnlocksSatisfied:
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: Mode where once you select they are gone from being able to be selected next time (smashdown)
+    ## Should detect if GameOver, don't add surviving members back if it was encountered
 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -3172,27 +3180,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +56
+    # +39
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -4704,11 +4693,11 @@ loc_41458:
     /* 00041470: */    addi r1,r1,0x120
     /* 00041474: */    blr
 muAdvSelchrCTask__storeResult:
-    /* 00041478: */    stwu r1,-0x44(r1) #stwu r1,-0x40(r1)
+    /* 00041478: */    stwu r1,-0x50(r1) #stwu r1,-0x40(r1)
     /* 0004147C: */    mflr r0
-    /* 00041480: */    stw r0,0x48(r1) #stw r0,0x44(r1)
-    /* 00041484: */    addi r11,r1,0x44 #addi r11,r1,0x40
-    /* 00041488: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_20")]
+    /* 00041480: */    stw r0,0x54(r1) #stw r0,0x44(r1)
+    /* 00041484: */    addi r11,r1,0x50 #addi r11,r1,0x40
+    /* 00041488: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_18")]
     /* 00041490: */    mr r28,r3
     /* 0004148C: */    lwz r20,muAdvSelchrCTask_0xC3C(r3) #lwz r0,muAdvSelchrCTask_0xC3C(r3)
     /* 00041494: */    cmpwi r20,0x0 #cmpwi r0,0x0
@@ -4805,7 +4794,7 @@ loc_415BC:
 loc_415CC:
     /* 000415CC: */    lwz r10,muAdvSelchrCTask_0xC1C(r28) #lwz r0,muAdvSelchrCTask_0xC1C(r28)
     ## SSEEX: Add team number to jumpLevelId if setting is set in selc (so can have different levels depending on team picked)
-    lbz r11, muAdvSelchrCTask_useTeamSublevel(r28)
+    lbz r11, muAdvSelchrCTask_sublevelChanger(r28)
     cmpwi r11, 0x1
     bne+ loc_dontAddToJumpLevelId
     lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
@@ -4820,6 +4809,10 @@ loc_415CC:
     rlwinm r9,r9,0,24,31        # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
     stw r9, 0x628(r12)          # /
 loc_dontAddToJumpLevelId:
+
+    lbz r19, muAdvSelchrCTask_rosterMode(r28)
+    lis r18,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_smashdownCSSData")]
+    addi r18, r18, 0x0              [R_PPC_ADDR16_LO(40, 6, "loc_smashdownCSSData")]
 
     /* 000415D4: */    li r25,0x0
     /* 000415D8: */    li r27,0x0
@@ -4875,6 +4868,11 @@ loc_415E8:
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersCSSIds")]
     stbx r3, r12, r25
 loc_41630:
+    cmpwi r19, 0x2          # \
+    bne+ loc_noSmashdown1   # |
+    li r0, 0x1              # | Keep track of which character has been selected before if in Smashdown roster mode 
+    stbx r0, r18, r3        # /
+loc_noSmashdown1:
     /* 00041630: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
     /* 00041634: */    cmpwi r3,0x1B
     /* 00041638: */    stwx r3,r20,r27 #stwx r3,r4,r27
@@ -4966,6 +4964,11 @@ loc_416FC:
     bge- loc_p1AndP2NotSame     # |
     addi r23, r23, 0x1          # /
 loc_p1AndP2NotSame:
+    cmpwi r19, 0x2          # \
+    bne+ loc_noSmashdown2   # |
+    li r0, 0x1              # | Keep track of which character has been selected before if in Smashdown roster mode 
+    stbx r0, r18, r3        # /
+loc_noSmashdown2:
     /* 00041704: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041708: */    #lwz r3,0x54(r3)
     /* 0004170C: */    cmpwi r3,0x1B
@@ -5062,11 +5065,11 @@ loc_41810:
     /* 00041814: */    li r0,0x28
     /* 00041818: */    stw r0,0x64(r20) #stw r0,0x64(r3)
 loc_4181C:
-    /* 0004181C: */    addi r11,r1,0x44 #addi r11,r1,0x40
-    /* 00041820: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_20")]
-    /* 00041824: */    lwz r0,0x48(r1) #lwz r0,0x44(r1)
+    /* 0004181C: */    addi r11,r1,0x50 #addi r11,r1,0x40
+    /* 00041820: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_18")]
+    /* 00041824: */    lwz r0,0x54(r1) #lwz r0,0x44(r1)
     /* 00041828: */    mtlr r0
-    /* 0004182C: */    addi r1,r1,0x44 #addi r1,r1,0x40
+    /* 0004182C: */    addi r1,r1,0x50 #addi r1,r1,0x40
     /* 00041830: */    blr
 muAdvSelchrCTask__reportResult:
     /* 00041834: */    stwu r1,-0x20(r1)
