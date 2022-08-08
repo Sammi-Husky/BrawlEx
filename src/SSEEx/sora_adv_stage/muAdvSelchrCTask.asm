@@ -1567,6 +1567,7 @@ loc_minUnlocksSatisfied:
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: skip over in restartStcok if custom selb/selc
     ## Could have numStocks be changed as temp overwrite value for numStocks in restartStcok and make sure setAdventureCondition is called (then can have more stocks being able to be assigned and less GameOver jank)
+    # TODO: Roster mode where team 1 is surviving members you picked before (can be based on if Team 1 is -1), and rest of is members you can pick to add (Smashup)
 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -3185,14 +3186,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop
-    nop
-    nop
-    nop
-    nop
 
-    nop
-    # +31
+    # +25
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -4803,23 +4798,39 @@ loc_415BC:
     /* 000415C4: */    addi r3,r1,0x8
     /* 000415C8: */    lwzx r29,r3,r0
 loc_415CC:
+    /* 00041670: */    addi r3,r28,muAdvSelchrCTask_0xAC0 #addi r30,r28,muAdvSelchrCTask_0xAC0
+    /* 00041674: */    #mr r3, r30
+    /* 00041688: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
+    /* 0004168C: */    rlwinm r0,r3,1,31,31
+    /* 00041690: */    xori r24,r0,0x1
+
     /* 000415CC: */    lwz r10,muAdvSelchrCTask_0xC1C(r28) #lwz r0,muAdvSelchrCTask_0xC1C(r28)
     ## SSEEX: Add team number to jumpLevelId if setting is set in selc (so can have different levels depending on team picked)
-    lbz r11, muAdvSelchrCTask_sublevelChanger(r28)
-    cmpwi r11, 0x1
-    bne+ loc_dontAddToJumpLevelId
+
     lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r12,0x0(r12)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r12, 0x30(r12)          # | Get GameGlobal->advSaveData->jumpLevelId
     lwz r9, 0x62C(r12)          # / (if it's 0 then skip)
-    add r9, r9, r10             # \ 
+    
+    lbz r11, muAdvSelchrCTask_sublevelChanger(r28)
+    cmpwi r11, 0x1                          # \ Check if should change sublevel based on team 
+    bne+ loc_dontChangeBasedOnSelectedTeam  # /
+    add r9, r9, r10                         # Add team number to jumpLevelId 
+    b loc_addToJumpLevelId
+loc_dontChangeBasedOnSelectedTeam:
+    cmpwi r11, 0x2                          # \ Check if should change sublevel if coop
+    bne+ loc_dontChangeBasedOnCoop          # /
+    cmpwi r24, 0x0                          # \ Check if p2 exists
+    beq+ loc_dontChangeBasedOnCoop          # /
+    addi r9, r9, 0x1                    # Add to jumpLevelId
+loc_addToJumpLevelId:
     stw r9, 0x62C(r12)          # / Add team number to jumpLevelId  (Note: Could increment door id too instead and then gets handled by adsj)
     stw r9, 0x620(r12)          # Update currentLevelId
     stw r9, 0x624(r12)          # Update activeLevelId
     lwz r9, 0x628(r12)          # \
     rlwinm r9,r9,0,24,31        # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
     stw r9, 0x628(r12)          # /
-loc_dontAddToJumpLevelId:
+loc_dontChangeBasedOnCoop:
 
     lbz r19, muAdvSelchrCTask_rosterMode(r28)
     lis r18,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_smashdownCSSData")]
@@ -4830,11 +4841,6 @@ loc_dontAddToJumpLevelId:
     /* 000415DC: */    mulli r31,r10,0xAC #mulli r31,r0,0xAC
     /* 000415E0: */    add r26,r28,r31
     
-    /* 00041670: */    addi r3,r28,muAdvSelchrCTask_0xAC0 #addi r30,r28,muAdvSelchrCTask_0xAC0
-    /* 00041674: */    #mr r3, r30
-    /* 00041688: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]
-    /* 0004168C: */    rlwinm r0,r3,1,31,31
-    /* 00041690: */    xori r24,r0,0x1
     /* 00041660: */    lwz r23,muAdvSelchrCTask_0xAB8(r28) #lwz r0,muAdvSelchrCTask_0xAB8(r28)
     li r21, 0x0                             # \
     mr r22, r23                             # |
