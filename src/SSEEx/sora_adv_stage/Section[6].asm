@@ -3266,6 +3266,8 @@ loc_smashdownCSSData:
         .byte 0x00      # 0xF0
         .byte 0x00      # 0xF1
         .byte 0x00      # 0xF2
+loc_gameOverEncountered:
+        .byte 0x00
 
 # TODO: Last level id specifically for gauntlet saves which gets updated upon savepoint
 # When level id is 0x0 in adsj while in a savepoint it will take you to last gauntlet save, otherwise will drop you back in current level

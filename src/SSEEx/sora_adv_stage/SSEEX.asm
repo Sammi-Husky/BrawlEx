@@ -6,6 +6,7 @@
 ## Maybe do it Sonic style and display score as a combo of speed and score, also try to display speed at Level Clear
 ## Use getGameFrameDelta
 ## Show time on HUD
+## Keep track of num gameovers in stage as byte?
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
 # TODO: Investigate Lucas up throw on enemy crash
@@ -27,6 +28,9 @@
 # TODO: jump Flag2 -> random 2-16
 # TODO: In adsj jumpLevelId, if it's a single integer then that's the new door index
 # TODO: Disable checkpoints for a NG+
+## Disable Game Overs making game easier with button combo at beginning (or introduce a brand new difficulty option).
+# TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone)
+# TODO: Game Over takes you to another stage (can do this maybe based on sublevel id?)
 
 ################################################################################################################################
 ## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex

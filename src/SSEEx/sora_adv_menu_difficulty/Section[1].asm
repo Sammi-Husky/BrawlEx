@@ -887,15 +887,12 @@ muAdvDifficultyTask__mainStepSelectedMain:
     li r4, 0x1                          # Ensure flag is 1 before going to muAdvSelchrCTask
     stb r4,0x0(r12)                         [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
 
-    lis r12,0x0                              [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
-    lwz r12,0x0(r12)                         [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
-    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    li r4, 0x4              # |
-    mulli r0,r12,0x14       # |
-    lwz r3,0x30(r3)         # | gameGlobal->advSaveData->levelSaveData[selectedLevel].clearFlag = 4
-    add r3,r3,r0            # |
-    stw r4,0x4(r3)          # /
+    ## li r0, 3                  
+    lis r4, 0x3800
+    ori r4, r4, 0x0003
+    # @ scAdvMap::selDiffProc
+    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
+    stw r4,0x0(r12)                         [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
 loc_notOverride:
 
     /* 00000CA8: */    li r0,0x1

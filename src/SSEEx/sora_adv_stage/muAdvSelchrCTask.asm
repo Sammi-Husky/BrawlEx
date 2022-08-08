@@ -512,15 +512,15 @@ muAdvSelchrCTask__loc_3E418:
     li r6, 0x2                          # Set flag to 2 to ensure level clear flag can't get reset again when a muAdvSelchrCTask is created (i.e. only will happen on map screen)
     stb r6,0x0(r12)                         
 loc_finishedSettingOverrideState:    
-    lwz r10,-0x8(r12)       # Get selectedLevel                  
-    lis r5,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    lwz r5,0x0(r5)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r6,-0x4(r12)        # Get original clear flag
-    mulli r0,r10,0x14       # \
-    lwz r5,0x30(r5)         # | gameGlobal->advSaveData->levelSaveData[selectedLevel].clearFlag = originalClearFlag
-    add r5,r5,r0            # |
-    stw r6,0x4(r5)          # /
+    ## lwz r0, 0x4(r3)                 
+    lis r5, 0x8003
+    ori r5, r5, 0x0004
+    # @ scAdvMap::selDiffProc
+    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
+    stw r5,0x0(r12)                         [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
 
+    lwz r10,-0x8(r12)       # Get selectedLevel                  
+    lwz r6,-0x4(r12)        # Get clear flag
     cmpwi r10, 0xA                          # \
     bne+ loc_notLakeShore                   # |
     li r0, 0x4                              # | Set number of members to pick to four if it's Lake Shore (since it's two otherwise)
@@ -1455,7 +1455,7 @@ loc_finishAddingMembers:
 loc_notP2Alive:
     lwz r18, 0x30(r22)      # Get GameGlobal->AdvSaveData
     lbz r17, 0x5FA(r18)     # Get advSaveData->numReserveStocks
-    lbz r16, 0x2B4(r18)     # Get advSaveData->numSelectedFighters
+    lbz r16, 0x5FB(r18)     # Get advSaveData->numSelectedFightersCount
     addi r19, r18, 0x2B9    # Go to start of prev advSaveData->selectedSlotIds
     lbz r15, 0x2B5(r18)     # Get advSaveData->nextRespawnFighterIndex
     b loc_startLoopThroughPrevSelectedMembers
@@ -1487,6 +1487,9 @@ loc_addNumTeamMembers:
     lbz r8, 0x0(r9)                                    
     cmpwi r0, 0x1                       # \ Check if add back surviving members is true
     bne+ loc_skipAddSurvivingMembers    # /
+    lbz r3, 0xF3(r28)                   # \
+    cmpwi r3, 0x1                       # | Check if a game over was encountered
+    beq- loc_skipAddSurvivingMembers    # /
 loc_addSurvivingMembers:
     cmpw r4, r23                        # \ Check if all surviving members have been added
     bge+ loc_skipAddSurvivingMembers    # /
@@ -1516,7 +1519,8 @@ loc_noMembersInTeam:
     cmpwi r11, 0x8
     blt+ loc_addNumTeamMembers 
     # TODO:If no members add surviving members to team 1 regardless by memcopying to team1 and updating numTeams and team 1 members
-    stw r5,0x6F8(r29)      # Store total number of teams
+    stw r5,0x6F8(r29)       # Store total number of teams
+    stb r25, 0xF3(r28)       # Reset game over encountered flag
 
     ## Check if minumum number of unlocks is satisfied (otherwise go back to an alternate path)
     lbz r6, 0x15A(r1)               # \
@@ -1531,8 +1535,7 @@ loc_noMembersInTeam:
     lwz r10, 0x628(r18)         # \
     rlwinm r10,r10,0,24,31      # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
     stw r10, 0x628(r18)         # /
-    li r10, 0x0                 
-    stb r10, muAdvSelchrCTask_sublevelChanger(r29)
+    stb r25, muAdvSelchrCTask_sublevelChanger(r29)
     
     #stw r10, 0x6FC(r29)
     #stb r10, muAdvSelchrCTask_team0MemberCount(r29) 
@@ -1540,13 +1543,17 @@ loc_noMembersInTeam:
     #stw r10, 0x6F8(r29) 
 loc_minUnlocksSatisfied:
 
+    
+
     # TODO: For sub-level based on team number, keep track of number so can add to the SongId so can have different songs based on selection
     ## Also implement for selb
     ## Also have case to send to different level if p2 or difficulty
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: Mode where once you select they are gone from being able to be selected next time (smashdown)
+    ## Should check for surviving members at the start
     ## Should detect if GameOver, don't add surviving members back if it was encountered
+    # TODO: skip over in restartStcok if custom selb/selc
 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -3179,9 +3186,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop
 
-    # +39
+    # +38
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

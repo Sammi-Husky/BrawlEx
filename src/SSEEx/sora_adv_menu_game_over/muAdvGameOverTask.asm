@@ -157,6 +157,8 @@ loc_234:
 loc_25C:
     /* 0000025C: */    rlwinm r0,r6,2,0,29
     /* 00000260: */    li r5,0x1
+    lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_gameOverEncountered")]
+    stb r5, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_gameOverEncountered")]
     /* 00000264: */    add r4,r30,r0
     /* 00000268: */    addi r6,r6,0x1
     /* 0000026C: */    stw r5,0x234(r4)
@@ -265,9 +267,13 @@ loc_3A8:
 loc_3F0:
     /* 000003F0: */    li r28,0x0
     /* 000003F4: */    li r29,0x0
-    lis r26, 0x9018         # \
-    lwz r26, 0x1330(r26)    # / Get GameGlobal->advSaveData
-    /* 000003F8: */    b loc_434
+    lis r26,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r26,0x0(r26)                     [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r26, 0x30(r26)          # / Get GameGlobal->advSaveData
+    lbz r12, 0x5FB(r26) # \ advSaveData->numSelectedFighters = advSaveData->numSelectedFightersCount
+    stb r12, 0x2B4(r26) # / (done because SSEEX character selection skips restartStcok and thus numSelectedFighters doesn't get updated properly)
+    b __unresolved                          [R_PPC_REL24(33, 7, "loc_muAdvGameOverTask____ct_setInitialFighterSlotId")]
+    /* 000003F8: */    #b loc_434
 loc_3FC:
     /* 000003FC: */    lwz r12,0x0(r27)
     /* 00000400: */    mr r3,r27
@@ -278,12 +284,12 @@ loc_3FC:
     /* 00000410: */    #add r4,r30,r29
     /* 00000414: */    #stw r3,0x1B8(r4)
     /* 00000418: */    #mr r3,r27
+    /* 0000041C: */    #lwz r12,0x0(r27)
+    /* 00000420: */    #lwz r12,0x20(r12)
+    /* 00000424: */    #mtctr r12
+    /* 00000428: */    #bctrl
+    /* 0000042C: */    #addi r29,r29,0x4
 loc_exFighterTrophiesFinished:
-    /* 0000041C: */    lwz r12,0x0(r27)
-    /* 00000420: */    lwz r12,0x20(r12)
-    /* 00000424: */    mtctr r12
-    /* 00000428: */    bctrl
-    /* 0000042C: */    addi r29,r29,0x4
     /* 00000430: */    addi r28,r28,0x1
 loc_434:
     /* 00000434: */    cmpw r28,r31

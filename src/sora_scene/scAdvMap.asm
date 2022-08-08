@@ -616,6 +616,7 @@ loc_1D4A4:
 loc_1D4BC:
     /* 0001D4BC: */    mulli r0,r28,0x14
     /* 0001D4C0: */    add r3,r27,r0
+SSEEX_tempOverrideNewAdvMapState:
     /* 0001D4C4: */    lwz r0,0x4(r3)
     /* 0001D4C8: */    cmpwi r0,0x2
     /* 0001D4CC: */    beq- loc_1D4E4
