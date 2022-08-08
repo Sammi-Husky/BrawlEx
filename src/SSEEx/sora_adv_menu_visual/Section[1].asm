@@ -51,7 +51,11 @@ loc_84:
     /* 000000B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__readRequest")]
     /* 000000C4: */    addi r4,r31,0x44
 
-    ## SSEEX: If jumpLevelID is not 0 then it's a bonus Ex video and thus should skip character selection (TODO: Later have option to select characters based on if there are characters in settingTable or not)
+    li r10, 0x0
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_gameOverEncountered")]
+    stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_gameOverEncountered")]
+
+    ## SSEEX: If jumpLevelID is not 0 then it's a bonus Ex video and should change the path to custom selb file
     lis r6,0x0                              [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r6,0x0(r6)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r6, 0x30(r6)      # | Get GameGlobal->advSaveData->jumpLevelId
@@ -3363,11 +3367,8 @@ muAdvSelchrBTask__mainStepZombieMain:
     nop
     nop
     nop
-    nop
-    nop
-    nop
 
-    # +108
+    # +105
 
 muAdvSelchrBTask__isSelected:
     /* 00002BAC: */    lwz r0,0xB4(r3)

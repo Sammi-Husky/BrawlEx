@@ -1359,98 +1359,20 @@ loc_3EC04:
     /* 0003EC08: */    stw r10,muAdvSelchrCTask_0xC38(r29) #stw r0,muAdvSelchrCTask_0xC38(r29)
 loc_3EC0C:
     ## SSEEX: Add Ex team members
-    lbz r17, muAdvSelchrCTask_rosterMode(r29)               # Get RosterMode 
     lis r28,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_smashdownCSSData")]
     addi r28, r28, 0x0              [R_PPC_ADDR16_LO(40, 6, "loc_smashdownCSSData")]
-    cmpwi r17, 0x0
-    bne+ loc_noResetSmashdown
-    mr r3, r28              # \
-    li r4, 0x0              # | memfill with 0 to reset Smashdown roster
-    li r5, 0xF3             # /
-    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-loc_noResetSmashdown:
-
-    addi r30, r1, 0x60      # Get to beginning of normal character save data
-    addi r27, r29, 0x44      # Get to beginning of team member array
-    addi r26, r1, 0x15C      # Get to beginning of team member sizes from selc file
-    addi r25, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
-    li r31, 0x0             # Team incrementer
-    li r21, 0x0             # Available member incrementer 
-
-    addi r22, r1, 0x164     # Beginning of Roster data from selc file
-loc_loopThroughTeamMembers:
-    li r19, 0x0             # Team member incrementer 
-    lbzx r20, r26, r31      # Get number of members for current team
-    li r23, 0x0              
-    cmpwi r14, 0x5
-    bge- loc_startAddingFighters
-    
-    lbz r23, 0x0(r25) #lwz r23, 0xe4(r29)     # Get current number of team members
-
-    lis r22,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
-    addi r22,r22,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
-    lbz r20,-0x2(r22)        # Get Number of potential additional team members 
-
-    cmpwi r14, 0x3       # Check if unlock override
-    bne- loc_startAddingFighters 
-    lbz r4, -0x1(r22)       # \ Add Sonic since for some reason not included when overriding save
-    stbx r4, r27, r23       # |
-    addi r23, r23, 0x1      # /
-loc_startAddingFighters:
-    cmpwi r20, 0x0
-    beq+ loc_teamEmpty
-loc_addFightersToTeam:                  # \ Add team members if unlocked or override is activated
-    lbzx r4, r22, r21                   # |
-    cmpwi r17, 0x1                      # | Check if RosterMode == Randomize
-    bne+ loc_notRandom                  # |
-    lwz r3, 0x13(r1)                    # | 
-    subi r3, r3, 0x10                   # | Get roster size for randomization from gfFileIOHandle.length - 0x10 (offset to roster data)
-    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
-    lbzx r4, r22, r3                    # | Get random character from selc roster based on returned index
-loc_notRandom:                          # |
-    cmpwi r14, 0x3                      # | Check if unlock override
-    beq- loc_addFighterToTeamMenu       # |
-    cmpwi r17, 0x2                      # |
-    bne- loc_notSmashdown               # |
-    lbzx r0, r28, r4                    # | Don't add if Smashdown mode and character has been used before
-    cmpwi r0, 0x1                       # |
-    beq+ loc_skipAddFighterToTeamMenu   # |
-loc_notSmashdown:                       # |
-    cmpwi r14, 0x6                      # |
-    beq- loc_addFighterToTeamMenu       # | 
-    lbzx r0, r30, r4                    # | Check if unlocked
-    cmpwi r0, 0x1                       # |
-    bge- loc_addFighterToTeamMenu       # |
-    b loc_skipAddFighterToTeamMenu      # |
-loc_addFighterToTeamMenu:               # |
-    stbx r4, r27, r23                   # | Add to team
-    li r10, 0x3                         # |
-    stbx r10, r30, r4                   # | Set unlock flag to 3 which means that character has been added
-    addi r23, r23, 0x1                  # |
-loc_skipAddFighterToTeamMenu:           # |
-    addi r21, r21, 0x1                  # |
-    addi r19, r19, 0x1                  # |
-    cmpw r19, r20                       # |
-    blt+ loc_addFightersToTeam          # /
-    stb r23,0x0(r25) #stw r23, 0xe4(r29)      # Store team member count
- loc_teamEmpty:  
-    addi r31, r31, 0x1          
-    addi r25, r25, 0xAC               
-    addi r27, r27, 0xAC
-    cmpwi r14, 0x5
-    blt+ loc_finishAddingMembers
-    cmpwi r31, 0x8
-    blt+ loc_loopThroughTeamMembers
-loc_finishAddingMembers:
 
     ## Preparing to re-add surviving members
+    lbz r0, 0x15B(r1)                   # Get add back surviving members bool
     lis r22,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r22,0x0(r22)                     [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r21, 0x8(r22)           # Get GameGlobal->gmGlobalModeMelee
     li r23, 0x0                 # Keep track of number of surviving members 
-    addi r24, r1, 0x15C         # Store surviving members CSS Ids
+    addi r24, r1, 0x207         # Store surviving members CSS Ids
     li r25, 0x0
 
+    cmpwi r0, 0x1                           # \ Check if add back surviving members is true
+    bne+ loc_skipCheckForSurvivingMembers   # /
     lbz r3, 0x98(r21)       # \ gmGlobalModeMelee->gmPlayer1InitData.slotID 
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add P1 CSSID to survival array
@@ -1485,9 +1407,92 @@ loc_loopThroughPrevSelectedMembers:
 loc_startLoopThroughPrevSelectedMembers:
     cmpwi r17, 0x0
     bgt+ loc_loopThroughPrevSelectedMembers
+loc_skipCheckForSurvivingMembers:
+
+    lbz r17, muAdvSelchrCTask_rosterMode(r29)               # Get RosterMode 
+    cmpwi r17, 0x0
+    bne+ loc_noResetSmashdown
+    mr r3, r28              # \
+    li r4, 0x0              # | memfill with 0 to reset Smashdown roster
+    li r5, 0xF3             # /
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
+loc_noResetSmashdown:
+
+    addi r30, r1, 0x60      # Get to beginning of normal character save data
+    addi r27, r29, 0x44      # Get to beginning of team member array
+    addi r26, r1, 0x15C      # Get to beginning of team member sizes from selc file
+    addi r25, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
+    li r31, 0x0             # Team incrementer
+    li r21, 0x0             # Available member incrementer 
+
+    addi r22, r1, 0x164     # Beginning of Roster data from selc file
+loc_loopThroughTeamMembers:
+    li r19, 0x0             # Team member incrementer 
+    lbzx r20, r26, r31      # Get number of members for current team
+    li r16, 0x0              
+    cmpwi r14, 0x5
+    bge- loc_startAddingFighters
     
+    lbz r16, 0x0(r25)   # Get current number of team members
+
+    lis r22,0x0            [R_PPC_ADDR16_HA(40, 8, "loc_AddedTeamMemberCSSIds")]
+    addi r22,r22,0x0        [R_PPC_ADDR16_LO(40, 8, "loc_AddedTeamMemberCSSIds")]
+    lbz r20,-0x2(r22)        # Get Number of potential additional team members 
+
+    cmpwi r14, 0x3       # Check if unlock override
+    bne- loc_startAddingFighters 
+    lbz r4, -0x1(r22)       # \ Add Sonic since for some reason not included when overriding save
+    stbx r4, r27, r16       # |
+    addi r16, r16, 0x1      # /
+loc_startAddingFighters:
+    cmpwi r20, 0x0
+    beq+ loc_teamEmpty
+loc_addFightersToTeam:                  # \ Add team members if unlocked or override is activated
+    lbzx r4, r22, r21                   # |
+    cmpwi r17, 0x1                      # | Check if RosterMode == Randomize
+    bne+ loc_notRandom                  # |
+    lwz r3, 0x13(r1)                    # | 
+    subi r3, r3, 0x10                   # | Get roster size for randomization from gfFileIOHandle.length - 0x10 (offset to roster data)
+    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
+    lbzx r4, r22, r3                    # | Get random character from selc roster based on returned index
+loc_notRandom:                          # |
+    cmpwi r14, 0x3                      # | Check if unlock override
+    beq- loc_addFighterToTeamMenu       # |
+    cmpwi r17, 0x2                      # |
+    bne- loc_notSmashdown               # |
+    lbzx r0, r28, r4                    # | Don't add if Smashdown mode and character has been used before
+    cmpwi r0, 0x1                       # |
+    beq+ loc_skipAddFighterToTeamMenu   # |
+loc_notSmashdown:                       # |
+    cmpwi r14, 0x6                      # |
+    beq- loc_addFighterToTeamMenu       # | 
+    lbzx r0, r30, r4                    # | Check if unlocked
+    cmpwi r0, 0x1                       # |
+    bge- loc_addFighterToTeamMenu       # |
+    b loc_skipAddFighterToTeamMenu      # |
+loc_addFighterToTeamMenu:               # |
+    stbx r4, r27, r16                   # | Add to team
+    li r10, 0x3                         # |
+    stbx r10, r30, r4                   # | Set unlock flag to 3 which means that character has been added
+    addi r16, r16, 0x1                  # |
+loc_skipAddFighterToTeamMenu:           # |
+    addi r21, r21, 0x1                  # |
+    addi r19, r19, 0x1                  # |
+    cmpw r19, r20                       # |
+    blt+ loc_addFightersToTeam          # /
+    stb r16,0x0(r25)                    # Store team member count
+ loc_teamEmpty:  
+    addi r31, r31, 0x1          
+    addi r25, r25, 0xAC               
+    addi r27, r27, 0xAC
+    cmpwi r14, 0x5
+    blt+ loc_finishAddingMembers
+    cmpwi r31, 0x8
+    blt+ loc_loopThroughTeamMembers
+loc_finishAddingMembers:
+
     ## Count total number of members as well as check to add surviving members
-    lbz r0, 0x15B(r1)                   # Get add back surviving members bool
+    li r0, 0x0
     li r11, 0x0                         # Team incrementer
     li r5, 0x0                          # Keep track of total number of teams
     li r7, 0x0                          # Keep track of total number of members  
@@ -1496,9 +1501,7 @@ loc_startLoopThroughPrevSelectedMembers:
     addi r9, r29, muAdvSelchrCTask_team0MemberCount   # Get to beginning of team member array  
     addi r10, r29, 0x44                               # Get to beginning of team member sizes 
 loc_addNumTeamMembers:                                  
-    lbz r8, 0x0(r9)                                    
-    cmpwi r0, 0x1                       # \ Check if add back surviving members is true
-    bne+ loc_skipAddSurvivingMembers    # /
+    lbz r8, 0x0(r9)       # Get num members in current team                             
     lbz r3, 0xF3(r28)                   # \
     cmpwi r3, 0x1                       # | Check if a game over was encountered
     beq- loc_skipAddSurvivingMembers    # /
@@ -1532,7 +1535,7 @@ loc_noMembersInTeam:
     blt+ loc_addNumTeamMembers 
     # TODO:If no members add surviving members to team 1 regardless by memcopying to team1 and updating numTeams and team 1 members
     stw r5,0x6F8(r29)       # Store total number of teams
-    stb r25, 0xF3(r28)       # Reset game over encountered flag
+    stb r0, 0xF3(r28)       # Reset game over encountered flag
 
     ## Check if minumum number of unlocks is satisfied (otherwise go back to an alternate path)
     lbz r6, 0x15A(r1)               # \
@@ -1547,7 +1550,7 @@ loc_noMembersInTeam:
     lwz r10, 0x628(r18)         # \
     rlwinm r10,r10,0,24,31      # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
     stw r10, 0x628(r18)         # /
-    stb r25, muAdvSelchrCTask_sublevelChanger(r29)
+    stb r0, muAdvSelchrCTask_sublevelChanger(r29)
     
     #stw r10, 0x6FC(r29)
     #stb r10, muAdvSelchrCTask_team0MemberCount(r29) 
@@ -1562,10 +1565,8 @@ loc_minUnlocksSatisfied:
     ## Also have case to send to different level if p2 or difficulty
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
-    # TODO: Mode where once you select they are gone from being able to be selected next time (smashdown)
-    ## Should check for surviving members at the start
     # TODO: skip over in restartStcok if custom selb/selc
-    ## Could have numStocks be changed as temp overwrite value for numStocks in restartStcok and make sure setAdventureCondition is called
+    ## Could have numStocks be changed as temp overwrite value for numStocks in restartStcok and make sure setAdventureCondition is called (then can have more stocks being able to be assigned and less GameOver jank)
 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -3191,8 +3192,7 @@ loc_4010C:
     nop
 
     nop
-    nop 
-    # +32
+    # +31
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

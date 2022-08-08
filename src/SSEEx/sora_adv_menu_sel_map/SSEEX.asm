@@ -70,6 +70,8 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stw r10, 0x0(r12)                          [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
     li r10, 0x0
     stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_gameOverEncountered")]
+    stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_gameOverEncountered")]
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     stb r10,0x0(r12)        # Set override characters flag to zero
@@ -77,6 +79,7 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stb r10,0x2(r12)        # Set override character amount to zero
     stw r0, -0x4(r12)               # Store selected level clear
     stw r29, -0x8(r12)              # Store selected level
+    
 
     lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
     lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem    
