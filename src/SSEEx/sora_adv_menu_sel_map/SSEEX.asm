@@ -58,6 +58,13 @@ loc_newUnlock:
 
 ## SSEEX: Check for override input to later force open difficulty and CSS menu
 loc_muAdvSelmapTask__controllProc_checkIfOverride:
+    ## ble- ->0x806ECD94 (Original operation)
+    lis r10, 0x4081
+    ori r10, r10, 0x0148
+    # @ sqAdventure::restartStcok             
+    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    
     li r10, -1             # Set prevSequenceIndex to -1 (so don't accidentially return to an old sequenceIndex)
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
     stw r10, 0x0(r12)                          [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]

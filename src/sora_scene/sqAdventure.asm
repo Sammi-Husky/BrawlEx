@@ -7409,6 +7409,7 @@ loc_316D8:
     /* 000316EC: */    lwz r4,0x4(r4)
     /* 000316F0: */    subi r0,r4,0x3
     /* 000316F4: */    cmplwi r0,0x1
+SSEEX_tempOverrideAddStocks:
     /* 000316F8: */    ble- loc_31840
     /* 000316FC: */    lwz r0,0x10(r3)
     /* 00031700: */    lis r4,0x0                               [R_PPC_ADDR16_HA(1, 4, "loc_1378")]

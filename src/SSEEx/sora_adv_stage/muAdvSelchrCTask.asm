@@ -512,7 +512,7 @@ muAdvSelchrCTask__loc_3E418:
     li r6, 0x2                          # Set flag to 2 to ensure level clear flag can't get reset again when a muAdvSelchrCTask is created (i.e. only will happen on map screen)
     stb r6,0x0(r12)                         
 loc_finishedSettingOverrideState:    
-    ## lwz r0, 0x4(r3)                 
+    ## lwz r0, 0x4(r3)    (Original operation)             
     lis r5, 0x8003
     ori r5, r5, 0x0004
     # @ scAdvMap::selDiffProc
@@ -767,8 +767,14 @@ muAdvSelchrCTask__setMenuData:
     li r5, 0xC9         # | memcopy Ex unlock array to this temp fighter unlock array
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] 
 
-    lis r12,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
-    lbz r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    lis r22,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    lbz r14, 0x0(r22)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    ## ble- ->0x806ECD94 (Original operation)
+    lis r10, 0x4081
+    ori r10, r10, 0x0148
+    # @ sqAdventure::restartStcok             
+    lis r21,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    stw r10,0x0(r21)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
 
     ## SSEEX: Check for .selc file if jumpLevelId is not 0x0 (which signifies custom cutscene followed by custom level)
     li r10, 0xFF                              # \ Default number of stocks (0xFF) signifies no .selc file
@@ -801,7 +807,14 @@ muAdvSelchrCTask__setMenuData:
     li r6,0	
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
     cmpwi r3, 0x0
-    bne+ loc_checkIfOverride                    
+    bne+ loc_checkIfOverride
+    
+    ## b 0x1EC
+    lis r10, 0x4800                 # \
+    ori r10, r10, 0x01EC            # | Skip adding stocks
+    # @ sqAdventure::restartStcok             
+    stw r10,0x0(r21)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+
     lbz r10, 0x159(r1)                          # \ Set roster mode from selc file
     stb r10, muAdvSelchrCTask_rosterMode(r29)   # /
     lbz r10, 0x155(r1)                          # \ Set num stocks from selc file
@@ -877,8 +890,7 @@ loc_checkForOverrideInput:          # |
     b loc_overrideCheckFinished        
 loc_teamMemberOverride:
     li r14, 0x3                     # Set unlock override so that anytime CSS pops up during stage characters remain present  
-    lis r12,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
-    stb r14, 0x0(r12)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    stb r14, 0x0(r22)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     b loc_singleTeam
 loc_overrideCheckFinished:
 
@@ -1552,8 +1564,8 @@ loc_minUnlocksSatisfied:
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: Mode where once you select they are gone from being able to be selected next time (smashdown)
     ## Should check for surviving members at the start
-    ## Should detect if GameOver, don't add surviving members back if it was encountered
     # TODO: skip over in restartStcok if custom selb/selc
+    ## Could have numStocks be changed as temp overwrite value for numStocks in restartStcok and make sure setAdventureCondition is called
 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -3179,15 +3191,8 @@ loc_4010C:
     nop
 
     nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +38
+    nop 
+    # +32
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

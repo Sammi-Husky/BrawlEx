@@ -9,6 +9,12 @@ loc_muAdvNameTask__create_patchSoraModules:
     li r10, -1                      # Initialize prevSequenceIndex as -1
     lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
     stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+    li r10, 0x0
+    lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    stb r10,0x0(r12)        # Set override characters flag to zero
+    stb r10,0x1(r12)        # Set override character amount flag to zero
+    stb r10,0x2(r12)        # Set override character amount to zero
 
     lis r10, 0x4800
 
@@ -64,5 +70,14 @@ loc_muAdvNameTask__create_patchSoraModules:
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchTwo")]
     lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchThree")]
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchThree")]
+
+    ### Restore original operation in sqAdventure::restartStcok in case it was changed
+
+    ## ble- ->0x806ECD94 (Original operation)
+    lis r10, 0x4081
+    ori r10, r10, 0x0148
+    # @ sqAdventure::restartStcok             
+    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
 
     b __unresolved                           [R_PPC_REL24(28, 1, "loc_finishedPatching")]
