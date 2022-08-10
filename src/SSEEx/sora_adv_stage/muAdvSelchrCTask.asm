@@ -61,7 +61,7 @@ loc_3DE30:
     /* 0003DE34: */    mr r4,r28
     /* 0003DE38: */    mr r5,r29
     /* 0003DE3C: */    mr r6,r30
-    /* 0003DE40: */    bl muAdvSelchrCTask__loc_3E418
+    /* 0003DE40: */    bl muAdvSelchrCTask__initProc
 
     /* 0003DE44: */    mr r3,r31
     /* 0003DE48: */    lwz r31,0x1C(r1)
@@ -484,7 +484,7 @@ loc_3E3F4:
     /* 0003E40C: */    mtlr r0
     /* 0003E410: */    addi r1,r1,0x20
     /* 0003E414: */    blr
-muAdvSelchrCTask__loc_3E418:
+muAdvSelchrCTask__initProc:
     /* 0003E418: */    stwu r1,-0x20(r1)
     /* 0003E41C: */    mflr r0
     /* 0003E420: */    stw r0,0x24(r1)
@@ -1363,20 +1363,25 @@ loc_3EC0C:
     addi r28, r28, 0x0              [R_PPC_ADDR16_LO(40, 6, "loc_smashdownCSSData")]
 
     ## Preparing to re-add surviving members
-    lbz r0, 0x15B(r1)                   # Get add back surviving members bool
+    lbz r20, 0x15B(r1)                   # Get add back surviving members option
     lis r22,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r22,0x0(r22)                     [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r21, 0x8(r22)           # Get GameGlobal->gmGlobalModeMelee
     li r23, 0x0                 # Keep track of number of surviving members 
     addi r24, r1, 0x207         # Store surviving members CSS Ids
     li r25, 0x0
+    li r30, 0x2
 
-    cmpwi r0, 0x1                           # \ Check if add back surviving members is true
-    bne+ loc_skipCheckForSurvivingMembers   # /
+    cmpwi r20, 0x0                          # \ Check if should add back surviving members
+    beq+ loc_skipCheckForSurvivingMembers   # /
     lbz r3, 0x98(r21)       # \ gmGlobalModeMelee->gmPlayer1InitData.slotID 
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add P1 CSSID to survival array
     stbx r25, r28, r3       # | Reset Smashdown flag
+    cmpwi r20, 0x2          # |
+    bne+ loc_notSmashup1    # |
+    stbx r30, r28, r3       # | Set Smashup flag
+loc_notSmashup1:            # |
     addi r23, r23, 0x1      # /   
     lbz r3, 0xF5(r21)       # \
     cmpwi r3, 0x0           # | Check if P2 is alive by checking gmGlobalModeMelee->gmPlayer2InitData.initState == 0
@@ -1385,6 +1390,10 @@ loc_3EC0C:
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add P2 CSSID to survival array
     stbx r25, r28, r3       # | Reset Smashdown flag
+    cmpwi r20, 0x2          # |
+    bne+ loc_notSmashup2    # |
+    stbx r30, r28, r3       # | Set Smashup flag
+loc_notSmashup2:            # |
     addi r23, r23, 0x1      # /  
 loc_notP2Alive:
     lwz r18, 0x30(r22)      # Get GameGlobal->AdvSaveData
@@ -1399,6 +1408,10 @@ loc_loopThroughPrevSelectedMembers:
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add CSS Id to survival array
     stbx r25, r28, r3       # | Reset Smashdown flag
+    cmpwi r20, 0x2          # |
+    bne+ loc_notSmashup3    # |
+    stbx r30, r28, r3       # | Set Smashup flag
+loc_notSmashup3:            # |
     addi r23, r23, 0x1      # /
     addi r15, r15, 0x1                              # \
     cmpwi r15, r16                                  # | add 1 to nextRespawnFighterIndex
@@ -1418,7 +1431,7 @@ loc_skipCheckForSurvivingMembers:
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
 loc_noResetSmashdown:
 
-    addi r30, r1, 0x60      # Get to beginning of normal character save data
+    addi r30, r1, 0x60      # Get to beginning of character unlock data
     addi r27, r29, 0x44      # Get to beginning of team member array
     addi r26, r1, 0x15C      # Get to beginning of team member sizes from selc file
     addi r25, r29, muAdvSelchrCTask_team0MemberCount # Get to beginning of team member sizes 
@@ -1449,6 +1462,8 @@ loc_startAddingFighters:
     beq+ loc_teamEmpty
 loc_addFightersToTeam:                  # \ Add team members if unlocked or override is activated
     lbzx r4, r22, r21                   # |
+    cmpwi r14, 0x3                      # | Check if override
+    beq+ loc_notRandom                  # |
     cmpwi r17, 0x1                      # | Check if RosterMode == Randomize
     bne+ loc_notRandom                  # |
     lwz r3, 0x13(r1)                    # | 
@@ -1461,8 +1476,8 @@ loc_notRandom:                          # |
     cmpwi r17, 0x2                      # |
     bne- loc_notSmashdown               # |
     lbzx r0, r28, r4                    # | Don't add if Smashdown mode and character has been used before
-    cmpwi r0, 0x1                       # |
-    beq+ loc_skipAddFighterToTeamMenu   # |
+    cmpwi r0, 0x0                       # |
+    bne+ loc_skipAddFighterToTeamMenu   # |
 loc_notSmashdown:                       # |
     cmpwi r14, 0x6                      # |
     beq- loc_addFighterToTeamMenu       # | 
@@ -1480,8 +1495,8 @@ loc_skipAddFighterToTeamMenu:           # |
     addi r19, r19, 0x1                  # |
     cmpw r19, r20                       # |
     blt+ loc_addFightersToTeam          # /
-    stb r16,0x0(r25)                    # Store team member count
  loc_teamEmpty:  
+    stb r16,0x0(r25)                    # Store team member count
     addi r31, r31, 0x1          
     addi r25, r25, 0xAC               
     addi r27, r27, 0xAC
@@ -1498,10 +1513,15 @@ loc_finishAddingMembers:
     li r7, 0x0                          # Keep track of total number of members  
     li r6, 0x0                          # Keep track of current number of surviving members added      
     li r4, 0x0                          # Surviving members incrementer                           
-    addi r9, r29, muAdvSelchrCTask_team0MemberCount   # Get to beginning of team member array  
-    addi r10, r29, 0x44                               # Get to beginning of team member sizes 
+    addi r9, r29, muAdvSelchrCTask_team0MemberCount   # Get to beginning of team member sizes  
+    addi r10, r29, 0x44                               # Get to beginning of team member array
+    lbz r19, 0x15B(r1)                 # Get surviving members mode      
 loc_addNumTeamMembers:                                  
-    lbz r8, 0x0(r9)       # Get num members in current team                             
+    lbz r8, 0x0(r9)       # Get num members in current team 
+    cmpwi r14, 0x3                                # \ Check if override
+    beq+ loc_skipAddSurvivingMembers              # /
+    cmpwi r19, 0x1                      # \ Check if should add back surviving members
+    bne+ loc_skipAddSurvivingMembers    # /                 
     lbz r3, 0xF3(r28)                   # \
     cmpwi r3, 0x1                       # | Check if a game over was encountered
     beq- loc_skipAddSurvivingMembers    # /
@@ -1534,9 +1554,46 @@ loc_noMembersInTeam:
     cmpwi r11, 0x8
     blt+ loc_addNumTeamMembers 
     # TODO:If no members add surviving members to team 1 regardless by memcopying to team1 and updating numTeams and team 1 members
-    stw r5,0x6F8(r29)       # Store total number of teams
-    stb r0, 0xF3(r28)       # Reset game over encountered flag
+    
+    ## Add existing Smashup members to Team 1
+    lbz r8, muAdvSelchrCTask_team0MemberCount(r29)  
+    addi r10, r29, 0x44                               # Get to beginning of team member array 
+    li r9, 0x0         # Incrementer
+    cmpwi r14, 0x3                  # \ Check if override
+    beq+ loc_noSmashup              # /
+    cmpwi r8, 0x0                   # \ Check if team 1 empty
+    bne+ loc_noSmashup              # /
+loc_smashUpLoop:
+    cmpwi r8, 163                   # \ Check if max number of characters in team
+    bge+ loc_noSmashup              # /
+    cmpwi r7, 173                   # \ Check if max number of characters in total roster
+    bge+ loc_noSmashup              # /
+    lbzx r12, r28, r9              # \
+    cmpwi r12, 0x2                  # | Check if a character should be added 
+    bne+ loc_notASmashUpMember      # /
+    stbx r9, r10, r8                # Add member
+    addi r8, r8, 0x1                # Increment team 1 character count
+    addi r7, r7, 0x1                # Increment total character count
+    cmpwi r5, 0x1                   # \
+    bge+ loc_notASmashUpMember      # | Check if there is at least 1 team, set to 1 if there isn't
+    li r5, 0x1                      # /
+loc_notASmashUpMember:
+    addi r9, r9, 0x1
+    cmpwi r9, 242
+    ble+ loc_smashUpLoop
+loc_noSmashup:
+    stb r8, muAdvSelchrCTask_team0MemberCount(r29)  
+    stw r5,0x6F8(r29)       # Store total number of teams 
 
+    cmpwi r19, 0x2                              # \
+    bne+ loc_onlySmashdown                      # |
+    cmpwi r17, 0x2                              # | Change RosterMode if Smashup but not Smashdown for storeResult later
+    beq+ loc_onlySmashdown                      # |
+    li r17, 0x3                                 # |
+    stb r17, muAdvSelchrCTask_rosterMode(r29)   # /
+loc_onlySmashdown:
+
+    stb r0, 0xF3(r28)       # Reset game over encountered flag
     ## Check if minumum number of unlocks is satisfied (otherwise go back to an alternate path)
     lbz r6, 0x15A(r1)               # \
     cmpw r7, r6                     # | Check total number of team members >= min num characters to be unlocked
@@ -1558,8 +1615,6 @@ loc_noMembersInTeam:
     #stw r10, 0x6F8(r29) 
 loc_minUnlocksSatisfied:
 
-    
-
     # TODO: For sub-level based on team number, keep track of number so can add to the SongId so can have different songs based on selection
     ## Also implement for selb
     ## Also have case to send to different level if p2 or difficulty
@@ -1567,7 +1622,6 @@ loc_minUnlocksSatisfied:
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: skip over in restartStcok if custom selb/selc
     ## Could have numStocks be changed as temp overwrite value for numStocks in restartStcok and make sure setAdventureCondition is called (then can have more stocks being able to be assigned and less GameOver jank)
-    # TODO: Roster mode where team 1 is surviving members you picked before (can be based on if Team 1 is -1), and rest of is members you can pick to add (Smashup)
 
     /* 0003EC0C: */    lwz r0,0x6F8(r29)
     /* 0003EC10: */    cmpwi r0,0x0
@@ -3184,10 +3238,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop
-    nop
 
-    # +25
+    # +23
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -4832,7 +4884,15 @@ loc_addToJumpLevelId:
     stw r9, 0x628(r12)          # /
 loc_dontChangeBasedOnCoop:
 
-    lbz r19, muAdvSelchrCTask_rosterMode(r28)
+    lbz r0, muAdvSelchrCTask_rosterMode(r28)    # \
+    li r19, 0x1                                 # | 
+    cmpwi r0, 0x2                               # |
+    beq- loc_smashdownValueDecided              # | Get value to fill smashdown with based on rosterMode
+    li r19, 0x0                                 # | When rosterMode = 2 -> 1
+    cmpwi r0, 0x3                               # | When rosterMode = 3 -> 0
+    beq- loc_smashdownValueDecided              # |
+    li r19, -1                                  # |
+loc_smashdownValueDecided:                      # /
     lis r18,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_smashdownCSSData")]
     addi r18, r18, 0x0              [R_PPC_ADDR16_LO(40, 6, "loc_smashdownCSSData")]
 
@@ -4885,11 +4945,14 @@ loc_415E8:
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersCSSIds")]
     stbx r3, r12, r25
 loc_41630:
-    cmpwi r19, 0x2          # \
-    bne+ loc_noSmashdown1   # |
-    li r0, 0x1              # | Keep track of which character has been selected before if in Smashdown roster mode 
-    stbx r0, r18, r3        # /
-loc_noSmashdown1:
+    cmpwi r19, 0x0              # \
+    blt+ loc_noSmashdown1       # | Keep track of which character has been selected before if in Smashdown roster mode (or just remove from team if only in Smashup mode)
+    bne+ loc_updateSmashDown1   # |
+    cmpwi r31, 0x0              # | Check if team 1 for Smashup
+    bne+ loc_noSmashdown1       # |
+loc_updateSmashDown1:           # |
+    stbx r19, r18, r3           # | Update Smashdown flag for the character
+loc_noSmashdown1:               # /
     /* 00041630: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
     /* 00041634: */    cmpwi r3,0x1B
     /* 00041638: */    stwx r3,r20,r27 #stwx r3,r4,r27
@@ -4981,11 +5044,14 @@ loc_416FC:
     bge- loc_p1AndP2NotSame     # |
     addi r23, r23, 0x1          # /
 loc_p1AndP2NotSame:
-    cmpwi r19, 0x2          # \
-    bne+ loc_noSmashdown2   # |
-    li r0, 0x1              # | Keep track of which character has been selected before if in Smashdown roster mode 
-    stbx r0, r18, r3        # /
-loc_noSmashdown2:
+    cmpwi r19, 0x0              # \
+    blt+ loc_noSmashdown2       # | Keep track of which character has been selected before if in Smashdown roster mode (or just remove from team if only in Smashup mode)
+    bne+ loc_updateSmashDown2   # |
+    cmpwi r31, 0x0              # | Check if team 1 for Smashup
+    bne+ loc_noSmashdown2       # |
+loc_updateSmashDown2:           # |
+    stbx r19, r18, r3           # | Update Smashdown flag for the character
+loc_noSmashdown2:               # /
     /* 00041704: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
     /* 00041708: */    #lwz r3,0x54(r3)
     /* 0004170C: */    cmpwi r3,0x1B
@@ -5089,65 +5155,66 @@ loc_4181C:
     /* 0004182C: */    addi r1,r1,0x50 #addi r1,r1,0x40
     /* 00041830: */    blr
 muAdvSelchrCTask__reportResult:
-    /* 00041834: */    stwu r1,-0x20(r1)
-    /* 00041838: */    mflr r0
-    /* 0004183C: */    stw r0,0x24(r1)
-    /* 00041840: */    stw r31,0x1C(r1)
-    /* 00041844: */    lis r31,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_17A88")]
-    /* 00041848: */    addi r31,r31,0x0                         [R_PPC_ADDR16_LO(40, 5, "loc_17A88")]
-    /* 0004184C: */    stw r30,0x18(r1)
-    /* 00041850: */    stw r29,0x14(r1)
-    /* 00041854: */    stw r28,0x10(r1)
-    /* 00041858: */    mr r28,r3
-    /* 0004185C: */    lwz r0,muAdvSelchrCTask_0xC3C(r3)
-    /* 00041860: */    cmpwi r0,0x0
-    /* 00041864: */    beq- loc_418F8
-    /* 00041868: */    addi r3,r31,0x1E8
-    /* 0004186C: */    crclr 6
-    /* 00041870: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
-    /* 00041874: */    addi r3,r31,0x210
-    /* 00041878: */    crclr 6
-    /* 0004187C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
-    /* 00041880: */    li r29,0x0
-    /* 00041884: */    li r30,0x0
-    /* 00041888: */    b loc_418A8
+    ## SSEEX: Removed to save space and not really needed since it's just for debugging
+    /* 00041834: */    #stwu r1,-0x20(r1)
+    /* 00041838: */    #mflr r0
+    /* 0004183C: */    #stw r0,0x24(r1)
+    /* 00041840: */    #stw r31,0x1C(r1)
+    /* 00041844: */    #lis r31,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_17A88")]
+    /* 00041848: */    #addi r31,r31,0x0                         [R_PPC_ADDR16_LO(40, 5, "loc_17A88")]
+    /* 0004184C: */    #stw r30,0x18(r1)
+    /* 00041850: */    #stw r29,0x14(r1)
+    /* 00041854: */    #stw r28,0x10(r1)
+    /* 00041858: */    #mr r28,r3
+    /* 0004185C: */    #lwz r0,muAdvSelchrCTask_0xC3C(r3)
+    /* 00041860: */    #cmpwi r0,0x0
+    /* 00041864: */    #beq- loc_418F8
+    /* 00041868: */    #addi r3,r31,0x1E8
+    /* 0004186C: */    #crclr 6
+    /* 00041870: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    /* 00041874: */    #addi r3,r31,0x210
+    /* 00041878: */    #crclr 6
+    /* 0004187C: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    /* 00041880: */    #li r29,0x0
+    /* 00041884: */    #li r30,0x0
+    /* 00041888: */    #b loc_418A8
 loc_4188C:
-    /* 0004188C: */    lwzx r5,r3,r30
-    /* 00041890: */    addi r3,r31,0x228
-    /* 00041894: */    addi r4,r29,0x1
-    /* 00041898: */    crclr 6
-    /* 0004189C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
-    /* 000418A0: */    addi r30,r30,0x4
-    /* 000418A4: */    addi r29,r29,0x1
+    /* 0004188C: */    #lwzx r5,r3,r30
+    /* 00041890: */    #addi r3,r31,0x228
+    /* 00041894: */    #addi r4,r29,0x1
+    /* 00041898: */    #crclr 6
+    /* 0004189C: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    /* 000418A0: */    #addi r30,r30,0x4
+    /* 000418A4: */    #addi r29,r29,0x1
 loc_418A8:
-    /* 000418A8: */    lwz r3,muAdvSelchrCTask_0xC3C(r28)
-    /* 000418AC: */    lwz r0,0x50(r3)
-    /* 000418B0: */    cmpw r29,r0
-    /* 000418B4: */    blt+ loc_4188C
-    /* 000418B8: */    addi r3,r31,0x234
-    /* 000418BC: */    crclr 6
-    /* 000418C0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
-    /* 000418C4: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
-    /* 000418C8: */    addi r3,r31,0x24C
-    /* 000418CC: */    lwz r4,0x54(r4)
-    /* 000418D0: */    crclr 6
-    /* 000418D4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
-    /* 000418D8: */    addi r3,r31,0x258
-    /* 000418DC: */    crclr 6
-    /* 000418E0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
-    /* 000418E4: */    lwz r4,muAdvSelchrCTask_0xC3C(r28)
-    /* 000418E8: */    addi r3,r31,0x268
-    /* 000418EC: */    lwz r4,0x60(r4)
-    /* 000418F0: */    crclr 6
-    /* 000418F4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    /* 000418A8: */    #lwz r3,muAdvSelchrCTask_0xC3C(r28)
+    /* 000418AC: */    #lwz r0,0x50(r3)
+    /* 000418B0: */    #cmpw r29,r0
+    /* 000418B4: */    #blt+ loc_4188C
+    /* 000418B8: */    #addi r3,r31,0x234
+    /* 000418BC: */    #crclr 6
+    /* 000418C0: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    /* 000418C4: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
+    /* 000418C8: */    #addi r3,r31,0x24C
+    /* 000418CC: */    #lwz r4,0x54(r4)
+    /* 000418D0: */    #crclr 6
+    /* 000418D4: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    /* 000418D8: */    #addi r3,r31,0x258
+    /* 000418DC: */    #crclr 6
+    /* 000418E0: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    /* 000418E4: */    #lwz r4,muAdvSelchrCTask_0xC3C(r28)
+    /* 000418E8: */    #addi r3,r31,0x268
+    /* 000418EC: */    #lwz r4,0x60(r4)
+    /* 000418F0: */    #crclr 6
+    /* 000418F4: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
 loc_418F8:
-    /* 000418F8: */    lwz r0,0x24(r1)
-    /* 000418FC: */    lwz r31,0x1C(r1)
-    /* 00041900: */    lwz r30,0x18(r1)
-    /* 00041904: */    lwz r29,0x14(r1)
-    /* 00041908: */    lwz r28,0x10(r1)
-    /* 0004190C: */    mtlr r0
-    /* 00041910: */    addi r1,r1,0x20
+    /* 000418F8: */    #lwz r0,0x24(r1)
+    /* 000418FC: */    #lwz r31,0x1C(r1)
+    /* 00041900: */    #lwz r30,0x18(r1)
+    /* 00041904: */    #lwz r29,0x14(r1)
+    /* 00041908: */    #lwz r28,0x10(r1)
+    /* 0004190C: */    #mtlr r0
+    /* 00041910: */    #addi r1,r1,0x20
     /* 00041914: */    blr
 muAdvSelchrCTask__mainStepAppearInit:
     /* 00041918: */    stwu r1,-0xB0(r1)

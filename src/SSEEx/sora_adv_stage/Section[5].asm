@@ -25256,41 +25256,43 @@ loc_17C68:
         .4byte 0x5F5F3000
 loc_17C6C:
         .4byte 0x25640000
-        .4byte 0x2D2D2D20
-        .4byte 0x43686172
-        .4byte 0x61637465
-        .4byte 0x72207365
-        .4byte 0x6C656374
-        .4byte 0x20547970
-        .4byte 0x652D4320
-        .4byte 0x52657375
-        .4byte 0x6C74202D
-        .4byte 0x2D2D0A00
-        .4byte 0x31502073
-        .4byte 0x656C6563
-        .4byte 0x74656420
-        .4byte 0x63686172
-        .4byte 0x61637465
-        .4byte 0x720A0000
-        .4byte 0x20282564
-        .4byte 0x29203A20
-        .4byte 0x25640A00
-        .4byte 0x32502073
-        .4byte 0x656C6563
-        .4byte 0x74656420
-        .4byte 0x63686172
-        .4byte 0x61637465
-        .4byte 0x720A0000
-        .4byte 0x20282D29
-        .4byte 0x203A2025
-        .4byte 0x640A0000
-        .4byte 0x7365616C
-        .4byte 0x20636861
-        .4byte 0x72616374
-        .4byte 0x65720A00
-        .4byte 0x20202020
-        .4byte 0x20202025
-        .4byte 0x640A0000
+        ## SSEEX: Removed to save space and not really needed since it's just for debugging
+        # (used for muAdvSelchrCTask::reportResult)
+        #.4byte 0x2D2D2D20
+        #.4byte 0x43686172
+        #.4byte 0x61637465
+        #.4byte 0x72207365
+        #.4byte 0x6C656374
+        #.4byte 0x20547970
+        #.4byte 0x652D4320
+        #.4byte 0x52657375
+        #.4byte 0x6C74202D
+        #.4byte 0x2D2D0A00
+        #.4byte 0x31502073
+        #.4byte 0x656C6563
+        #.4byte 0x74656420
+        #.4byte 0x63686172
+        #.4byte 0x61637465
+        #.4byte 0x720A0000
+        #.4byte 0x20282564
+        #.4byte 0x29203A20
+        #.4byte 0x25640A00
+        #.4byte 0x32502073
+        #.4byte 0x656C6563
+        #.4byte 0x74656420
+        #.4byte 0x63686172
+        #.4byte 0x61637465
+        #.4byte 0x720A0000
+        #.4byte 0x20282D29
+        #.4byte 0x203A2025
+        #.4byte 0x640A0000
+        #.4byte 0x7365616C
+        #.4byte 0x20636861
+        #.4byte 0x72616374
+        #.4byte 0x65720A00
+        #.4byte 0x20202020
+        #.4byte 0x20202025
+        #.4byte 0x640A0000
 loc_17CFC:
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_17D80")]
         .4byte 0x00000000
