@@ -43,6 +43,10 @@
 # Useful if want to put sequenceIndex so that character selection happens after movie or end stage
 
 loc_stAdventure2__changeStep_SSEEX:
+    li r10, 0x0
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    
     ## Check for character unlocks
     li r10, 201                         # num Ex characters
     lis r12,0x0                         [R_PPC_ADDR16_HA(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
@@ -159,7 +163,11 @@ loc_stAdventure2__getBgmId_customTracklist:
     lhz r10, -0xE00(r12)    # | Check if a tlst is uploaded
     cmpwi r10, 0x544C       # |
     bnelr-                  # /
-    lwz r3, -0xDF4(r12)     # Get custom song id from 1st tlst entry
+    lis r11,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    lbz r10, 0x0(r11)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    mulli r10, r10, 0x10    # \ Get entry based on sublevel index
+    add r12, r12, r10       # /
+    lwz r3, -0xDF4(r12)     # Get custom song id from tlst entry
     blr
 
 loc_stAdventure2__getBgmVolume_customTracklist:
@@ -167,6 +175,10 @@ loc_stAdventure2__getBgmVolume_customTracklist:
     lhz r10, -0xE00(r12)    # | Check if a tlst is uploaded
     cmpwi r10, 0x544C       # |
     bne- loc_noTlst1        # /
+    lis r11,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    lbz r10, 0x0(r11)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    mulli r10, r10, 0x10    # \ Get entry based on sublevel index
+    add r12, r12, r10       # /
     lbz r5, -0xDEE(r12)     # Get volume from 1st tlst entry
 loc_noTlst1:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_bgmConvertToFloat")]
@@ -176,6 +188,10 @@ loc_stAdventure2__getBgmPlayOffsetFrame_customTracklist:
     lhz r10, -0xE00(r12)    # | Check if a tlst is uploaded
     cmpwi r10, 0x544C       # |
     bne- loc_noTlst2        # /
+    lis r11,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    lbz r10, 0x0(r11)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    mulli r10, r10, 0x10    # \ Get entry based on sublevel index
+    add r12, r12, r10       # /
     lhz r5, -0xDF0(r12)     # Get bgmPlayOffsetFrame from 1st tlst entry
 loc_noTlst2:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_bgmConvertToFloat")]

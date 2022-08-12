@@ -2820,6 +2820,8 @@ loc_overrideCharactersCSSIds:
         .byte 0x00
 loc_prevSequenceIndex:
         .4byte 0xFFFFFFFF
+loc_subLevelIndex:
+        .byte 0x00
 loc_advExSaveData:
         .byte 0x00      # 0x2A
         .byte 0x00      # 0x2B
