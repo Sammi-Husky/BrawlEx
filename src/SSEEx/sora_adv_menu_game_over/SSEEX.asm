@@ -1,10 +1,27 @@
-loc_muAdvGameOverTask____ct_setInitialFighterSlotId:
+loc_muAdvGameOverTask____ct_SSEEX:
+    ## Decrement sublevel upon game over
+    lis r11,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
+    lbz r0, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
+    cmpwi r0, 0x1
+    bne+ loc_dontDecrementSublevel
+    lis r11,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    lbz r10, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    subi r10, r10, 0x1                # Subtract sub level index
+    cmpwi r10, 0x0                   # \ Check if new sub level index >= 0
+    blt- loc_dontDecrementSublevel  # /
+    stb r10, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    lwz r9, 0x628(r26)          # \
+    subi r9, r9, 0x1            # | Subtract lastDoorId 
+    stw r9, 0x628(r26)          # /
+loc_dontDecrementSublevel:
+    ## Set initial fighter slot id
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     lis r4,0x0                                  [R_PPC_ADDR16_HA(1, 5, "loc_7BA0")]
     addi r4, r4, 0x0                            [R_PPC_ADDR16_LO(1, 5, "loc_7BA0")]
     bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__searchSequence")]
     stw r28, 0x14(r3)           # set sqAdventure->initialFighterSlotId=0 to signify to start with selectedSlotIds
     b __unresolved                          [R_PPC_REL24(33, 1, "loc_434")]
+
 
 loc_muAdvGameOverTask____ct_exFighterTrophies:
     lbz r10, 0x4925(r26)        #advSaveData->gameOverSlotIds[i]

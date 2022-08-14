@@ -1598,14 +1598,9 @@ loc_onlySmashdown:
     lbz r6, 0x15A(r1)               # \
     cmpw r7, r6                     # | Check total number of team members >= min num characters to be unlocked
     bge+ loc_minUnlocksSatisfied    # /
-    lwz r10, 0x62C(r18)         # Get advSaveData->jumpLevelId
+    lwz r10, 0x628(r18)         # Get advSaveData->lastDoorId
     rlwinm r10, r10,0,0,23      # \
-    addi r10, r10, 0x19         # | 
-    stw r10, 0x62C(r18)         # | Set jumpLevelId to (jumpLevelId & 0xFFFFFF00) + 0x19 i.e. make sublevel id 0x19 (y)
-    stw r10, 0x620(r18)         # Update currentLevelId
-    stw r10, 0x624(r18)         # Update activeLevelId
-    lwz r10, 0x628(r18)         # \
-    rlwinm r10,r10,0,24,31      # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
+    addi r10, r10, 0xFF         # | Set door id to 0xFF
     stw r10, 0x628(r18)         # /
     stb r0, muAdvSelchrCTask_sublevelChanger(r29)
     
@@ -3221,16 +3216,14 @@ loc_4010C:
     nop
     nop
     nop
-    nop
+    nop 
+    nop 
+
+    nop 
+    nop 
     nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +15
+    # +13
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
@@ -4852,37 +4845,45 @@ loc_415CC:
 
     lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r12,0x0(r12)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r12, 0x30(r12)          # | Get GameGlobal->advSaveData->jumpLevelId
-    lwz r9, 0x62C(r12)          # / (if it's 0 then skip)
+    lwz r12, 0x30(r12)          # | Get GameGlobal->advSaveData->lastDoorId
+    lwz r9, 0x628(r12)          # / (if it's 0 then skip)
     lbz r8, 0x5FD(r12)          # Get current stage difficulty
+    li r7, 0x3                  # \
+    subi r8, r8, 0x2            # | Get selected difficulty from (currentStageDifficulty - 2) / 3
+    divw r8, r8, r7             # /
+    lbz r5, 0x4916(r12)         # Get num game overs in current stage
+    li r0, 0x0
     
     lbz r11, muAdvSelchrCTask_sublevelChanger(r28)
+    cmpwi r11, 0x0                          
+    beq+ loc_dontAddToJumpLevelId 
     cmpwi r11, 0x1                          # \ Check if should change sublevel based on team 
     bne+ loc_dontChangeBasedOnSelectedTeam  # /
     mr r6, r10                              # Get team number to add to jumpLevelId             
-    b loc_addToJumpLevelId
 loc_dontChangeBasedOnSelectedTeam:
     cmpwi r11, 0x2                          # \ Check if should change sublevel if coop
     bne+ loc_dontChangeBasedOnCoop          # /
     mr r6, r24                              # Get coop bool to add to jumpLevelId
-    b loc_addToJumpLevelId
 loc_dontChangeBasedOnCoop:
     cmpwi r11, 0x3                          # \ Check if should change sublevel based on difficulty
     bne+ loc_dontChangeBasedOnDifficulty    # /
-    li r7, 0x3                              # \
-    subi r6, r6, 0x2                        # | Get difficulty index to add to jumpLevelId
-    divw r6, r6, r7                         # /
+    mr r6, r8                               # Get selected difficulty to add to jumpLevelId
+loc_dontChangeBasedOnDifficulty:
+    cmpwi r11, 0x4                          # \ Check if should change sublevel based on difficulty - game over
+    bne+ loc_addToJumpLevelId               # /
+    li r0, 0x1
+    sub r6, r8, r5                          # \
+    cmpwi r6, 0x0                           # | Get selected difficulty minus num game overs to add to jump level id
+    bge+ loc_addToJumpLevelId               # |
+    li r6, 0x0                              # /
 loc_addToJumpLevelId:
     lis r11,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
     stb r6, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
-    add r9, r9, r6              # Add to jumpLevelId 
-    stw r9, 0x62C(r12)          # / Add team number to jumpLevelId  (Note: Could increment door id too instead and then gets handled by adsj)
-    stw r9, 0x620(r12)          # Update currentLevelId
-    stw r9, 0x624(r12)          # Update activeLevelId
-    lwz r9, 0x628(r12)          # \
-    rlwinm r9,r9,0,24,31        # | set lastDoorId to be just the door index (so it doesn't get used in updateStepId)
-    stw r9, 0x628(r12)          # /    
-loc_dontChangeBasedOnDifficulty:
+    add r9, r9, r6              # \ Add to lastDoorId 
+    stw r9, 0x628(r12)          # /
+loc_dontAddToJumpLevelId:
+    lis r11,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
+    stb r0, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
 
     lbz r0, muAdvSelchrCTask_rosterMode(r28)    # \
     li r19, 0x1                                 # | 

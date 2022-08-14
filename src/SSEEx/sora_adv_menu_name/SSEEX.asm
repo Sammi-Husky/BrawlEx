@@ -14,6 +14,8 @@ loc_muAdvNameTask__create_patchSoraModules:
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_gameOverEncountered")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
+    stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     stb r10,0x0(r12)        # Set override characters flag to zero

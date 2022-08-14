@@ -272,7 +272,7 @@ loc_3F0:
     lwz r26, 0x30(r26)          # / Get GameGlobal->advSaveData
     lbz r12, 0x5FB(r26) # \ advSaveData->numSelectedFighters = advSaveData->numSelectedFightersCount
     stb r12, 0x2B4(r26) # / (done because SSEEX character selection skips restartStcok and thus numSelectedFighters doesn't get updated properly)
-    b __unresolved                          [R_PPC_REL24(33, 7, "loc_muAdvGameOverTask____ct_setInitialFighterSlotId")]
+    b __unresolved                          [R_PPC_REL24(33, 7, "loc_muAdvGameOverTask____ct_SSEEX")]
     /* 000003F8: */    #b loc_434
 loc_3FC:
     /* 000003FC: */    lwz r12,0x0(r27)

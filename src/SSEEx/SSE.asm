@@ -16,6 +16,7 @@ SSEEx Levels [Kapedani]
 # 0xXX5A0000 (XX900000) to 0xXX636363 (XX999999) -> Vs. Fighter
 # 0xXX500000 (XX800000) to 0xXX596363 (XX899999) -> Vs. Boss
 # 0xXX460000 (XX700000) to 0xXX4F6363 (XX799999) -> Vs. Zako (enemies)
+# TODO: savepoints at 69? (if it is 69 then don't wipe jumpLevelId upon entering savepoint so can use selc file)
 
 HOOK @ $806e8b34    # During sqAdventure state 0x1b
 {   
@@ -76,10 +77,11 @@ op bgt- 0x24 @ $8095c1b0 # Branch to condition setting stOperatorRuleAdventure s
 #         outputId += ((shiftIdQuotient*16) + shiftIdRemainder) << i;
         
 #     }
-    
-#     outputId += (currentLevelId & 0xf) << 4; // Move sub level id to digit before
+#     if ((currentLevelId & 0xff) << 4 < 0x100) {
+#       outputId += (currentLevelId & 0xf) << 4; // Move sub level id to digit before
+#     }
 #     outputId += (lastDoorId & 0xf); // Have last door index be door index so that there is some flexibility (jump can be determined based on what door was entered previously)
-
+     
 #     return outputId;
 # }
 
@@ -94,11 +96,11 @@ HOOK @ $8095c8c4    # Hook During State 10 of stOperatorRuleAdventure::processBe
     lwz r4, 0x628(r30)  # advSaveData->lastDoorid
     li r10,8                # \
     li r6,0                 # |
-    li r5,10                # |
+    li r12,10               # |
 loc_forEachByte:            # |
     srw r7,r0,r10           # |
     andi. r7, r7, 0xFF      # |
-    divwu r9,r7,r5          # |
+    divwu r9,r7,r12         # |
     slwi r8,r9,4            # |
     mulli r9,r9,10          # | Turn first 3 bytes into base 10
     subf r9,r9,r7           # |
@@ -110,9 +112,13 @@ loc_forEachByte:            # |
     add r6,r6,r9            # |
     bne+ loc_forEachByte    # /
     rlwinm r4,r4,0,28,31    # Get last door index
-    rlwinm r0,r0,4,24,27    # Move sub level id to digit before (TODO: should check if it's F or lower)
-    add r0,r0,r4            # \
-    add r0,r0,r6            # / Calculate new final door id
+    rlwinm r0,r0,4,20,27    # Move sub level id to digit 
+    cmpwi r0, 0x100             # \ If sub level id 16 or greater don't use it to calculate new door id
+    bge+ loc_dontAddSubLevelId  # /                
+    add r6,r6,r0            # \ 
+loc_dontAddSubLevelId:      # | Calculate new final door id
+    add r0,r6,r4            # /
+    cmplwi r5, levelIdForVsZako
 }
 op bge- 0x6C @ $8095c8c8 # Branch to setting stOperatorRuleAdventure state and levelId
 
@@ -263,47 +269,73 @@ HOOK @ $80945b34  # in stLoaderStageAdventureCommon::updateStepId
     lhz r0, -0x1000(r12)    # | Check if external ADSJ is loaded
     cmpwi r0, 0x4144        # |
     bne+ %END%              # /
-    lwz r0, -0xFE4(r12)     # \
+    lwz r11, -0xFFC(r12)    # Get number of entries 
+    mulli r10, r11, 0x4     # \ Add offset based on number of entries
+    add r12, r12, r10       # /
+    mtctr r11
+loopThroughADSJ1:
+    lwz r0, -0xFE8(r12)     # \
     lwz r10, 0xD0(r30)      # |
     lwz r10, 0x620(r10)     # | Check if advStepJumpEntry->jumpLevelId == advSaveData->currentLevelId 
     cmpw r0, r10            # |
-    bne+ %END%              # /
-    lbz r0, -0xFE8(r12)     # \
+    bne+ notMatchingEntry1  # /
+    lbz r0, -0xFEC(r12)     # \
     cmpwi r0, 0x1           # | Check if advStepJumpEntry->flag0 is 0x1
-    bne+ %END%              # /
-    lwz r4, -0xFEC(r12)     # Load level id from ADSJ
+    bne+ notMatchingEntry1  # /
+    lwz r4, -0xFF0(r12)     # Load level id from ADSJ
+notMatchingEntry1:
+    addi r12, r12, 0x2C
+    bdnz loopThroughADSJ1
 }
 
 HOOK @ $80945bb0 # in stLoaderStageAdventureCommon::updateStepId 
 {
     li r0, 0x0
     lis r31, 0x8053         # \ 
-    ori r31, r31, 0xF014    # | Set pointer to external ADSJ entry
-    lhz r12, -0x14(r31)     # | Check if external ADSJ is loaded
+    ori r31, r31, 0xF010    # | Set pointer to external ADSJ entry
+    lhz r12, -0x10(r31)     # | Check if external ADSJ is loaded
     cmpwi r12, 0x4144       # |
     bne+ %END%              # /
+    lwz r11, -0xC(r31)      # Get number of entries 
+    mulli r10, r11, 0x4     # \ Add offset based on number of entries
+    add r31, r31, r10       # /
+    mtctr r11
+loopThroughADSJ2:
     lwz r12, 0x0(r31)       # \
     lwz r10, 0xD0(r30)      # |
     lwz r10, 0x628(r10)     # | Check if advStepJumpEntry->levelId == advSaveData->lastDoorId 
     cmpw r12, r10           # |
-    bne+ %END%              # /
+    bne+ notMatchingEntry2  # /
     li r0, 0x1
+    b %END%
+notMatchingEntry2:
+    addi r31, r31, 0x2C
+    bdnz loopThroughADSJ2
 }
 
 HOOK @ $80945cc0 # in stLoaderStageAdventureCommon::updateStepId 
 {
     li r0, 0x0
-    lis r31, 0x8053         # \
-    ori r31, r31, 0xF014    # | Set pointer to external ADSJ entry
-    lhz r12, -0x14(r31)     # | Check if external ADSJ is loaded
+    lis r31, 0x8053         # \ 
+    ori r31, r31, 0xF010    # | Set pointer to external ADSJ entry
+    lhz r12, -0x10(r31)     # | Check if external ADSJ is loaded
     cmpwi r12, 0x4144       # |
     bne+ %END%              # /
+    lwz r11, -0xC(r31)      # Get number of entries 
+    mulli r10, r11, 0x4     # \ Add offset based on number of entries
+    add r31, r31, r10       # /
+    mtctr r11
+loopThroughADSJ3:
     lwz r12, 0x0(r31)       # \
     lwz r10, 0xD0(r30)      # |
     lwz r10, 0x628(r10)     # | Check if advStepJumpEntry->levelId == advSaveData->lastDoorId 
     cmpw r12, r10           # |
-    bne+ %END%              # /
+    bne+ notMatchingEntry3  # /
     li r0, 0x1
+    b %END%
+notMatchingEntry3:
+    addi r31, r31, 0x2C
+    bdnz loopThroughADSJ3
 }
 
 ###########################################################################################################

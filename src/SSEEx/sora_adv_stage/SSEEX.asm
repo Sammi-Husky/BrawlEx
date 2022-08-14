@@ -127,7 +127,10 @@ loc_stAdventure2__changeStep_findExternalADSJ:
     cmpwi r3, 0x0
     bne+ loc_adsjNotFound
     lis r27, 0x8053
-    ori r27, r27, 0xF014
+    ori r27, r27, 0xF010
+    lwz r11, -0xC(r27)      # Get number of entries 
+    mulli r11, r11, 0x4     # \ Add offset based on number of entries to get first entry of adsj file
+    add r27, r27, r11       # /
 loc_adsjNotFound:
     lwz r8,0x524(r31)
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_1F04")]
