@@ -1372,14 +1372,19 @@ loc_3EC0C:
     li r25, 0x0
     li r30, 0x2
 
-    cmpwi r20, 0x0                          # \ Check if should add back surviving members
-    beq+ loc_skipCheckForSurvivingMembers   # /
+    lbz r3, 0xF3(r28)                   # \
+    cmpwi r3, 0x0                       # | 
+    beq+ loc_noGameOver                 # | If game over was encountered set add surviving members option to No
+    li r20, 0x0                         # |
+loc_noGameOver:                         # /
+
     lbz r3, 0x98(r21)       # \ gmGlobalModeMelee->gmPlayer1InitData.slotID 
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add P1 CSSID to survival array
+    cmpwi r20, 0x1          # |
+    blt+ loc_notSmashup1    # |
     stbx r25, r28, r3       # | Reset Smashdown flag
-    cmpwi r20, 0x2          # |
-    bne+ loc_notSmashup1    # |
+    ble+ loc_notSmashup1    # |
     stbx r30, r28, r3       # | Set Smashup flag
 loc_notSmashup1:            # |
     addi r23, r23, 0x1      # /   
@@ -1389,9 +1394,10 @@ loc_notSmashup1:            # |
     lbz r3, 0xF4(r21)       # \ gmGlobalModeMelee->gmPlayer2InitData.slotID 
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add P2 CSSID to survival array
+    cmpwi r20, 0x1          # |
+    blt+ loc_notSmashup2    # |
     stbx r25, r28, r3       # | Reset Smashdown flag
-    cmpwi r20, 0x2          # |
-    bne+ loc_notSmashup2    # |
+    ble+ loc_notSmashup2    # |
     stbx r30, r28, r3       # | Set Smashup flag
 loc_notSmashup2:            # |
     addi r23, r23, 0x1      # /  
@@ -1407,9 +1413,10 @@ loc_loopThroughPrevSelectedMembers:
     lbzx r3, r19, r15       # \ Get next prev selected slotId
     bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     stbx r3, r24, r23       # | Add CSS Id to survival array
+    cmpwi r20, 0x1          # |
+    blt+ loc_notSmashup3    # |
     stbx r25, r28, r3       # | Reset Smashdown flag
-    cmpwi r20, 0x2          # |
-    bne+ loc_notSmashup3    # |
+    ble+ loc_notSmashup3    # |
     stbx r30, r28, r3       # | Set Smashup flag
 loc_notSmashup3:            # |
     addi r23, r23, 0x1      # /
@@ -1522,9 +1529,6 @@ loc_addNumTeamMembers:
     beq+ loc_skipAddSurvivingMembers              # /
     cmpwi r19, 0x1                      # \ Check if should add back surviving members
     bne+ loc_skipAddSurvivingMembers    # /                 
-    lbz r3, 0xF3(r28)                   # \
-    cmpwi r3, 0x1                       # | Check if a game over was encountered
-    beq- loc_skipAddSurvivingMembers    # /
 loc_addSurvivingMembers:
     cmpw r4, r23                        # \ Check if all surviving members have been added
     bge+ loc_skipAddSurvivingMembers    # /
@@ -1547,13 +1551,12 @@ loc_skipAddSurvivingMembers:
     mr r5, r11                  # |
     addi r5, r5, 0x1            # /
 loc_noMembersInTeam:
-    addi r7, r7, r8             # Add num in team to total number of members
+    add r7, r7, r8              # Add num in team to total number of members
     addi r11, r11, 0x1
     addi r9, r9, 0xAC                                  
     addi r10, r10, 0xAC                                   
     cmpwi r11, 0x8
     blt+ loc_addNumTeamMembers 
-    # TODO:If no members add surviving members to team 1 regardless by memcopying to team1 and updating numTeams and team 1 members
     
     ## Add existing Smashup members to Team 1
     lbz r8, muAdvSelchrCTask_team0MemberCount(r29)  
@@ -1594,7 +1597,7 @@ loc_noSmashup:
 loc_onlySmashdown:
 
     stb r0, 0xF3(r28)       # Reset game over encountered flag
-    ## Check if minumum number of unlocks is satisfied (otherwise go back to an alternate path)
+    ## Check if minumum number of unlocks is satisfied (otherwise go to an alternate path)
     lbz r6, 0x15A(r1)               # \
     cmpw r7, r6                     # | Check total number of team members >= min num characters to be unlocked
     bge+ loc_minUnlocksSatisfied    # /
@@ -1603,17 +1606,21 @@ loc_onlySmashdown:
     addi r10, r10, 0xFF         # | Set door id to 0xFF
     stw r10, 0x628(r18)         # /
     stb r0, muAdvSelchrCTask_sublevelChanger(r29)
-    
-    #stw r10, 0x6FC(r29)
-    #stb r10, muAdvSelchrCTask_team0MemberCount(r29) 
-    #li r10, 0x1
-    #stw r10, 0x6F8(r29) 
 loc_minUnlocksSatisfied:
 
-    # TODO: For sub-level based on team number, keep track of number so can add to the SongId so can have different songs based on selection
-    ## Also implement for selb
-    ## Also have case to send to different level if p2 or difficulty
-    ## For difficulty, have two options, one for set difficulty and also go based on difficulty - GameOver and set flag for muAdvGameOver to decrease doorId upon GameOver
+    ## If no members add surviving members to team 1 regardless by memcopying to team1 and updating numTeams and team 1 members
+    cmpwi r7, 0x0                       # \ Check if there are any members already
+    bne+ loc_atLeastOneMemberPresent    # /
+    addi r3, r29, 0x44                      # Get to beginning of team member array
+    mr r4, r24                              # Get surviving members array
+    mr r5, r23                              # Get number of surviving members
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] 
+    stb r23, muAdvSelchrCTask_team0MemberCount(r29)
+    li r5, 0x1          # \ Update number of teams to have one team
+    stw r5,0x6F8(r29)   # / 
+loc_atLeastOneMemberPresent:
+
+    # TODO: Implement sub-level changer for selb
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: Could have numStocks be changed as temp overwrite value for numStocks in restartStcok and make sure setAdventureCondition is called (then can have more stocks being able to be assigned and less GameOver jank)
@@ -3210,20 +3217,8 @@ loc_4010C:
     
     nop
     nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop 
-    nop 
 
-    nop 
-    nop 
-    nop
-
-    # +13
+    # +2
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
