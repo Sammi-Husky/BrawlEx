@@ -821,6 +821,7 @@ muAdvSelchrCTask__setMenuData:
     stb r10, muAdvSelchrCTask_numStocks(r29)    # /    
     lbz r11, 0x154(r1)                          # \ Set num of members to select from selc file
     stw r11, 0x6FC(r29)                         # /
+    # Handle special number of stocks settings
     lbz r7, 0x5FA(r20)      # \ 
     addi r7, r7, 0x1        # | Get previous num stocks  
     lwz r5, 0x8(r19)        # |        
@@ -1620,7 +1621,6 @@ loc_minUnlocksSatisfied:
     stw r5,0x6F8(r29)   # / 
 loc_atLeastOneMemberPresent:
 
-    # TODO: Implement sub-level changer for selb
     # TODO: Random
     ## For gauntlet checkpoints, maybe have option to only go to once when random and you're forced to take the options, risk vs reward to switch characters or keep the same characters 
     # TODO: Could have numStocks be changed as temp overwrite value for numStocks in restartStcok and make sure setAdventureCondition is called (then can have more stocks being able to be assigned and less GameOver jank)
@@ -4841,7 +4841,7 @@ loc_415CC:
     lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r12,0x0(r12)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r12, 0x30(r12)          # | Get GameGlobal->advSaveData->lastDoorId
-    lwz r9, 0x628(r12)          # / (if it's 0 then skip)
+    lwz r9, 0x628(r12)          # /
     lbz r8, 0x5FD(r12)          # Get current stage difficulty
     li r7, 0x3                  # \
     subi r8, r8, 0x2            # | Get selected difficulty from (currentStageDifficulty - 2) / 3

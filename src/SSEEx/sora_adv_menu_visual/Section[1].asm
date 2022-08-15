@@ -9,7 +9,7 @@ muAdvSelchrBTask__create:
     /* 0000001C: */    mr r28,r4
     /* 00000020: */    mr r29,r5
     /* 00000024: */    addi r31,r31,0x0                         [R_PPC_ADDR16_LO(29, 5, "loc_0")]
-    /* 00000028: */    li r3,0x371 #0x36C
+    /* 00000028: */    li r3,0x372 #0x36C
     /* 0000002C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
     /* 00000030: */    cmpwi r3,0x0
     /* 00000034: */    mr r30,r3
@@ -193,6 +193,7 @@ muAdvSelchrBTask____ct:
     /* 00000290: */    stw r31,0x33C(r30)
     li r12, 0xFF
     stb r12, 0x370(r30)
+    stb r31, 0x371(r30)
     /* 00000294: */    lwz r31,0xC(r1)
     /* 00000298: */    lwz r30,0x8(r1)
     /* 0000029C: */    lwz r0,0x14(r1)
@@ -727,8 +728,51 @@ loc_9F4:
 
     addi r27, r29, 0x4      # Set pointer to character table from file
     lbz r31, 0x0(r29)       # Get number of members to select from .selb file
-    lbz r12, 0x1(r29)       # \ Get number of lives from .selb file and store later for storeResult
-    stb r12, 0x370(r25)     # /
+    lbz r10, 0x1(r29)       # \ Get number of lives from .selb file and store later for storeResult
+    stb r10, 0x370(r25)     # /
+    lbz r12, 0x2(r29)       # \ Get sublevel changer from .selb file and store later for storeResult
+    stb r12, 0x371(r25)     # /
+    # Handle special number of stocks settings
+    lis r11,0x0                         [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r11,0x0(r11)                    [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r12, 0x30(r11)      # / Get GameGlobal->advSaveData
+    lbz r7, 0x5FA(r12)      # \ 
+    addi r7, r7, 0x1        # | Get previous num stocks  
+    lwz r5, 0x8(r11)        # |        
+    lbz r5, 0xF5(r5)        # | Check if p2 is alive by checking if GameGlobal->gmGlobalModeMelee->gmPlayer2InitData.initState == 0
+    cmpwi r5, 0x0           # |               
+    bne+ loc_p2NotAlive     # | GameGlobal->AdvSaveData->numReserveStock + 1 (P1) + 1 (P2 if they are alive)
+    addi r7, r7, 0x1        # |
+loc_p2NotAlive:             # /
+    cmpwi r7, 0xA                   # \
+    ble+ loc_isLessThanMaxStocks    # | max(0xA, previous stock count)
+    li r7, 0xA                      # |
+loc_isLessThanMaxStocks:            # /
+    cmpwi r10, 0xFE                             # \
+    bne+ loc_noKeepPrevStockCount               # | if numStocks from selc = -2, set numStocks to previous stock count
+    stb r7, 0x370(r25)                          # |
+    cmpwi r31, 0x0                              # |
+    bne+ loc_noKeepPrevStockCount               # | if there is no set numFightersToSelect, set it to previous stock count
+    mr r31, r7                                  # |
+loc_noKeepPrevStockCount:                       # /
+    add r7, r7, r31             # \
+    cmpwi r7, 0xA               # | 
+    ble+ loc_isUnderMaxStocks   # | max(0xA, numFightersToSelect + previous stock count)
+    li r7, 0xA                  # |
+loc_isUnderMaxStocks:           # /
+    cmpwi r10, 0xFD                                 # \
+    bne+ loc_noAddPrevStockCountToCharacterCount    # | if numStocks from selc = -3, set numStocks to previous stock count + numFightersToSelect
+    stb r7, 0x370(r25)                              # |
+loc_noAddPrevStockCountToCharacterCount:            # /
+    cmpwi r10, 0xFC                                 # \
+    bne+ loc_noAddCharacterCountToPrevStockCount    # | if numStocks from selc = -4, set numFightersToSelect to previous stock count + numFightersToSelect
+    mr r31, r7                                      # |
+loc_noAddCharacterCountToPrevStockCount:            # /
+    cmpwi r10, 0xFB                                 # \
+    bne+ loc_noAddToBoth                            # | if numStocks from selc = -5, set numFightersToSelect and numStocks to previous stock count + numFightersToSelect
+    mr r31, r7                                      # | (difference is if there isn't enough characters to select, stock count will still be used)
+    stb r7, 0x370(r25)                              # |
+loc_noAddToBoth:                                    # /
     b loc_skipUtRelocate
 loc_normalTable:
     /* 000009F4: */    mr r4,r29
@@ -787,11 +831,15 @@ loc_AB0:
     /* 00000AB8: */    bge+ loc_A38
     /* 00000ABC: */    stw r26,0x334(r25)
     cmpwi r28, 0x0
-    beq loc_skipFillingMembers
+    beq loc_clampNumMembersToSelect
     /* 00000ACC: */    addi r3,r1,0x8
     /* 00000AD0: */    li r4,-0x1
     /* 00000AD4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IpHuman____dt")]
     /* 00000AC8: */    lbz r31,0x0(r28)
+loc_clampNumMembersToSelect:
+    cmpw r31, r26                   # \
+    ble+ loc_skipFillingMembers     # | If numMembersToSelect > numMembers then numMembersToSelect = numMembers
+    mr r31, r26                     # /
 loc_skipFillingMembers:
     /* 00000AC0: */    mr r3,r29
     /* 00000AC4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfHeapManager__free")]
@@ -2478,7 +2526,7 @@ muAdvSelchrBTask__storeResult:
     /* 000021F4: */    mflr r0
     /* 000021F8: */    stw r0,0x24(r1)
     addi r11,r1,0x20
-    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
 
     lis r28,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r28,0x0(r28)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
@@ -2494,6 +2542,57 @@ muAdvSelchrBTask__storeResult:
     /* 00002218: */    li r5,0x68
     /* 0000221C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]    
     /* 00002220: */    #mr r6,r31
+
+    /* 00002278: */    addi r3,r31,0x194
+    /* 0000228C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]    
+    /* 00002290: */    rlwinm r0,r3,1,31,31
+    /* 00002294: */    xori r26,r0,0x1
+
+    ## SSEEX: Add first selected index to jumpLevelId if setting is set in selc (so can have different levels depending on first character picked)
+
+    lwz r10, 0x164(r31)         # Get first selected index
+    lis r12,0x0                          [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r12,0x0(r12)                      [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r12, 0x30(r12)          # | Get GameGlobal->advSaveData->lastDoorId
+    lwz r9, 0x628(r12)          # /
+    lbz r8, 0x5FD(r12)          # Get current stage difficulty
+    li r7, 0x3                  # \
+    subi r8, r8, 0x2            # | Get selected difficulty from (currentStageDifficulty - 2) / 3
+    divw r8, r8, r7             # /
+    lbz r5, 0x4916(r12)         # Get num game overs in current stage
+    li r0, 0x0
+    
+    lbz r11, 0x371(r31)  # Get sublevel changer setting
+    cmpwi r11, 0x0                          
+    beq+ loc_dontAddToJumpLevelId 
+    cmpwi r11, 0x1                          # \ Check if should change sublevel based on team 
+    bne+ loc_dontChangeBasedOnSelectedTeam  # /
+    mr r6, r10                              # Get team number to add to jumpLevelId             
+loc_dontChangeBasedOnSelectedTeam:
+    cmpwi r11, 0x2                          # \ Check if should change sublevel if coop
+    bne+ loc_dontChangeBasedOnCoop          # /
+    mr r6, r26                              # Get coop bool to add to jumpLevelId
+loc_dontChangeBasedOnCoop:
+    cmpwi r11, 0x3                          # \ Check if should change sublevel based on difficulty
+    bne+ loc_dontChangeBasedOnDifficulty    # /
+    mr r6, r8                               # Get selected difficulty to add to jumpLevelId
+loc_dontChangeBasedOnDifficulty:
+    cmpwi r11, 0x4                          # \ Check if should change sublevel based on difficulty - game over
+    bne+ loc_addToJumpLevelId               # /
+    li r0, 0x1
+    sub r6, r8, r5                          # \
+    cmpwi r6, 0x0                           # | Get selected difficulty minus num game overs to add to jump level id
+    bge+ loc_addToJumpLevelId               # |
+    li r6, 0x0                              # /
+loc_addToJumpLevelId:
+    lis r11,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    stb r6, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    add r9, r9, r6              # \ Add to lastDoorId 
+    stw r9, 0x628(r12)          # /
+loc_dontAddToJumpLevelId:
+    lis r11,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
+    stb r0, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
+
     /* 00002224: */    li r8,0x0
     /* 00002228: */    li r7,0x0
     /* 0000222C: */    li r4,0x3E
@@ -2545,11 +2644,8 @@ loc_atLeastOneMember:
     /* 00002280: */    lwz r0,0x264(r31)
     /* 00002284: */    #lwz r4,0x348(r31)
     /* 00002288: */    stw r0,0x5C(r29) #stw r0,0x5C(r4)
-    /* 00002278: */    addi r3,r31,0x194
-    /* 0000228C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__getControllerID")]    
-    /* 00002290: */    rlwinm r0,r3,1,31,31
-    /* 00002294: */    xori r0,r0,0x1
-    /* 00002298: */    cmpwi r0,0x0
+
+    /* 00002298: */    cmpwi r26,0x0 #cmpwi r0,0x0
     /* 0000229C: */    beq- loc_22E0
     /* 000022A0: */    #lwz r0,0x264(r31)
     /* 000022A4: */    cmpwi r27,0x0 #cmpwi r0,0x0
@@ -2645,7 +2741,7 @@ loc_p1AndP2NotSame:
     stw r4,0x54(r29)                 # store in menuTask->advSelchrResult->p2CSSId
 loc_noResult:
     addi r11,r1,0x20
-    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
     /* 000022F8: */    lwz r0,0x24(r1)
     /* 000022FC: */    #lwz r31,0x1C(r1)
     /* 00002300: */    mtlr r0
@@ -3285,90 +3381,7 @@ muAdvSelchrBTask__mainStepZombieMain:
     nop
     nop
 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop   
-    
-    nop
-    nop
-    nop
-    nop
-    nop
-
-    # +105
+    # +30
 
 muAdvSelchrBTask__isSelected:
     /* 00002BAC: */    lwz r0,0xB4(r3)
