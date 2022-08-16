@@ -2155,7 +2155,7 @@ loc_resetJumpInfo:                          # |
     /* 00001F34: */    #lwz r3,0x524(r3)    # |
     /* 00001F38: */    addi r3,r28,0x630    # /
     /* 00001F3C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    /* 00001F4C: */    b loc_SSEEX
+    /* 00001F4C: */    b loc_changeSequenceIndex
 loc_1F50:
     /* 00001F54: */    li r4,0x0
     /* 00001F58: */    li r5,0x20
@@ -2194,8 +2194,8 @@ loc_1FC4:
     /* 00001FD4: */    li r4,0x3EA
     /* 00001FD8: */    li r5,0x1
     /* 00001FDC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "adKeepManager__setGlobalFlag")]
-loc_SSEEX:
-    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_SSEEX")]
+loc_changeSequenceIndex:
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_changeSequenceIndex")]
 loc_1FE0:
     /* 00001FE0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
     /* 00001FE4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]

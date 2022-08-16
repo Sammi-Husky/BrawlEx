@@ -30,11 +30,34 @@
 # TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone) or jumpLevelId?
 # TODO: Game Over takes you to another stage (can do this maybe based on sublevel id?), change door id to 0xFF
 
-###########################################################################
-## SSEEX: Redirect door index based on jumpLevelId and Flag2 random setting
-###########################################################################
+######################################################################################################################
+## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId and Flag2 random setting
+######################################################################################################################
 loc_stAdventure2__changeStep_checkForRedirectDoorIndex:
     lwz r29,0x628(r28)  # Get current lastDoorId
+    
+    ## Check for character unlocks
+    li r10, 201                         # num Ex characters
+    lis r12,0x0                         [R_PPC_ADDR16_HA(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
+    addi r12, r12, 0x0                  [R_PPC_ADDR16_LO(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
+    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    li r6, 0x1                  # \
+    mtctr r10                   # |
+loc_checkStepJumpId:            # |
+    lwz r8, 0x0(r12)            # |
+    cmpw r8, r29                # |
+    bne+ loc_continueLoop       # |
+    lbz r7, 0x0(r11)            # | Loop through each step jump unlock criteria for each character, check if it equals current step jump
+    cmplwi r7, 1                # | If it does (and the character hasn't been unlocked yet), then set unlock flag for that character
+    bgt+ loc_continueLoop       # |
+    stb r6, 0x0(r11)            # |
+loc_continueLoop:               # |
+    addi r12, r12, 0x4          # |
+    addi r11, r11, 0x1          # |
+    bdnz loc_checkStepJumpId    # /
+
+    ## Check for redirect door index
     lwz r0,0x8(r27)         # \
     cmpwi r0, 0xFF          # | Check if jumpLevelId is <= 0xFF
     bgt+ loc_dontRedirect   # /
@@ -47,11 +70,14 @@ loc_dontAddRandomIndex:
     stw r29,0x628(r28)      # Set new lastDoorId
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_redirectDoorIndex")]
 loc_dontRedirect:
+    li r10, 0x0
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_noRedirectDoorIndex")]
 
-################################################################################################################################
-## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
-################################################################################################################################
+######################################################################################
+## SSEEX: Unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
+######################################################################################
 ## Flag1 is used to jump to specific sequence indices
 # 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (since it opens up muAdvSelchrCTask)
 # TODO: 5 -> some muAdvSelchrBTask
@@ -60,33 +86,7 @@ loc_dontRedirect:
 
 # Useful if want to put sequenceIndex so that character selection happens after movie or end stage
 
-loc_stAdventure2__changeStep_SSEEX:
-    li r10, 0x0
-    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
-    stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
-    
-    ## Check for character unlocks
-    li r10, 201                         # num Ex characters
-    lis r12,0x0                         [R_PPC_ADDR16_HA(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
-    addi r12, r12, 0x0                  [R_PPC_ADDR16_LO(40, 8, "loc_stepJumpIdCSSIdUnlockCriteria")]
-    lis r11,0x0                         [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
-    addi r11, r11, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
-    lwz r3, 0x0(r27)            # \ Get stepJumpId
-    li r6, 0x1                  # |
-    mtctr r10                   # |
-loc_checkStepJumpId:            # |
-    lwz r8, 0x0(r12)            # |
-    cmpw r8, r3                 # |
-    bne+ loc_continueLoop       # |
-    lbz r7, 0x0(r11)            # | Loop through each step jump unlock criteria for each character, check if it equals current step jump
-    cmplwi r7, 1                # | If it does (and the character hasn't been unlocked yet), then set unlock flag for that character
-    bgt+ loc_continueLoop       # |
-    stb r6, 0x0(r11)            # |
-loc_continueLoop:               # |
-    addi r12, r12, 0x4          # |
-    addi r11, r11, 0x1          # |
-    bdnz loc_checkStepJumpId    # /
-loc_changeSequenceIndex:  
+loc_stAdventure2__changeStep_changeSequenceIndex:
     ## Check to change sequence Index
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     li r6, 29                   # \
@@ -116,7 +116,7 @@ loc_notjumpToSeqIndexWithSelchrCTask:           # \
 loc_addOrSubtractSequenceIndex:
     lbz r0, 0x7(r27)            # Get usused flag to use to add/subtract to current sequenceIndex
     extsb r0, r0                # \ 
-    #slwi r0, r0, 1              # | Add to sequence index (sequenceIndex + addedSequenceIndex)
+    #slwi r0, r0, 1             # | Add to sequence index (sequenceIndex + addedSequenceIndex)
     add r3, r3, r0              # / 
     stw r3, 0x10(r5)            # Store new sequenceIndex
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_1FE0")]
