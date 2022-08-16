@@ -2025,9 +2025,9 @@ stAdventure2__changeStep:
     /* 00001D9C: */    stw r0,0xF4(r1) #stw r0,0x24(r1)
     /* 00001DA0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
     /* 00001DA4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
-    /* 00001DA8: */    lwz r8,0x524(r3) #lwz r6,0x524(r3)
+    /* 00001DA8: */    lwz r28,0x524(r3) #lwz r6,0x524(r3)
     /* 00001DAC: */    mr r31,r3
-    /* 00001DB0: */    lbz r0,0x603(r8) #lbz r0,0x603(r6)
+    /* 00001DB0: */    lbz r0,0x603(r28) #lbz r0,0x603(r6)
     /* 00001DB4: */    cmplwi r0,0x1
     /* 00001DB8: */    bne- loc_1FE0
     /* 00001DBC: */    lis r5,0x0                               [R_PPC_ADDR16_HA(40, 6, "loc_16C")]
@@ -2091,20 +2091,21 @@ loc_1E70:
     /* 00001E90: */    stb r0,0x0(r3)                           [R_PPC_ADDR16_LO(40, 6, "loc_16C")]
     /* 00001E94: */    b loc_1FE0
 loc_1E98:
-    /* 00001E98: */    li r4,0x2
     /* 00001E9C: */    li r0,0x0
-    /* 00001EA0: */    stb r4,0x603(r8) #stb r4,0x603(r6)
+    /* 00001EB4: */    stb r0,0x0(r5)                           [R_PPC_ADDR16_LO(40, 6, "loc_16C")]
+loc_redirectDoorIndex:
+    /* 00001E98: */    li r4,0x2
+    /* 00001EA0: */    stb r4,0x603(r28) #stb r4,0x603(r6)
     /* 00001EA4: */    li r27,0x0
-    /* 00001EA8: */    lwz r7,0x51C(r3)
+    /* 00001EA8: */    lwz r7,0x51C(r31) #lwz r7,0x51C(r3)
     /* 00001EAC: */    #lwz r8,0x524(r3)
     /* 00001EB0: */    cmpwi r7,0x0
-    /* 00001EB4: */    stb r0,0x0(r5)                           [R_PPC_ADDR16_LO(40, 6, "loc_16C")]
-    /* 00001EB8: */    lwz r6,0x628(r8) #lwz r4,0x628(r8)
+    /* 00001EB8: */    lwz r6,0x628(r28) #lwz r4,0x628(r8)
     /* 00001EBC: */    bne- loc_1EC8
     /* 00001EC0: */    #li r0,0x0
     /* 00001EC4: */    b loc_1F04
 loc_1EC8:
-    /* 00001EC8: */    lwz r0,0x520(r3)
+    /* 00001EC8: */    lwz r0,0x520(r31) #lwz r0,0x520(r3)
     /* 00001ECC: */    li r9,0x0 #li r6,0x0
     /* 00001ED0: */    mtctr r0
     /* 00001ED4: */    cmplwi r0,0x0
@@ -2126,8 +2127,10 @@ loc_1F00:
 loc_1F04:
     /* 00001F04: */    cmpwi r27,0x0 #cmpwi r0,0x0
     /* 00001F08: */    beq- loc_1FE0
-    /* 00001F50: */    lwz r0,0x8(r27)      # \
-    /* 00001F5C: */    stw r0,0x62C(r8)     # |
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_checkForRedirectDoorIndex")]
+loc_noRedirectDoorIndex:
+    /* 00001F50: */    #lwz r0,0x8(r27)     # \
+    /* 00001F5C: */    stw r0,0x62C(r28)    # |
     /* 00001F0C: */    lbz r9,0x4(r27)      # |
     /* 00001F10: */    cmplwi r9,0x2        # |
     /* 00001F14: */    blt- loc_1F50        # |
@@ -2136,10 +2139,10 @@ loc_1F04:
     blt+ loc_changedStepJumpState           # | When Flag0 is:
     addi r4, r9, 0x9                        # | 4 -> stepJumpState=0xD, 5 -> stepJumpState=0xE, 6 -> stepJumpState=0xF
 loc_changedStepJumpState:                   # | 0xD - signify playing a custom movie after a non-normal level
-    /* 00001F20: */    stb r4,0x603(r8)     # | 0xE - signify playing a custom movie after a non-normal level and continuing regular SSE flow after
+    /* 00001F20: */    stb r4,0x603(r28)    # | 0xE - signify playing a custom movie after a non-normal level and continuing regular SSE flow after
     /* 00001F40: */    #lwz r6,0x524(r31)   # | 0xF - signify continuing regular SSE flow after a non-normal level
     /* 00001F44: */    li r4,0x1            # |
-    /* 00001F48: */    stb r4,0x605(r8)     # | Rearranged to introduce to new condition 
+    /* 00001F48: */    stb r4,0x605(r28)    # | Rearranged to introduce to new condition 
     cmplwi r9, 0x6                          # | (to keep jumpLevelId to determine if thp should be played based on current jumpLevelid)
     beq- loc_resetJumpInfo                  # |
     cmplwi r9, 0x3                          # | 
@@ -2148,16 +2151,16 @@ loc_resetJumpInfo:                          # |
     /* 00001F24: */    li r4,0x0            # |
     /* 00001F28: */    li r5,0x20           # |
     /* 00001F2C: */    #lwz r6,0x524(r31)   # | 
-    /* 00001F30: */    stw r4,0x62C(r8)     # |
+    /* 00001F30: */    stw r4,0x62C(r28)    # |
     /* 00001F34: */    #lwz r3,0x524(r3)    # |
-    /* 00001F38: */    addi r3,r8,0x630     # /
+    /* 00001F38: */    addi r3,r28,0x630    # /
     /* 00001F3C: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
     /* 00001F4C: */    b loc_SSEEX
 loc_1F50:
     /* 00001F54: */    li r4,0x0
     /* 00001F58: */    li r5,0x20
     /* 00001F60: */    #lwz r3,0x524(r3)
-    /* 00001F64: */    addi r3,r8,0x630 #addi r3,r3,0x630
+    /* 00001F64: */    addi r3,r28,0x630 #addi r3,r3,0x630
     /* 00001F68: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
     /* 00001F6C: */    lwz r3,0x524(r31)
     /* 00001F70: */    addi r4,r27,0xC

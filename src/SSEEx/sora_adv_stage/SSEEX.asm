@@ -25,18 +25,36 @@
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
 # TODO: Stamina battles?
-# TODO: jump Flag2 -> random 2-16
-# TODO: In adsj jumpLevelId, if it's a single integer then that's the new door index
 # TODO: Disable checkpoints for a NG+
 ## Disable Game Overs making game easier with button combo at beginning (or introduce a brand new difficulty option).
-# TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone)
-# TODO: Game Over takes you to another stage (can do this maybe based on sublevel id?)
+# TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone) or jumpLevelId?
+# TODO: Game Over takes you to another stage (can do this maybe based on sublevel id?), change door id to 0xFF
+
+###########################################################################
+## SSEEX: Redirect door index based on jumpLevelId and Flag2 random setting
+###########################################################################
+loc_stAdventure2__changeStep_checkForRedirectDoorIndex:
+    lwz r29,0x628(r28)  # Get current lastDoorId
+    lwz r0,0x8(r27)         # \
+    cmpwi r0, 0xFF          # | Check if jumpLevelId is <= 0xFF
+    bgt+ loc_dontRedirect   # /
+    rlwinm r29,r29,0,0,23   # \ lastDoorId = (lastDoorId & 0xFFFFFF00) + jumpLevelId
+    add r29,r29,r0          # /
+    lbz r3, 0x6(r27)        # Flag2 gets used for random range during redirects
+    bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
+    add r29,r29,r3          # lastDoorId = lastDoorId + randi(Flag2)
+loc_dontAddRandomIndex:
+    stw r29,0x628(r28)      # Set new lastDoorId
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_redirectDoorIndex")]
+loc_dontRedirect:
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_noRedirectDoorIndex")]
 
 ################################################################################################################################
 ## SSEEX: Character unlocks based on stepJumpId and unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
 ################################################################################################################################
 ## Flag1 is used to jump to specific sequence indices
-# 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (since it opens up muAdvSelcTask)
+# 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (since it opens up muAdvSelchrCTask)
+# TODO: 5 -> some muAdvSelchrBTask
 # 1 -> return to original previous sequence index
 ## Flag3 is used to increment/decrement sequence index
 
@@ -132,7 +150,6 @@ loc_stAdventure2__changeStep_findExternalADSJ:
     mulli r11, r11, 0x4     # \ Add offset based on number of entries to get first entry of adsj file
     add r27, r27, r11       # /
 loc_adsjNotFound:
-    lwz r8,0x524(r31)
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_1F04")]
 
 ####################################################################################################################################################
