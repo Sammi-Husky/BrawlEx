@@ -15,11 +15,6 @@
 # TODO: Fix Great Maze savepoint stocks for Ex fighters
 # TODO: Load second fighter ahead of time (by setting P2's gmPlayerInitData early in sqAdventure::setAdventureCondition just like in co-op)
 
-# TODO: Have space that says what level id corresponds to character to unlock, loop to check for level id. Use extra space in the module to upload file that determines whether a character is unlocked or not?
-## 00 signifies not unlocked, 01 signifies unlocked but should play the newcomer menu, 02 signfies locked
-## level id 00000000 -> no unlock, level id 00000001 -> always unlocked, level id 00000002 -> unlocked after Great Maze
-# TODO: Make jump Flag1 special goto sequenceIndex flag (4 and above) to goto certain sequenceIndex like one that forces a muAdvSelcTask
-## When jump Flag1 is 1 that means return to previous sequenceIndex (and reset), when it's 0 no goto anything
 # TODO: Investigate putting entirely new level markers on the map
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
@@ -58,11 +53,28 @@ loc_continueLoop:               # |
     bdnz loc_checkStepJumpId    # /
 
     ## Check for redirect door index
+    lbz r8, 0x5FD(r28)          # Get current stage difficulty
+    li r7, 0x3                  # \
+    subi r8, r8, 0x2            # | Get selected difficulty from (currentStageDifficulty - 2) / 3
+    divw r8, r8, r7             # /
+    lbz r5, 0x4916(r28)         # Get num game overs in current stage
+    cmpw r5, r8                             # \
+    ble+ loc_gameOverLessThanDifficulty     # | cap num game overs to be below difficulty
+    mr r5, r8                               # |
+loc_gameOverLessThanDifficulty:             # /
+
     lwz r0,0x8(r27)         # \
     cmpwi r0, 0xFF          # | Check if jumpLevelId is <= 0xFF
     bgt+ loc_dontRedirect   # /
     rlwinm r29,r29,0,0,23   # \ lastDoorId = (lastDoorId & 0xFFFFFF00) + jumpLevelId
     add r29,r29,r0          # /
+    lbz r0, 0x7(r27)                    # \
+    cmpwi r0, 0x1                       # | If Flag3 == 1 or Flag3 == 2
+    blt+ loc_noAddDifficultyToDoorId    # |
+    add r29,r29,r8                      # / Add difficulty to lastDoorId
+    beq+ loc_noAddDifficultyToDoorId    # \ If Flag3 == 2
+    sub r29,r29,r5                      # | Subtract num game overs 
+loc_noAddDifficultyToDoorId:            # /
     lbz r3, 0x6(r27)        # Flag2 gets used for random range during redirects
     bl __unresolved                          [R_PPC_REL24(0, 4, "mtprng__randi")]
     add r29,r29,r3          # lastDoorId = lastDoorId + randi(Flag2)
