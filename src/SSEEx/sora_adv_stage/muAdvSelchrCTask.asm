@@ -30,11 +30,11 @@
 .set muAdvSelchrCTask_team6MemberCount, 0xe4 + 0xAC*6 + 3
 .set muAdvSelchrCTask_team7MemberCount, 0xe4 + 0xAC*7 + 3
 
+.set muAdvSelchrCTask_disableSubFighter, 0xC2F + 3*addedMembers*4
 .set muAdvSelchrCTask_desiredNumMembersToSelect, muAdvSelchrCTask_0xC5C + 0x4
 .set muAdvSelchrCTask_SubFighterCSSIdArray, muAdvSelchrCTask_desiredNumMembersToSelect + 0x1
 .set muAdvSelchrCTask_numStocks, muAdvSelchrCTask_SubFighterCSSIdArray + maxNumberOfFighters
-.set muAdvSelchrCTask_disableSubFighter, muAdvSelchrCTask_numStocks + 0x1
-.set muAdvSelchrCTask_sublevelChanger, muAdvSelchrCTask_disableSubFighter + 0x1
+.set muAdvSelchrCTask_sublevelChanger, muAdvSelchrCTask_numStocks + 0x1
 .set muAdvSelchrCTask_rosterMode, muAdvSelchrCTask_sublevelChanger + 0x1
 .set muAdvSelchrCTask_size, muAdvSelchrCTask_rosterMode + 0x1
 
@@ -138,7 +138,7 @@ muAdvSelchrCTask____ct:
 
     addi r3, r30, muAdvSelchrCTask_0xC24
     li r4, 0x0          
-    li r5, muAdvSelchrCTask_0xC2F - muAdvSelchrCTask_0xC24         
+    li r5, muAdvSelchrCTask_disableSubFighter - muAdvSelchrCTask_0xC24         
     bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
 
     /* 0003DF58: */    lbz r0,0x2C(r30)
@@ -178,7 +178,6 @@ loc_3DFA8:
     /* 0003DFDC: */    add r3,r30,r0
     /* 0003DFE0: */    stw r4,0x710(r3)
 
-    stb r4, muAdvSelchrCTask_disableSubFighter(r30)
     stb r4, muAdvSelchrCTask_sublevelChanger(r30)
 
     ## Reduce code space by replacing with memfill
@@ -1630,6 +1629,7 @@ loc_minUnlocksSatisfied:
     stb r23, muAdvSelchrCTask_team0MemberCount(r29)
     li r5, 0x1          # \ Update number of teams to have one team
     stw r5,0x6F8(r29)   # / 
+    # TODO: Play a sfx to signify num unlocks not satisfied
 loc_atLeastOneMemberPresent:
 
     # TODO: Random
@@ -3229,8 +3229,9 @@ loc_4010C:
     nop
     nop
     nop
+    nop
 
-    # +3
+    # +4
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

@@ -23,6 +23,7 @@
 # TODO: Disable checkpoints for a NG+
 ## Disable Game Overs making game easier with button combo at beginning (or introduce a brand new difficulty option).
 # TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone) or jumpLevelId?
+## Min time requirement like in Melee adventure mode for certain events
 
 ######################################################################################################################
 ## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId and Flag2 random setting
