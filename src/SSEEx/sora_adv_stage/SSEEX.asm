@@ -23,7 +23,6 @@
 # TODO: Disable checkpoints for a NG+
 ## Disable Game Overs making game easier with button combo at beginning (or introduce a brand new difficulty option).
 # TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone) or jumpLevelId?
-# TODO: Game Over takes you to another stage (can do this maybe based on sublevel id?), change door id to 0xFF
 
 ######################################################################################################################
 ## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId and Flag2 random setting
@@ -126,7 +125,7 @@ loc_notjumpToSeqIndexWithSelchrCTask:           # \
     mr r3, r9                                   # / 
     stw r10, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
 loc_addOrSubtractSequenceIndex:
-    lbz r0, 0x7(r27)            # Get usused flag to use to add/subtract to current sequenceIndex
+    lbz r0, 0x7(r27)            # Get usused Flag3 to use to add/subtract to current sequenceIndex
     extsb r0, r0                # \ 
     #slwi r0, r0, 1             # | Add to sequence index (sequenceIndex + addedSequenceIndex)
     add r3, r3, r0              # / 
@@ -175,7 +174,7 @@ loc_stAdventure2__changeStep_uploadCustomTracklist:
     addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_tlstFilePath")]
     lis r5,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_tlstFolderPath")]
     addi r5,r5,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_tlstFolderPath")]
-    lwz r6, 0x8(r27)
+    lwz r6, 0x0(r27)        # Get lastDoorId from adsj entry
     #crclr 6
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
     lis r5, 0x8053          # \ Upload tlst to expected TLST location in P+
@@ -197,6 +196,11 @@ loc_stAdventure2__getBgmId_customTracklist:
     bnelr-                  # /
     lis r11,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
     lbz r10, 0x0(r11)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    extsb. r10, r10                     # \
+    bge+ loc_notNegativeSubLevelIndex1  # | 
+    lwz r9, -0xDFC(r12)                 # | If sublevel index is negative, then get entry at numEntries - subLevelIndex
+    add r10, r9, r10                    # |
+loc_notNegativeSubLevelIndex1:          # /
     mulli r10, r10, 0x10    # \ Get entry based on sublevel index
     add r12, r12, r10       # /
     lwz r3, -0xDF4(r12)     # Get custom song id from tlst entry
@@ -209,6 +213,11 @@ loc_stAdventure2__getBgmVolume_customTracklist:
     bne- loc_noTlst1        # /
     lis r11,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
     lbz r10, 0x0(r11)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    extsb. r10, r10                     # \
+    bge+ loc_notNegativeSubLevelIndex2  # | 
+    lwz r9, -0xDFC(r12)                 # | If sublevel index is negative, then get entry at numEntries - subLevelIndex
+    add r10, r9, r10                    # |
+loc_notNegativeSubLevelIndex2:          # /
     mulli r10, r10, 0x10    # \ Get entry based on sublevel index
     add r12, r12, r10       # /
     lbz r5, -0xDEE(r12)     # Get volume from 1st tlst entry
@@ -222,6 +231,11 @@ loc_stAdventure2__getBgmPlayOffsetFrame_customTracklist:
     bne- loc_noTlst2        # /
     lis r11,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
     lbz r10, 0x0(r11)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
+    extsb. r10, r10                     # \
+    bge+ loc_notNegativeSubLevelIndex3  # | 
+    lwz r9, -0xDFC(r12)                 # | If sublevel index is negative, then get entry at numEntries - subLevelIndex
+    add r10, r9, r10                    # |
+loc_notNegativeSubLevelIndex3:          # /
     mulli r10, r10, 0x10    # \ Get entry based on sublevel index
     add r12, r12, r10       # /
     lhz r5, -0xDF0(r12)     # Get bgmPlayOffsetFrame from 1st tlst entry

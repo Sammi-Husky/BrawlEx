@@ -38,6 +38,8 @@
 .set muAdvSelchrCTask_rosterMode, muAdvSelchrCTask_sublevelChanger + 0x1
 .set muAdvSelchrCTask_size, muAdvSelchrCTask_rosterMode + 0x1
 
+.set doorIndexWhenMinUnlocksNotMet, 0xFF
+
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)
     /* 0003DDF0: */    mflr r0
@@ -120,19 +122,25 @@ muAdvSelchrCTask____ct:
     /* 0003DF18: */    li r6,0x4
     /* 0003DF1C: */    li r7,0x5
     /* 0003DF20: */    stb r10,muAdvSelchrCTask_0xC20(r30)
-    /* 0003DF24: */    stw r31,muAdvSelchrCTask_0xC24(r30)
-    /* 0003DF28: */    stb r31,muAdvSelchrCTask_0xC28(r30)
-    /* 0003DF2C: */    stb r31,muAdvSelchrCTask_0xC29(r30)
-    /* 0003DF30: */    stb r31,muAdvSelchrCTask_0xC2A(r30)
-    /* 0003DF34: */    stb r31,muAdvSelchrCTask_0xC2B(r30)
-    /* 0003DF38: */    stb r31,muAdvSelchrCTask_0xC2C(r30)
-    /* 0003DF3C: */    stb r31,muAdvSelchrCTask_0xC2D(r30)
-    /* 0003DF40: */    stb r31,muAdvSelchrCTask_0xC2E(r30)
+    /* 0003DF24: */    #stw r31,muAdvSelchrCTask_0xC24(r30)
+    /* 0003DF28: */    #stb r31,muAdvSelchrCTask_0xC28(r30)
+    /* 0003DF2C: */    #stb r31,muAdvSelchrCTask_0xC29(r30)
+    /* 0003DF30: */    #stb r31,muAdvSelchrCTask_0xC2A(r30)
+    /* 0003DF34: */    #stb r31,muAdvSelchrCTask_0xC2B(r30)
+    /* 0003DF38: */    #stb r31,muAdvSelchrCTask_0xC2C(r30)
+    /* 0003DF3C: */    #stb r31,muAdvSelchrCTask_0xC2D(r30)
+    /* 0003DF40: */    #stb r31,muAdvSelchrCTask_0xC2E(r30)
     /* 0003DF44: */    stw r9,muAdvSelchrCTask_0xC30(r30)
     /* 0003DF48: */    stw r8,muAdvSelchrCTask_0xC34(r30)
     /* 0003DF4C: */    stw r0,muAdvSelchrCTask_0xC38(r30)
     /* 0003DF50: */    stw r31,muAdvSelchrCTask_0xC3C(r30)
     /* 0003DF54: */    bl __unresolved                          [R_PPC_REL24(0, 4, "NMWException____construct_array")]
+
+    addi r3, r30, muAdvSelchrCTask_0xC24
+    li r4, 0x0          
+    li r5, muAdvSelchrCTask_0xC2F - muAdvSelchrCTask_0xC24         
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
+
     /* 0003DF58: */    lbz r0,0x2C(r30)
     /* 0003DF5C: */    li r3,0x2A
     /* 0003DF60: */    li r6,0x2B
@@ -1603,10 +1611,13 @@ loc_onlySmashdown:
     cmpw r7, r6                     # | Check total number of team members >= min num characters to be unlocked
     bge+ loc_minUnlocksSatisfied    # /
     lwz r10, 0x628(r18)         # Get advSaveData->lastDoorId
-    rlwinm r10, r10,0,0,23      # \
-    addi r10, r10, 0xFF         # | Set door id to 0xFF
-    stw r10, 0x628(r18)         # /
+    rlwinm r10, r10,0,0,23                          # \
+    addi r10, r10, doorIndexWhenMinUnlocksNotMet    # | Set door id to 0xFF
+    stw r10, 0x628(r18)                             # /
     stb r0, muAdvSelchrCTask_sublevelChanger(r29)
+    li r10, doorIndexWhenMinUnlocksNotMet
+    lis r12,0x0                  [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
+    stb r10, 0x0(r12)            [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
 loc_minUnlocksSatisfied:
 
     ## If no members add surviving members to team 1 regardless by memcopying to team1 and updating numTeams and team 1 members
@@ -3217,8 +3228,9 @@ loc_4010C:
     
     nop
     nop
+    nop
 
-    # +2
+    # +3
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
