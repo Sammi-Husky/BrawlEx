@@ -24,6 +24,8 @@
 ## Disable Game Overs making game easier with button combo at beginning (or introduce a brand new difficulty option).
 # TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone) or jumpLevelId?
 ## Min time requirement like in Melee adventure mode for certain events
+# TODO: If '.param' is in the jump bone, then load VS stage
+## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 
 ######################################################################################################################
 ## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId and Flag2 random setting
@@ -68,6 +70,40 @@ loc_gameOverLessThanDifficulty:             # /
     bgt+ loc_dontRedirect   # /
     rlwinm r29,r29,0,0,23   # \ lastDoorId = (lastDoorId & 0xFFFFFF00) + jumpLevelId
     add r29,r29,r0          # /
+    # Check for score using jump bone string (time-score), use Flag1 (1 use score, 2 use score and subtract cost, 3 use score and wipe, 4 wipe if not satisfied, 5 spend regardless, 6 wipe regardless)
+    # TODO: Later also incorporate time check (either individually or also with score (Flag0))
+    # TODO: Stock? HP? Coin? Can be done by left digit representing resource to check (e.g. 01), jumpBone is formatted as Time-Resource
+    lbz r30, 0x5(r27)               # \
+    cmpwi r30, 0x0                  # | Check if Flag1 (score flag) is > 0 (which signifies to check score)
+    beq+ loc_noScoreRequirement     # /
+    rlwinm r30,r30,0,28,31          # Get last digit to decide what to do with resource
+    addi r3, r27, 0xC + 9           # Get offset to score requirement
+    bl __unresolved                 [R_PPC_REL24(0, 4, "strtoul__atoi")]
+    lwz r10, 0x4910(r28)            # \
+    cmpw r10, r3                    # | Check if current score >= score requirement
+    blt- loc_scoreRequirementNotMet # /
+    addi r29, r29, 0x1              # Increment door id
+    cmpwi r30, 0x5                  # \
+    beq- loc_spendScore             # |
+    cmpwi r30, 0x2                  # |
+    bne+ loc_noSpendScore           # | Subtract score requirement from score if Flag1 is 2 (spend score and subtract cost) or 5 (spend score regardless)
+loc_spendScore:                     # |
+    sub r10, r10, r3                # |
+loc_noSpendScore:                   # /
+    cmpwi r30, 0x3                  # \  
+    beq- loc_resetScore             # | Reset score if Flag1 is 3 (use score and wipe) or 6 (wipe regardless)
+    cmpwi r30, 0x6                  # |
+    beq- loc_resetScore             # /
+    b loc_setNewScore               
+loc_scoreRequirementNotMet:         # \
+    cmpwi r30, 0x4                  # |
+    blt+ loc_setNewScore            # | Reset score if score requirement not met and Flag1 is 4 (wipe if score requirement not met), 5 (spend score regardless) or 6 (wipe regardless)
+loc_resetScore:                     # |
+    li r10, 0x0                     # /
+loc_setNewScore:
+    stw r10, 0x4910(r28)            # Set new score
+loc_noScoreRequirement:
+    # Check if should add based on difficulty as well as random
     lbz r0, 0x7(r27)                    # \
     cmpwi r0, 0x1                       # | If Flag3 == 1 or Flag3 == 2
     blt+ loc_noAddDifficultyToDoorId    # |

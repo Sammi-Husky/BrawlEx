@@ -38,7 +38,7 @@
 .set muAdvSelchrCTask_rosterMode, muAdvSelchrCTask_sublevelChanger + 0x1
 .set muAdvSelchrCTask_size, muAdvSelchrCTask_rosterMode + 0x1
 
-.set doorIndexWhenMinUnlocksNotMet, 0xFF
+.set doorIndexWhenMinUnlocksNotMet, 0xFE
 
 muAdvSelchrCTask__create:
     /* 0003DDEC: */    stwu r1,-0x20(r1)

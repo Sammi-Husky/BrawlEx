@@ -2,7 +2,6 @@
 .set levelIdForVsBoss, 0x50
 .set levelIdForVsZako, 0x46
 
-## TODO: See max number before invalid characters
 .set subLevelIdForGameOverCondition, 0x1E
 .set doorIndexUponGameOverCondition, 0xFF
 
@@ -13,6 +12,9 @@ loc_muAdvGameOverTask____ct_SSEEX:
     addi r4, r4, 0x0                            [R_PPC_ADDR16_LO(1, 5, "loc_7BA0")]
     bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__searchSequence")]
     stw r28, 0x14(r3)           # set sqAdventure->initialFighterSlotId=0 to signify to start with selectedSlotIds
+
+    ## Set score to 0
+    stw r28, 0x4910(r26)
 
     ## Decrement sublevel upon game over and change game mode if needed based on new jumpLevelId
     lwz r9, 0x628(r26)          # Get current lastDoorId
