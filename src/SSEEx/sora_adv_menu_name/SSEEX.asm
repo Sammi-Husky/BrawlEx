@@ -16,6 +16,8 @@ loc_muAdvNameTask__create_patchSoraModules:
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
+    stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     stb r10,0x0(r12)        # Set override characters flag to zero
@@ -76,6 +78,22 @@ loc_muAdvNameTask__create_patchSoraModules:
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchTwo")]
     lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchThree")]
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchThree")]
+
+    ### Change score formatter to always show 9 digits (fixes issue when score is decreased)
+    
+    ## subi r4, r13, 23989
+    lis r9, 0x388D
+    ori r9, r9, 0xA24B
+    # @ IfAdvGauge::drawScore
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchFour")]
+    stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchFour")]
+
+    ## "%09d"
+    lis r9, 0x2530
+    ori r9, r9, 0x3964
+    # @ 0x8059e66b
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchFive")]
+    stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchFive")]
 
     ### Restore original operation in sqAdventure::restartStcok in case it was changed
 

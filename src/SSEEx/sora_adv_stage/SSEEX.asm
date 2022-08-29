@@ -27,6 +27,23 @@
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 
+##############################################
+## SSEEX: Decrease score if time attack is on
+##############################################
+
+loc_stAdventure2__changeStep_updateOnFrame:
+    mr r31,r3               # Original operation
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
+    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
+    lwz r10, 0x4910(r28)            # \
+    cmpwi r10, r12                  # |
+    sub r10, r10, r12               # |
+    bge+ loc_setScoreToZero         # | Decrement score
+    li r10, 0x0                     # |
+loc_setScoreToZero:                 # |
+    stw r10, 0x4910(r28)            # /
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToChangeStep")]
+
 ######################################################################################################################
 ## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId and Flag2 random setting
 ######################################################################################################################
@@ -70,14 +87,13 @@ loc_gameOverLessThanDifficulty:             # /
     bgt+ loc_dontRedirect   # /
     rlwinm r29,r29,0,0,23   # \ lastDoorId = (lastDoorId & 0xFFFFFF00) + jumpLevelId
     add r29,r29,r0          # /
-    # Check for score using jump bone string (time-score), use Flag1 (1 use score, 2 use score and subtract cost, 3 use score and wipe, 4 wipe if not satisfied, 5 spend regardless, 6 wipe regardless)
-    # TODO: Later also incorporate time check (either individually or also with score (Flag0))
-    # TODO: Stock? HP? Coin? Can be done by left digit representing resource to check (e.g. 01), jumpBone is formatted as Time-Resource
-    lbz r30, 0x5(r27)               # \
-    cmpwi r30, 0x0                  # | Check if Flag1 (score flag) is > 0 (which signifies to check score)
+    # Check for resource using jump bone string Format: <resource><mode>-<amount> e.g. S1-000000400 (Modes: 1 check for resource, 2 check for resource and subtract cost, 3 check for resource and wipe, 4 wipe if not satisfied, 5 spend regardless, 6 wipe regardless)
+    # TODO: Stock, HP, Coin Note: For stock, IfAdvMngr::removeStock might be useful to update the UI
+    lbz r30, 0xD(r27)               # \    
+    rlwinm r30,r30,0,28,31          # | Check if Score flag > 0 (which signifies to check score) (just take right digit of char (e.g. "2" -> 32 -> 2))
+    cmpwi r30, 0x0                  # | 
     beq+ loc_noScoreRequirement     # /
-    rlwinm r30,r30,0,28,31          # Get last digit to decide what to do with resource
-    addi r3, r27, 0xC + 9           # Get offset to score requirement
+    addi r3, r27, 0xC + 3           # Get score requirement from jump bone
     bl __unresolved                 [R_PPC_REL24(0, 4, "strtoul__atoi")]
     lwz r10, 0x4910(r28)            # \
     cmpw r10, r3                    # | Check if current score >= score requirement
@@ -123,9 +139,9 @@ loc_dontRedirect:
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_noRedirectDoorIndex")]
 
-######################################################################################
-## SSEEX: Unused flags in stepjump entry is used to change sqAdventure->sequenceIndex
-######################################################################################
+#################################################################################################################################
+## SSEEX: Unused flags in stepjump entry is used to change sqAdventure->sequenceIndex and use jump bone to setup time attack info 
+##################################################################################################################################
 ## Flag1 is used to jump to specific sequence indices
 # 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (since it opens up muAdvSelchrCTask)
 # TODO: 5 -> some muAdvSelchrBTask
@@ -135,6 +151,34 @@ loc_dontRedirect:
 # Useful if want to put sequenceIndex so that character selection happens after movie or end stage
 
 loc_stAdventure2__changeStep_changeSequenceIndex:
+    
+    ## Check for Time Attack info in jump bone Format: $$<decrementer><set(=) or add(+)><target score> e.g. $$9+000010000
+    lhz r0, 0xC(r27)        # \
+    cmpwi r0, 0x2424        # | Check first two char of jump bone is "$$"
+    bne+ loc_noTimeAttack   # /
+    addi r3, r27, 0xC + 4
+    bl __unresolved                 [R_PPC_REL24(0, 4, "strtoul__atoi")]
+    lwz r10, 0x4910(r28)    # Get current score
+    lbz r0, 0xF(r27)        # \
+    cmpwi r0, 0x3D          # | Set score if fourth char is "="
+    beq+ loc_setScore       # /
+    cmpwi r0, 0x2B          # \
+    bne+ loc_dontSetScore   # | Add to score if fourth char is "+"
+    add r3, r3, r10         # |
+    lis r10, 0x3b9b         # |
+    subi r10, r10, 0x3601   # | max(99999999, addedScore)
+    cmplw r3, r10           # |
+    ble+ loc_setScore       # |
+    mr r3, r10              # /
+loc_setScore: 
+    stw r3, 0x4910(r28)     # Set new score
+loc_dontSetScore:
+    lbz r3, 0xE(r27)        # \ Get decrementer value (just take right digit of char (e.g. "2" -> 32 -> 2))
+    rlwinm r3,r3,0,28,31    # /
+    lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
+    stb r3, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
+loc_noTimeAttack:
+
     ## Check to change sequence Index
     bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     li r6, 29                   # \
@@ -201,7 +245,7 @@ loc_adsjNotFound:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_1F04")]
 
 ####################################################################################################################################################
-## SSEEX: Upload and use values from P+ tlsts named after level id e.g. 1C5A0100.tlst if level id is not present in one of BGMG nodes and tlst exists
+## SSEEX: Upload and use values from P+ tlsts named after door id e.g. 28000204.tlst if level id is not present in one of BGMG nodes and tlst exists
 # Note: Requires P+ music system codes
 # Note: Can probably reduce size of adventure_common by deleting BGMG entries and replacing with tlsts
 ####################################################################################################################################################

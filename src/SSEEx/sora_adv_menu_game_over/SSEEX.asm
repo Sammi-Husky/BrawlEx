@@ -13,8 +13,13 @@ loc_muAdvGameOverTask____ct_SSEEX:
     bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__searchSequence")]
     stw r28, 0x14(r3)           # set sqAdventure->initialFighterSlotId=0 to signify to start with selectedSlotIds
 
-    ## Set score to 0
+    ## Set score to 0 if time attack is off
+    lis r11,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
+    lbz r11, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
+    cmpwi r11, 0x0
+    bgt+ loc_timeAttackActive
     stw r28, 0x4910(r26)
+loc_timeAttackActive:
 
     ## Decrement sublevel upon game over and change game mode if needed based on new jumpLevelId
     lwz r9, 0x628(r26)          # Get current lastDoorId

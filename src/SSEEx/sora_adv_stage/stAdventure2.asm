@@ -2026,7 +2026,9 @@ stAdventure2__changeStep:
     /* 00001DA0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
     /* 00001DA4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
     /* 00001DA8: */    lwz r28,0x524(r3) #lwz r6,0x524(r3)
-    /* 00001DAC: */    mr r31,r3
+    /* 00001DAC: */    #mr r31,r3
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_updateOnFrame")]
+loc_returnToChangeStep:
     /* 00001DB0: */    lbz r0,0x603(r28) #lbz r0,0x603(r6)
     /* 00001DB4: */    cmplwi r0,0x1
     /* 00001DB8: */    bne- loc_1FE0
