@@ -4436,7 +4436,7 @@ loc_40FE8:
 loc_41004:
     /* 00041004: */    mr r3,r18
     /* 00041008: */    li r4,0x0
-    /* 0004100C: */    bl muAdvSaveLoadTask__loadResource
+    /* 0004100C: */    bl muAdvSelchrCTask__printRushMembers
     /* 00041010: */    li r20,0x1
 loc_41014:
     ## SSEEX: Removed auto select last character left to give chance to select same character multiple times
@@ -4469,7 +4469,7 @@ loc_41054:
     /* 00041078: */    #bl muAdvSelchrCTask__dispNumber
     /* 0004107C: */    #mr r3,r18
     /* 00041080: */    #li r4,0x0
-    /* 00041084: */    #bl muAdvSaveLoadTask__loadResource
+    /* 00041084: */    #bl muAdvSelchrCTask__printRushMembers
     /* 00041088: */    #li r3,0x1
     /* 0004108C: */    #b loc_41234
 loc_41090:
@@ -4496,7 +4496,7 @@ loc_410B8:
     /* 000410DC: */    rlwinm r0,r0,2,0,29
     /* 000410E0: */    add r5,r26,r0
     /* 000410E4: */    lwz r25,0xA8(r5)
-    /* 000410E8: */    bl muAdvSaveLoadTask__loadResource
+    /* 000410E8: */    bl muAdvSelchrCTask__printRushMembers
     /* 000410EC: */    li r20,0x1
     /* 000410F0: */    bl sndSystem__getInstance
     /* 000410F4: */    li r4,0x2
@@ -4668,7 +4668,7 @@ gfPadStatus____as:
     /* 0004135C: */    mtlr r0
     /* 00041360: */    addi r1,r1,0x30
     /* 00041364: */    blr
-muAdvSaveLoadTask__loadResource:
+muAdvSelchrCTask__printRushMembers:
     /* 00041368: */    stwu r1,-0x120(r1)
     /* 0004136C: */    mflr r0
     /* 00041370: */    stw r0,0x124(r1)
