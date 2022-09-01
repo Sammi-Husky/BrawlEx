@@ -5023,10 +5023,10 @@ loc_47764:
     /* 00047784: */    addi r1,r1,0x30
     /* 00047788: */    blr
 muAdvSaveTask__onDecided:
-    /* 0004778C: */    stwu r1,-0x40(r1)
+    /* 0004778C: */    stwu r1,-0xE0(r1) #stwu r1,-0x40(r1)
     /* 00047790: */    mflr r0
-    /* 00047794: */    stw r0,0x44(r1)
-    /* 00047798: */    addi r11,r1,0x40
+    /* 00047794: */    stw r0,0xE4(r1) #stw r0,0x44(r1)
+    /* 00047798: */    addi r11,r1,0xE0 #addi r11,r1,0x40
     /* 0004779C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_18")]
     /* 000477A0: */    lis r19,0x0                              [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     /* 000477A4: */    lwz r0,0x1414(r3)
@@ -5205,11 +5205,13 @@ loc_479E8:
     /* 00047A40: */    lwz r3,0x1B4(r18)
     /* 00047A44: */    mr r4,r31
     /* 00047A48: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muRecorder__saveAdv")]
-    /* 00047A4C: */    addi r11,r1,0x40
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSaveTask__onDecided_writeExSave")]
+loc_wroteExSave:
+    /* 00047A4C: */    #addi r11,r1,0xE0 #addi r11,r1,0x40
     /* 00047A50: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_18")]
-    /* 00047A54: */    lwz r0,0x44(r1)
+    /* 00047A54: */    lwz r0,0xE4(r1) #lwz r0,0x44(r1)
     /* 00047A58: */    mtlr r0
-    /* 00047A5C: */    addi r1,r1,0x40
+    /* 00047A5C: */    addi r1,r1,0xE0 #addi r1,r1,0x40
     /* 00047A60: */    blr
 muAdvSaveTask__afterDecided:
     /* 00047A64: */    lwz r3,0x1B4(r3)
@@ -5428,10 +5430,10 @@ loc_47D60:
     /* 00047D78: */    addi r1,r1,0x30
     /* 00047D7C: */    blr
 muAdvLoadTask__onDecided:
-    /* 00047D80: */    stwu r1,-0x10(r1)
+    /* 00047D80: */    stwu r1,-0xF0(r1) #stwu r1,-0x10(r1)
     /* 00047D84: */    mflr r0
-    /* 00047D88: */    stw r0,0x14(r1)
-    /* 00047D8C: */    stw r31,0xC(r1)
+    /* 00047D88: */    stw r0,0xF4(r1) #stw r0,0x14(r1)
+    /* 00047D8C: */    stw r31,0xEC(r1) #stw r31,0xC(r1)
     /* 00047D90: */    mr r31,r3
     /* 00047D94: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     /* 00047D98: */    lwz r0,0x1414(r31)
@@ -5445,10 +5447,12 @@ muAdvLoadTask__onDecided:
     /* 00047DB8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "GameGlobal__setAdventureSaveData")]
     /* 00047DBC: */    li r0,0x1
     /* 00047DC0: */    stb r0,0x1422(r31)
-    /* 00047DC4: */    lwz r31,0xC(r1)
-    /* 00047DC8: */    lwz r0,0x14(r1)
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvLoadTask__onDecided_loadExSave")]
+loc_loadedExSave:
+    /* 00047DC4: */    #lwz r31,0xC(r1)
+    /* 00047DC8: */    lwz r0,0xF4(r1) #lwz r0,0x14(r1)
     /* 00047DCC: */    mtlr r0
-    /* 00047DD0: */    addi r1,r1,0x10
+    /* 00047DD0: */    addi r1,r1,0xF0 #addi r1,r1,0x10
     /* 00047DD4: */    blr
 muAdvLoadTask__afterDecided:
     /* 00047DD8: */    blr

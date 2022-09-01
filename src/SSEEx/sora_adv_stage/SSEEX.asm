@@ -22,10 +22,9 @@
 # TODO: Stamina battles?
 # TODO: Disable checkpoints for a NG+
 ## Disable Game Overs making game easier with button combo at beginning (or introduce a brand new difficulty option).
-# TODO: Min score requirement (maybe should put it in jumpBone string i.e. warp to a different jumpBone) or jumpLevelId?
-## Min time requirement like in Melee adventure mode for certain events
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
+# TODO: Handle autosave (could potentially use sd save redirect)
 
 ##############################################
 ## SSEEX: Decrease score if time attack is on
@@ -44,9 +43,9 @@ loc_setScoreToZero:                 # |
     stw r10, 0x4910(r28)            # /
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToChangeStep")]
 
-######################################################################################################################
-## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId and Flag2 random setting
-######################################################################################################################
+#####################################################################################################################################################
+## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId with added Flag2 random setting/Flag3 Difficulty Setting 
+#####################################################################################################################################################
 loc_stAdventure2__changeStep_checkForRedirectDoorIndex:
     lwz r29,0x628(r28)  # Get current lastDoorId
     
@@ -88,7 +87,7 @@ loc_gameOverLessThanDifficulty:             # /
     rlwinm r29,r29,0,0,23   # \ lastDoorId = (lastDoorId & 0xFFFFFF00) + jumpLevelId
     add r29,r29,r0          # /
     # Check for resource using jump bone string Format: <resource><mode>-<amount> e.g. S1-000000400 (Modes: 1 check for resource, 2 check for resource and subtract cost, 3 check for resource and wipe, 4 wipe if not satisfied, 5 spend regardless, 6 wipe regardless)
-    # TODO: Stock, HP, Coin Note: For stock, IfAdvMngr::removeStock might be useful to update the UI
+    # TODO: Stock, HP, Coin, Time Note: For stock, IfAdvMngr::removeStock might be useful to update the UI
     lbz r30, 0xD(r27)               # \    
     rlwinm r30,r30,0,28,31          # | Check if Score flag > 0 (which signifies to check score) (just take right digit of char (e.g. "2" -> 32 -> 2))
     cmpwi r30, 0x0                  # | 
@@ -323,3 +322,58 @@ loc_notNegativeSubLevelIndex3:          # /
 loc_noTlst2:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_bgmConvertToFloat")]
 
+##########################################
+## SSEEX: Load/Save Character Unlock Data
+##########################################
+
+loc_muAdvLoadTask__onDecided_loadExSave:
+    addi r3, r1, 0x38
+    lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_advExSaveFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_advExSaveFilePath")]
+    lis r5,0x0                              [R_PPC_ADDR16_HA(0, 1, "loc_sdPath")]
+    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(0, 1, "loc_sdPath")]
+    lis r6, 0x8040      # \ Get build folder from FPC
+    ori r6, r6, 0x6920  # /
+    lwz r7, 0x1414(r31) # Get selected save file index
+    #crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    lis r5,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r5, r5, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    addi r3, r1, 0x8
+	addi r4, r1, 0x38	
+    li r6, 0x0
+	li r7, 0x0	
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIORequest__setReadParam1")]
+    addi r3, r1, 0x8
+    li r6,0	
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
+    lwz r31,0xEC(r1)      # Original operation
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_loadedExSave")]
+
+loc_muAdvSaveTask__onDecided_writeExSave:
+    addi r3, r1, 0x40
+    lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_advExSaveFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_advExSaveFilePath")]
+    addi r4, r4, 0x2    # Omit first formatter from path (which was for "sd:")
+    lis r5, 0x8040      # \ Get build folder from FPC
+    ori r5, r5, 0x6920  # /
+    lwz r6, 0x1414(r18) # \ Get selected save file index (add one since no auto save option)
+    addi r6, r6, 0x1    # /
+    #crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    addi r3, r1, 0x10
+    li r5, 0
+    stw r5, 0x4(r3)
+    stw r5, 0x10(r3)
+    lis r4,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r4, r4, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    stw r4, 0xC(r3)				    # Location to write
+    li r4, 0xC9						# Save data file Size
+    stw r4, 0x8(r3)
+    li  r4, -1
+    stw r4, 0x14(r3)
+    addi r4, r1, 0x40
+    stw r4, 0(r3)
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
+    addi r11,r1,0xE0      # Original operation
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_wroteExSave")]

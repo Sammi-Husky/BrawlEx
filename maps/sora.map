@@ -14323,6 +14323,7 @@
 80406478 MWCriticalSectiongc__MWExitCriticalSection
 8040649c MWCriticalSectiongc__MWEnterCriticalSection
 804064cc MWCriticalSectiongc__MWInitializeCriticalSection
+8059C568 loc_sdPath
 80109AFC SSEEX_patchOne
 8010A3C8 SSEEX_patchTwo
 8010A414 SSEEX_patchThree

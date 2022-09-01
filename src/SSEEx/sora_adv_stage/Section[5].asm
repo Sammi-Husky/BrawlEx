@@ -25909,6 +25909,6 @@ loc_menuAdvFolderPath:
 loc_selchrcFilePath:
         .asciz "%sselchr/%08x.selc"
         .balign 4
-loc_saveFilePath:
-        .asciz "%sExSaves/AdvEx%02d.sav"
+loc_advExSaveFilePath:
+        .asciz "%s%ssaves/adventure/AdvEx%02d.sav"
         .balign 4
