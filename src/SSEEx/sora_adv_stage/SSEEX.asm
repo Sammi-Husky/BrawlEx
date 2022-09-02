@@ -142,8 +142,10 @@ loc_dontRedirect:
 ## SSEEX: Unused flags in stepjump entry is used to change sqAdventure->sequenceIndex and use jump bone to setup time attack info 
 ##################################################################################################################################
 ## Flag1 is used to jump to specific sequence indices
-# 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (since it opens up muAdvSelchrCTask)
-# TODO: 5 -> some muAdvSelchrBTask
+# 4 -> 313 - The Subspace Bomb Factory II right before Ridley fight (opens up muAdvSelchrCTask)
+# 5 -> 235 - The Research Facility II right before Dark Samus fight (opens up muAdvSelchrBTask)
+# 6 -> 234 - The Research Facility II beginning (opens nothing)
+# 7 -> 32 - Skyworld End (ends the stage)
 # 1 -> return to original previous sequence index
 ## Flag3 is used to increment/decrement sequence index
 
@@ -188,17 +190,21 @@ loc_noTimeAttack:
     lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
     lwz r9, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
     li r10, -1
-    lbz r0, 0x5(r27)                            # \ Get unused flag1 to determine whether to jump to a specific sequenceIndex
-    cmpwi r0, 0x4                               # |
-    bne+ loc_notjumpToSeqIndexWithSelchrCTask   # | 
+    lbz r7, 0x5(r27)                            # \ Get unused flag1 to determine whether to jump to a specific sequenceIndex
+    lis r11, 0x0                            [R_PPC_ADDR16_HA(40, 4, "loc_sequenceIndices")]
+    addi r11, r11, 0x0                      [R_PPC_ADDR16_LO(40, 4, "loc_sequenceIndices")]
+    cmpwi r7, 0x4                               # |
+    blt+ loc_notJumpToSeqIndex                  # | 
     mr r8, r3                                   # |
-    li r3, 313                                  # | Set to 313
+    subi r7, r7, 0x4                            # |
+    mulli r7, r7, 0x4                           # | Set to desired sequenceIndex
+    lwzx r3, r7, r11                            # | 
     cmpw r9, r10                                # |
     bne+ loc_addOrSubtractSequenceIndex         # / Store prevSequenceIndex if there isn't one that has been stored yet
     stw r8, 0x0(r12)                        [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
     b loc_addOrSubtractSequenceIndex
-loc_notjumpToSeqIndexWithSelchrCTask:           # \
-    cmpwi r0, 0x1                               # |
+loc_notJumpToSeqIndex:                          # \
+    cmpwi r7, 0x1                               # |
     bne+ loc_addOrSubtractSequenceIndex         # |
     cmpw r9, r10                                # | Return to previous sequence index if flag1 is 1 and there is a prevSequenceIndex available
     beq+ loc_addOrSubtractSequenceIndex         # | and reset prevSequenceIndex

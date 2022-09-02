@@ -927,3 +927,8 @@ loc_B64:
 loc_B68:
         .4byte 0x43300000
         .4byte 0x80000000
+loc_sequenceIndices:
+        .int 313        # muAdvSelChrCTask
+        .int 235        # muAdvSelChrBTask
+        .int 234        # Nothing after
+        .int 32         # End of Stage 2
