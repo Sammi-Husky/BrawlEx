@@ -5,7 +5,7 @@ SSEEx Levels [Kapedani]
 .alias levelIdForVsFighter = 0x5A
 .alias levelIdForVsBoss = 0x50
 .alias levelIdForVsZako = 0x46
-.alias endingSideRoomId = 0x1A
+.alias levelIdForSavePoint = 0x45
 
 .alias levelIdForVsZakoMinusOne = levelIdForVsZako - 1
 
@@ -13,10 +13,10 @@ SSEEx Levels [Kapedani]
 # Subspace Level Ids between Ranges are Non-Normal Levels #
 ###########################################################
 
-# 0xXX5A0000 (XX900000) to 0xXX636363 (XX999999) -> Vs. Fighter
-# 0xXX500000 (XX800000) to 0xXX596363 (XX899999) -> Vs. Boss
-# 0xXX460000 (XX700000) to 0xXX4F6363 (XX799999) -> Vs. Zako (enemies)
-# TODO: savepoints at 69? (if it is 69 then don't wipe jumpLevelId upon entering savepoint so can use selc file)
+# 0xXX5A0000 (XX900000) to 0xXX63631A (XX9999z) -> Vs. Fighter
+# 0xXX500000 (XX800000) to 0xXX59631A (XX8999z) -> Vs. Boss
+# 0xXX460000 (XX700000) to 0xXX4F631A (XX7999z) -> Vs. Zako (enemies)
+# 0xXX450000 (XX690000) to 0xXX45631A (XX6999z) -> Savepoint
 
 HOOK @ $806e8b34    # During sqAdventure state 0x1b
 {   
@@ -37,14 +37,21 @@ checkIfVsBoss:
     b applySqAdventureState
 checkIfVsZako:
     cmplwi r5, levelIdForVsZako      # Check if level id is in the desired range
-    blt+ %END%
+    blt+ checkIfSavePoint
     li r0, 0x17         # Set sqAdventure state for VS Zako
+    b applySqAdventureState
+checkIfSavePoint:
+    cmplwi r5, levelIdForSavePoint   # Check if level id is in the desired range
+    blt+ %END%
+    li r0, 0x7          # \  
+    stb r0, 0x21(r28)   # /
+    li r0, 0x1A         # Set sqAdventure state for Savepoint
 applySqAdventureState:
     stw r0, 0xc(r28)    # Apply sqAdventure state
 }
 
 #############################################################################################
-#     End of Vs. Battles in Range Set Door Id Based on Current Level and Last Door Index    #
+#     End of Vs. Stages in Range Set Door Id Based on Current Level and Last Door Index    #
 #############################################################################################
 
 # If level id sends in 26 (z) continue SSE flow as normal (i.e. don't go to another custom level and continue sequence as normal)
@@ -53,9 +60,6 @@ HOOK @ $8095c1ac  # Hook During State 4 of stOperatorRuleAdventure::processBegin
 {
     lwz r4, 0x620(r30)                  # Original operation (advSaveData->currentLevelId)
     rlwinm r3, r4, 0, 0, 15             # Original next operation (so that can be overridden by branch condition)
-    rlwinm r5, r4, 0, 24, 31            # (currentLevelId) & 0x0000000f 
-    cmplwi r5, endingSideRoomId         # Check if level id ends in 26 (z)
-    beq- %END%
     rlwinm r5, r4, 16, 24, 31           # (currentLevelId >> 16) & 0x000000ff 
     cmplwi r5, levelIdForVsZakoMinusOne # Check if level id is in the desired range
 }
@@ -282,7 +286,7 @@ loopThroughADSJ1:
     lbz r0, -0xFEC(r12)     # \
     cmpwi r0, 0x1           # | Check if advStepJumpEntry->flag0 is 0x1
     bne+ notMatchingEntry1  # /
-    lwz r4, -0xFF0(r12)     # Load level id from ADSJ
+    lwz r4, -0xFF0(r12)     # Get door id from ADSJ
 notMatchingEntry1:
     addi r12, r12, 0x2C
     bdnz loopThroughADSJ1

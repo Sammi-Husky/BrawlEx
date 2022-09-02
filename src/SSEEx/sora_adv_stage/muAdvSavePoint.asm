@@ -1,19 +1,22 @@
+.set levelIdForSavePoint, 0x45
+
 muAdvSavePoint__create:
     /* 00047E50: */    stwu r1,-0x10(r1)
     /* 00047E54: */    mflr r0
-    /* 00047E58: */    lis r4,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    /* 00047E58: */    #lis r4,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
     /* 00047E5C: */    stw r0,0x14(r1)
     /* 00047E60: */    stw r31,0xC(r1)
     /* 00047E64: */    mr r31,r3
-    /* 00047E68: */    lwz r3,0x0(r4)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
-    /* 00047E6C: */    cmpwi r3,0x0
-    /* 00047E70: */    beq- loc_47E80
-    /* 00047E74: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__getStepType")]
-    /* 00047E78: */    cmpwi r3,0x0
-    /* 00047E7C: */    bne- loc_47E88
+    # Removes check that Great Maze map exists and level id check
+    /* 00047E68: */    #lwz r3,0x0(r4)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    /* 00047E6C: */    #cmpwi r3,0x0
+    /* 00047E70: */    #bne+ loc_47E88 #beq- loc_47E80
+    /* 00047E74: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__getStepType")]
+    /* 00047E78: */    #cmpwi r3,0x0
+    /* 00047E7C: */    #bne- loc_47E88
 loc_47E80:
-    /* 00047E80: */    li r3,0x0
-    /* 00047E84: */    b loc_47EA4
+    /* 00047E80: */    #li r3,0x0
+    /* 00047E84: */    #b loc_47EA4
 loc_47E88:
     /* 00047E88: */    li r3,0x22C
     /* 00047E8C: */    li r4,0x2A
@@ -28,6 +31,27 @@ loc_47EA4:
     /* 00047EAC: */    mtlr r0
     /* 00047EB0: */    addi r1,r1,0x10
     /* 00047EB4: */    blr
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+    # +7
+muAdvSavePoint__showRadar:
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    cmpwi r3, 0x0   # \ Check if IfAdvRadar is null
+    beqlr+          # /
+    b __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__show")]
+muAdvSavePoint__hideRadar:
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    cmpwi r3, 0x0   # \ Check if IfAdvRadar is null
+    beqlr+          # /
+    b __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__hide")]
+    
 muAdvSavePoint____ct:
     /* 00047EB8: */    stwu r1,-0x360(r1)
     /* 00047EBC: */    mflr r0
@@ -455,11 +479,16 @@ loc_484F0:
     /* 00048508: */    stb r30,0x12C(r29)
 loc_4850C:
     /* 0004850C: */    li r5,0x0
-## SSEEX: Set advSaveData->jumpLevelId to 0 during save point (so that it's zero during muAdvSelChrCTask)
+    ## SSEEX: Set advSaveData->jumpLevelId to 0 during save point (so that it's zero during muAdvSelChrCTask)
     lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r12,0x30(r12)       # | Set GameGlobal->advSaveData->jumpLevelId to 0
-    stw r5, 0x62C(r12)      # /  
+    lwz r12,0x30(r12)       
+    lwz r10, 0x62C(r12)             # \
+    rlwinm r10, r10, 16, 24, 31     # | (advSaveData->jumpLevelId >> 16) & 0x000000ff  
+    cmpwi r10, levelIdForSavePoint  # | Check if it's a custom savepoint
+    beq- loc_noCustomSavepoint      # /
+    stw r5, 0x62C(r12)      # Set GameGlobal->advSaveData->jumpLevelId to 0 (so selc file isn't used)
+loc_noCustomSavepoint:
     /* 00048510: */    lis r0,0x4330
     /* 00048514: */    xoris r3,r5,0x8000
     /* 00048518: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_B68")]
@@ -495,9 +524,10 @@ muAdvSavePoint____dt:
     /* 0004858C: */    stw r5,0x3C(r3)
     /* 00048590: */    lwz r3,0x0(r4)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
     /* 00048594: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvMngr__exitSavePointMenu")]
-    /* 00048598: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
-    /* 0004859C: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
-    /* 000485A0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__hide")]
+    /* 00048598: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    /* 0004859C: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    /* 000485A0: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__hide")]
+    bl muAdvSavePoint__hideRadar 
     /* 000485A4: */    addic. r0,r30,0x228
     /* 000485A8: */    beq- loc_485C4
     /* 000485AC: */    lwz r3,0x228(r30)
@@ -632,9 +662,10 @@ loc_48738:
     /* 00048770: */    lwz r12,0x34(r12)
     /* 00048774: */    mtctr r12
     /* 00048778: */    bctrl
-    /* 0004877C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
-    /* 00048780: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
-    /* 00048784: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__show")]
+    /* 0004877C: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    /* 00048780: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    /* 00048784: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__show")]
+    bl muAdvSavePoint__showRadar 
     /* 00048788: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_B60")]
     /* 0004878C: */    lwz r3,0x224(r31)
     /* 00048790: */    lfs f1,0x0(r4)                           [R_PPC_ADDR16_LO(40, 4, "loc_B60")]
@@ -676,9 +707,10 @@ loc_48810:
     /* 00048810: */    stw r30,0x1FC(r31)
     /* 00048814: */    lwz r3,0x228(r31)
     /* 00048818: */    bl __unresolved                          [R_PPC_REL24(0, 4, "nw4r3g3d6G3dObjFv__DetachFromParent")]
-    /* 0004881C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
-    /* 00048820: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
-    /* 00048824: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__hide")]
+    /* 0004881C: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    /* 00048820: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    /* 00048824: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__hide")]
+    bl muAdvSavePoint__hideRadar
     /* 00048828: */    li r0,0xDD
     /* 0004882C: */    stw r0,0x44(r31)
     /* 00048830: */    b loc_48A2C
@@ -699,9 +731,10 @@ loc_48834:
     /* 00048868: */    lwz r12,0x34(r12)
     /* 0004886C: */    mtctr r12
     /* 00048870: */    bctrl
-    /* 00048874: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
-    /* 00048878: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
-    /* 0004887C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__show")]
+    /* 00048874: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    /* 00048878: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    /* 0004887C: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__show")]
+    bl muAdvSavePoint__showRadar
     /* 00048880: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_B60")]
     /* 00048884: */    lwz r3,0x224(r31)
     /* 00048888: */    lfs f1,0x0(r4)                           [R_PPC_ADDR16_LO(40, 4, "loc_B60")]
@@ -749,9 +782,10 @@ loc_48918:
     /* 00048918: */    stw r30,0x200(r31)
     /* 0004891C: */    lwz r3,0x228(r31)
     /* 00048920: */    bl __unresolved                          [R_PPC_REL24(0, 4, "nw4r3g3d6G3dObjFv__DetachFromParent")]
-    /* 00048924: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
-    /* 00048928: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
-    /* 0004892C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__hide")]
+    /* 00048924: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    /* 00048928: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    /* 0004892C: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__hide")]
+    bl muAdvSavePoint__hideRadar
     /* 00048930: */    li r0,0x108
     /* 00048934: */    stw r0,0x44(r31)
     /* 00048938: */    b loc_48A2C
@@ -789,9 +823,10 @@ loc_4898C:
     /* 000489A4: */    lwz r12,0x34(r12)
     /* 000489A8: */    mtctr r12
     /* 000489AC: */    bctrl
-    /* 000489B0: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
-    /* 000489B4: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
-    /* 000489B8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__show")]
+    /* 000489B0: */    #lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
+    /* 000489B4: */    #lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
+    /* 000489B8: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "IfAdvRadar__show")]
+    bl muAdvSavePoint__showRadar
     /* 000489BC: */    lis r4,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_B60")]
     /* 000489C0: */    lwz r3,0x224(r31)
     /* 000489C4: */    lfs f1,0x0(r4)                           [R_PPC_ADDR16_LO(40, 4, "loc_B60")]
