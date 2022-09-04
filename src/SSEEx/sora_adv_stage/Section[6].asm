@@ -2826,6 +2826,10 @@ loc_decrementSublevelUponGameOver:
         .byte 0x00
 loc_timeAttackDecrementer:
         .byte 0x00
+loc_isGlobalTimeAttack:
+        .byte 0x00
+loc_originalTotalScore:
+        .4byte 0x00000000
 loc_advExSaveData:
         .byte 0x00      # 0x2A
         .byte 0x00      # 0x2B

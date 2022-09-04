@@ -14,12 +14,20 @@ loc_muAdvGameOverTask____ct_SSEEX:
     stw r28, 0x14(r3)           # set sqAdventure->initialFighterSlotId=0 to signify to start with selectedSlotIds
 
     ## Set score to 0 if time attack is off
+    lwz r10, 0x4910(r26)    # Get advSaveData->scoreInCurrentStage
     lis r11,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
     lbz r11, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
     cmpwi r11, 0x0
-    bgt+ loc_timeAttackActive
-    stw r28, 0x4910(r26)
-loc_timeAttackActive:
+    beq+ loc_setScoreToZero
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 4, "loc_timeAttackGameOverPenalty")]
+    lwz r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 4, "loc_timeAttackGameOverPenalty")] 
+    cmpw r10, r11           # \ 
+    sub r10, r10, r11       # |
+    bge+ loc_applyPenalty   # | min(0, score - penalty)
+loc_setScoreToZero:         # |
+    li r10, 0x0             # | 
+loc_applyPenalty:           # /
+    stw r10, 0x4910(r26)    # Set scoreInCurrentStage with applied penalty
 
     ## Decrement sublevel upon game over and change game mode if needed based on new jumpLevelId
     lwz r9, 0x628(r26)          # Get current lastDoorId

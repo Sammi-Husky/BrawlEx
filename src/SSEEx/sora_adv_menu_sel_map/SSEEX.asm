@@ -76,8 +76,6 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
-    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
-    stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     stb r10,0x0(r12)        # Set override characters flag to zero
@@ -87,7 +85,30 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stw r29, -0x8(r12)              # Store selected level
     
     lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
-    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem    
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r7, 0x0                          # \
+    li r9, 0x46                         # |
+loc_checkForTimeAttackInput:            # |
+    lhzx r5, r9, r8                     # | 
+    andi. r5, r5, 0x0400                # | Check for X input in each gfPadStatus
+    bne- loc_setTimeAttack              # |
+    addi r9, r9, 0x40                   # |
+    addi r7, r7, 0x1                    # |
+    cmpwi r7, 0x8                       # |
+    ble+ loc_checkForTimeAttackInput    # /
+    li r11, 0x0                    # Don't set time attack
+    b loc_noSetTimeAttack 
+loc_setTimeAttack:
+    lwz r11, 0x60C(r3)             # Get total score and store to restore later
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
+    stw r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
+    li r11, 0x1                    # Set time attack
+loc_noSetTimeAttack:
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
+    stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+
     li r7, 0x0                      # \
     li r9, 0x46                     # |
 loc_checkForOverrideInput:          # |

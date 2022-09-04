@@ -104,7 +104,9 @@ stAdventure2____ct:
     /* 00000200: */    stw r0,0xC(r1)
     /* 00000204: */    stw r30,0x588(r31)
     /* 00000208: */    stw r0,0x58C(r31)
-    /* 0000020C: */    stfs f1,0xB0(r31)
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2____ct_startStage")]
+loc_returnToCreate:
+    /* 0000020C: */    #stfs f1,0xB0(r31)
     /* 00000210: */    stfs f0,0xB4(r31)
     /* 00000214: */    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
     /* 00000218: */    addi r3,r31,0x594
@@ -2136,18 +2138,20 @@ loc_noRedirectDoorIndex:
     /* 00001F0C: */    lbz r9,0x4(r27)      # |
     /* 00001F10: */    cmplwi r9,0x2        # |
     /* 00001F14: */    blt- loc_1F50        # |
+    cmplwi r9, 0x3                          # |
+    beq- loc_1F50                           # |
     /* 00001F18: */    li r4,0x8            # | SSEEX
     cmplwi r9, 0x4                          # |
     blt+ loc_changedStepJumpState           # | When Flag0 is:
     addi r4, r9, 0x9                        # | 4 -> stepJumpState=0xD, 5 -> stepJumpState=0xE, 6 -> stepJumpState=0xF
-loc_changedStepJumpState:                   # | 0xD - signify playing a custom movie after a non-normal level
-    /* 00001F20: */    stb r4,0x603(r28)    # | 0xE - signify playing a custom movie after a non-normal level and continuing regular SSE flow after
-    /* 00001F40: */    #lwz r6,0x524(r31)   # | 0xF - signify continuing regular SSE flow after a non-normal level
+loc_changedStepJumpState:                   # | 0xD - signify playing a custom movie after a level
+    /* 00001F20: */    stb r4,0x603(r28)    # | 0xE - signify playing a custom movie after a level and continuing regular SSE flow after
+    /* 00001F40: */    #lwz r6,0x524(r31)   # | 0xF - signify continuing regular SSE flow after a level
     /* 00001F44: */    li r4,0x1            # |
     /* 00001F48: */    stb r4,0x605(r28)    # | Rearranged to introduce to new condition 
     cmplwi r9, 0x6                          # | (to keep jumpLevelId to determine if thp should be played based on current jumpLevelid)
     beq- loc_resetJumpInfo                  # |
-    cmplwi r9, 0x3                          # | 
+    cmplwi r9, 0x4                          # |
     bge+ loc_1F50                           # | 
 loc_resetJumpInfo:                          # |
     /* 00001F24: */    li r4,0x0            # |
@@ -2169,7 +2173,9 @@ loc_1F50:
     /* 00001F74: */    li r5,0x1F
     /* 00001F78: */    addi r3,r3,0x630
     /* 00001F7C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "string__strncpy")]
-    /* 00001F80: */    lwz r12,0x3C(r31)
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_uploadCustomTracklist")]
+loc_finishedCustomTracklist:
+    /* 00001F80: */    #lwz r12,0x3C(r31)
     /* 00001F84: */    mr r3,r31
     /* 00001F88: */    li r29,0x0
     /* 00001F8C: */    lwz r12,0x124(r12)
@@ -2177,14 +2183,12 @@ loc_1F50:
     /* 00001F94: */    bctrl
     /* 00001F98: */    lwz r12,0x3C(r31)
     /* 00001F9C: */    mr r30,r3
-    /* 00001FA0: */    lwz r4,0x524(r31)
+    /* 00001FA0: */    #lwz r4,0x524(r31)
     /* 00001FA4: */    mr r3,r31
     /* 00001FA8: */    lwz r12,0x120(r12)
-    /* 00001FAC: */    lwz r4,0x62C(r4)
+    /* 00001FAC: */    lwz r4,0x62C(r28) #lwz r4,0x62C(r4)
     /* 00001FB0: */    mtctr r12
     /* 00001FB4: */    bctrl
-    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_uploadCustomTracklist")]
-loc_finishedCustomTracklist:
     /* 00001FB8: */    cmpw r30,r3
     /* 00001FBC: */    bne- loc_1FC4
     /* 00001FC0: */    li r29,0x1

@@ -31,14 +31,6 @@ loc_47EA4:
     /* 00047EAC: */    mtlr r0
     /* 00047EB0: */    addi r1,r1,0x10
     /* 00047EB4: */    blr
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    # +7
 muAdvSavePoint__showRadar:
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0348")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]

@@ -1319,3 +1319,5 @@ loc_11C8:
         .4byte 0x00000000
 loc_11D0:
         .4byte 0x00000000
+loc_bytanScoreTimeAttackMultiplier:
+        .float 0.2

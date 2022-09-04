@@ -22,3 +22,17 @@ loc_emDamageModuleImpl__getDamageAngle_passConnectedHitboxForSpecialAngles:
     li r7,0x1                # Original operation
     lwz r8, 0x10(r1)
     b __unresolved                          [R_PPC_REL24(41, 1, "loc_passExtraParamForGetDamageAngleFinished")]
+
+
+## Apply multiplier if Time Attack
+loc_emBitan__getScore_applyTimeAttackMultiplier:
+    fmuls f1,f31,f1         # Original operation
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
+    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
+    cmpwi r12, 0x0
+    beq+ loc_notTimeAttack
+    lis r12,0x0                               [R_PPC_ADDR16_HA(41, 4, "loc_bytanScoreTimeAttackMultiplier")]
+    lfs f0,0x0(r12)                           [R_PPC_ADDR16_LO(41, 4, "loc_bytanScoreTimeAttackMultiplier")]
+    fmuls f1, f1, f0
+loc_notTimeAttack:
+    b __unresolved                          [R_PPC_REL24(41, 1, "loc_emBitan__getScore_appliedTimeAttackMultiplier")] 
