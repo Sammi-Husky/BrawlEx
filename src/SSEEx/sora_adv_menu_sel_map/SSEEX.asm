@@ -84,18 +84,12 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stw r0, -0x4(r12)               # Store selected level clear
     stw r29, -0x8(r12)              # Store selected level
     
-    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
-    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
-    li r7, 0x0                          # \
-    li r9, 0x46                         # |
-loc_checkForTimeAttackInput:            # |
-    lhzx r5, r9, r8                     # | 
-    andi. r5, r5, 0x0400                # | Check for X input in each gfPadStatus
-    bne- loc_setTimeAttack              # |
-    addi r9, r9, 0x40                   # |
-    addi r7, r7, 0x1                    # |
-    cmpwi r7, 0x8                       # |
-    ble+ loc_checkForTimeAttackInput    # /
+    lwz r5, 0x8C(r1)                # \
+    andi. r5, r5, 0x0400            # | 
+    bne- loc_setTimeAttack          # |
+    lwz r5, 0xCC(r1)                # | Check for X input in each gfPadStatus
+    andi. r5, r5, 0x0400            # |
+    bne- loc_setTimeAttack          # /
     li r11, 0x0                    # Don't set time attack
     b loc_noSetTimeAttack 
 loc_setTimeAttack:
@@ -117,20 +111,17 @@ loc_noSetTimeAttack:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
 
-    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
-    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
-    li r7, 0x0                      # \
-    li r9, 0x46                     # |
-loc_checkForOverrideInput:          # |
-    lhzx r5, r9, r8                 # | 
-    andi. r5, r5, 0x0040            # | Check for L input in each gfPadStatus
-    bne- loc_teamMemberOverride     # |
-    addi r9, r9, 0x40               # |
-    addi r7, r7, 0x1                # |
-    cmpwi r7, 0x8                   # |
-    ble+ loc_checkForOverrideInput  # /
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
-    lbz r0, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
+    lwz r0, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
+    cmpwi r0, 0x2                   # \ Check if level was completed
+    bgt+ loc_levelCompleted         # /
+    lwz r5, 0x8C(r1)                # \
+    andi. r5, r5, 0x0040            # | 
+    bne- loc_teamMemberOverride     # |
+    lwz r5, 0xCC(r1)                # | Check for L input in each gfPadStatus
+    andi. r5, r5, 0x0040            # |
+    bne- loc_teamMemberOverride     # /
+loc_levelCompleted:
     cmpwi r0,0x1                    # Original operation
     b __unresolved                                             [R_PPC_REL24(31, 1, "loc_noOverride")]  
 loc_teamMemberOverride:
@@ -146,4 +137,17 @@ loc_teamMemberOverride:
     li r8,-0x1          # /
     bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]                    
     b __unresolved                                             [R_PPC_REL24(31, 1, "loc_1768")]
-    
+
+
+loc_muAdvSelMapTask__loc_2264_displayTimeAttackScore:
+    li r5, 0x0
+    lwz r9,0xC(r30)                 # Get time attack score for selected level
+    cmpwi r9, 0x0                   # \ Check if time attack has been done before for the level (otherwise display 0)
+    blt- loc_noTimeAttackRecord     # /
+    mr r5, r9
+loc_noTimeAttackRecord:
+    b __unresolved                                             [R_PPC_REL24(31, 1, "loc_displayedTimeAttackScore")]
+
+# TODO: If Time Attack, temp set level as not being beaten
+## Can still override to negate that, but won't be counted in best score
+## How should Great Maze be handled though?

@@ -6,7 +6,7 @@ muAdvSelmapTask__create:
     /* 00000010: */    stw r31,0xC(r1)
     /* 00000014: */    stw r30,0x8(r1)
     /* 00000018: */    mr r30,r3
-    /* 0000001C: */    li r3,0x5EC
+    /* 0000001C: */    li r3,0x5ED #0x5EC
     /* 00000020: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
     /* 00000024: */    cmpwi r3,0x0
     /* 00000028: */    mr r31,r3
@@ -105,7 +105,8 @@ loc_14C:
     /* 00000190: */    addi r4,r4,0x40
     /* 00000194: */    bdnz+ loc_14C
     /* 00000198: */    rlwinm r0,r5,2,0,29
-    /* 0000019C: */    li r30,0x0
+    stb r30,0x5EC(r31)      # Initialize displayTimeAttack
+    /* 0000019C: */    #li r30,0x0
     /* 000001A0: */    add r6,r31,r0
     /* 000001A4: */    addi r3,r31,0x4C9
     /* 000001A8: */    stw r30,0x1C4(r6)
@@ -1032,12 +1033,14 @@ loc_EF8:
     /* 00000F04: */    blt+ loc_EA4
     /* 00000F08: */    blr
 muAdvSelmapTask__isLeftScroll:
+    ## SSEEX: Remove X and Y scroll (as well as optimize code)
+    lwz r3,0x4(r4)
     /* 00000F0C: */    lwz r0,0x3C(r4)
     /* 00000F10: */    cmpwi r0,0x2
     /* 00000F14: */    beq- loc_F70
     /* 00000F18: */    bge- loc_F2C
     /* 00000F1C: */    cmpwi r0,0x0
-    /* 00000F20: */    beq- loc_F38
+    /* 00000F20: */    # beq- loc_F38
     /* 00000F24: */    bge- loc_F54
     /* 00000F28: */    b loc_FB0
 loc_F2C:
@@ -1045,25 +1048,25 @@ loc_F2C:
     /* 00000F30: */    bge- loc_FB0
     /* 00000F34: */    b loc_F9C
 loc_F38:
-    /* 00000F38: */    lwz r3,0x4(r4)
-    /* 00000F3C: */    rlwinm. r0,r3,0,25,25
-    /* 00000F40: */    bne- loc_F4C
-    /* 00000F44: */    rlwinm. r0,r3,0,20,20
-    /* 00000F48: */    beq- loc_FB0
+    /* 00000F38: */    # lwz r3,0x4(r4)
+    /* 00000F3C: */    # rlwinm. r0,r3,0,25,25
+    /* 00000F40: */    # bne- loc_F4C
+    /* 00000F44: */    # rlwinm. r0,r3,0,20,20
+    /* 00000F48: */    # beq- loc_FB0
 loc_F4C:
-    /* 00000F4C: */    li r3,0x1
-    /* 00000F50: */    blr
+    /* 00000F4C: */    # li r3,0x1
+    /* 00000F50: */    # blr
 loc_F54:
-    /* 00000F54: */    lwz r3,0x4(r4)
+    /* 00000F54: */    # lwz r3,0x4(r4)
     /* 00000F58: */    rlwinm. r0,r3,0,25,25
-    /* 00000F5C: */    bne- loc_F68
-    /* 00000F60: */    rlwinm. r0,r3,0,20,20
-    /* 00000F64: */    beq- loc_FB0
+    /* 00000F5C: */    beq+ loc_FB0 # bne- loc_F68
+    /* 00000F60: */    # rlwinm. r0,r3,0,20,20
+    /* 00000F64: */    # beq- loc_FB0
 loc_F68:
     /* 00000F68: */    li r3,0x1
     /* 00000F6C: */    blr
 loc_F70:
-    /* 00000F70: */    lwz r3,0x4(r4)
+    /* 00000F70: */    # lwz r3,0x4(r4)
     /* 00000F74: */    rlwinm. r0,r3,0,10,10
     /* 00000F78: */    beq- loc_F84
     /* 00000F7C: */    li r3,0x1
@@ -1076,8 +1079,8 @@ loc_F84:
     /* 00000F94: */    li r3,0x1
     /* 00000F98: */    blr
 loc_F9C:
-    /* 00000F9C: */    lwz r0,0x4(r4)
-    /* 00000FA0: */    rlwinm. r0,r0,0,15,15
+    /* 00000F9C: */    # lwz r0,0x4(r4)
+    /* 00000FA0: */    rlwinm. r0,r3,0,15,15 # rlwinm. r0,r0,0,15,15
     /* 00000FA4: */    beq- loc_FB0
     /* 00000FA8: */    li r3,0x1
     /* 00000FAC: */    blr
@@ -1085,12 +1088,13 @@ loc_FB0:
     /* 00000FB0: */    li r3,0x0
     /* 00000FB4: */    blr
 muAdvSelmapTask__isRightScroll:
+    lwz r3,0x4(r4)
     /* 00000FB8: */    lwz r0,0x3C(r4)
     /* 00000FBC: */    cmpwi r0,0x2
     /* 00000FC0: */    beq- loc_101C
     /* 00000FC4: */    bge- loc_FD8
     /* 00000FC8: */    cmpwi r0,0x0
-    /* 00000FCC: */    beq- loc_FE4
+    /* 00000FCC: */    # beq- loc_FE4
     /* 00000FD0: */    bge- loc_1000
     /* 00000FD4: */    b loc_105C
 loc_FD8:
@@ -1098,25 +1102,25 @@ loc_FD8:
     /* 00000FDC: */    bge- loc_105C
     /* 00000FE0: */    b loc_1048
 loc_FE4:
-    /* 00000FE4: */    lwz r3,0x4(r4)
-    /* 00000FE8: */    rlwinm. r0,r3,0,26,26
-    /* 00000FEC: */    bne- loc_FF8
-    /* 00000FF0: */    rlwinm. r0,r3,0,21,21
-    /* 00000FF4: */    beq- loc_105C
+    /* 00000FE4: */    # lwz r3,0x4(r4)
+    /* 00000FE8: */    # rlwinm. r0,r3,0,26,26
+    /* 00000FEC: */    # bne- loc_FF8
+    /* 00000FF0: */    # rlwinm. r0,r3,0,21,21
+    /* 00000FF4: */    # beq- loc_105C
 loc_FF8:
-    /* 00000FF8: */    li r3,0x1
-    /* 00000FFC: */    blr
+    /* 00000FF8: */    # li r3,0x1
+    /* 00000FFC: */    # blr
 loc_1000:
-    /* 00001000: */    lwz r3,0x4(r4)
+    /* 00001000: */    # lwz r3,0x4(r4)
     /* 00001004: */    rlwinm. r0,r3,0,26,26
-    /* 00001008: */    bne- loc_1014
-    /* 0000100C: */    rlwinm. r0,r3,0,21,21
-    /* 00001010: */    beq- loc_105C
+    /* 00001008: */    beq+ loc_105C # bne- loc_1014
+    /* 0000100C: */    # rlwinm. r0,r3,0,21,21
+    /* 00001010: */    # beq- loc_105C
 loc_1014:
     /* 00001014: */    li r3,0x1
     /* 00001018: */    blr
 loc_101C:
-    /* 0000101C: */    lwz r3,0x4(r4)
+    /* 0000101C: */    # lwz r3,0x4(r4)
     /* 00001020: */    rlwinm. r0,r3,0,12,12
     /* 00001024: */    beq- loc_1030
     /* 00001028: */    li r3,0x1
@@ -1129,8 +1133,8 @@ loc_1030:
     /* 00001040: */    li r3,0x1
     /* 00001044: */    blr
 loc_1048:
-    /* 00001048: */    lwz r0,0x4(r4)
-    /* 0000104C: */    rlwinm. r0,r0,0,14,14
+    /* 00001048: */    # lwz r0,0x4(r4)
+    /* 0000104C: */    rlwinm. r0,r3,0,14,14 # rlwinm. r0,r0,0,14,14
     /* 00001050: */    beq- loc_105C
     /* 00001054: */    li r3,0x1
     /* 00001058: */    blr
@@ -1527,6 +1531,29 @@ loc_15CC:
     /* 000015D8: */    bge- loc_15E0
     /* 000015DC: */    stw r3,0x4AC(r25)
 loc_15E0:
+    ## SSEEX: Check for X input to determine whether to redraw map parts for Time Attack
+    lbz r12, 0x5EC(r25)
+    li r11, 0x1
+    lwz r10, 0x8C(r1)                   # \
+    andi. r10, r10, 0x0400              # | Check for X input
+    bne- loc_displayTimeAttackInput     # /
+    li r11, 0x0
+loc_displayTimeAttackInput:                 
+    cmpw r11, r12                           # \
+    beq+ loc_displayTimeAttackNotChanged    # | 
+    stb r11, 0x5EC(r25)                     # |
+    mr r3,r25                               # | Check if X has been just pressed/unpressed and redraw map if it has
+    mr r4,r27                               # |
+    bl muAdvSelmapTask__loc_2264            # /
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
+    li r4,35           # \
+    li r5,-0x1         # |
+    li r6,0x0          # | Play a sound (Page/Change) to acknowledge input
+    li r7,0x0          # |
+    li r8,-0x1         # /
+    bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]      
+loc_displayTimeAttackNotChanged:
     /* 000015E0: */    lwz r3,0x5E8(r25)
     /* 000015E4: */    addi r0,r3,0x1
     /* 000015E8: */    stw r0,0x5E8(r25)
@@ -2465,8 +2492,13 @@ muAdvSelmapTask__loc_2264:
     /* 0000234C: */    lfd f0,0x30(r1)
     /* 00002350: */    fsubs f1,f0,f1
     /* 00002354: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameMatCol")]
+    /* 0000235C: */    lwz r5,0x60C(r27)   # get advSaveData->totalScore
+    lbz r12,0x5EC(r31)  # Get displayTimeAttack bool
+    cmpwi r12, 0x1
+    bne+ loc_displayedTimeAttackScore
+    b __unresolved                                             [R_PPC_REL24(31, 7, "loc_muAdvSelMapTask__loc_2264_displayTimeAttackScore")]  
+loc_displayedTimeAttackScore:
     /* 00002358: */    lis r30,0x0                              [R_PPC_ADDR16_HA(31, 5, "loc_240")]
-    /* 0000235C: */    lwz r5,0x60C(r27)
     /* 00002360: */    addi r3,r1,0x14
     /* 00002364: */    addi r4,r30,0x0                          [R_PPC_ADDR16_LO(31, 5, "loc_240")]
     /* 00002368: */    crclr 6
