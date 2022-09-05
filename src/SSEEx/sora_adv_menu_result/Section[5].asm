@@ -41,7 +41,7 @@ loc_70:
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__processDebug")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__renderDebug")]
         .4byte 0x00000000         [R_PPC_ADDR32(0, 4, "gfTask__init")]
-        .4byte 0x00000000         [R_PPC_ADDR32(34, 1, "muAdvResultTask__initMsg")]
+        .4byte 0x00000000         [R_PPC_ADDR32(34, 1, "muAdvResultTask____dt")]
         .4byte 0x00000000
 loc_D8:
         .asciz "muAdvResultTask"
@@ -71,3 +71,6 @@ loc_124:
 loc_128:
         .asciz "mo_adv_menu.cpp"
         .4byte 0x00000000
+loc_timeAttackResult:
+        .asciz "menu2/sc_adv_result_timeattack.pac"
+        .balign 4        

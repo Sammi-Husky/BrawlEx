@@ -102,6 +102,14 @@ loc_setTimeAttack:
     lwz r11, 0x60C(r3)             # Get total score and store to restore later
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
     stw r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
+    li r4,0x1EFB        # \
+    li r5,-0x1          # |
+    li r6,0x0           # | Play a sound to acknowledge Time Attack
+    li r7,0x0           # |
+    li r8,-0x1          # /
+    bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]    
     li r11, 0x1                    # Set time attack
 loc_noSetTimeAttack:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
@@ -109,6 +117,8 @@ loc_noSetTimeAttack:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
 
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
     li r7, 0x0                      # \
     li r9, 0x46                     # |
 loc_checkForOverrideInput:          # |
@@ -119,11 +129,14 @@ loc_checkForOverrideInput:          # |
     addi r7, r7, 0x1                # |
     cmpwi r7, 0x8                   # |
     ble+ loc_checkForOverrideInput  # /
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
+    lbz r0, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
     cmpwi r0,0x1                    # Original operation
     b __unresolved                                             [R_PPC_REL24(31, 1, "loc_noOverride")]  
 loc_teamMemberOverride:
     li r10, 0x1                     # Set override character flag to true
-    stb r10,0x0(r12)
+    lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    stb r10,0x0(r12)                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
     li r4,0x26          # \

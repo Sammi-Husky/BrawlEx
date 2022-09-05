@@ -6,7 +6,7 @@ muAdvResultTask__create:
     /* 00000010: */    stw r31,0xC(r1)
     /* 00000014: */    stw r30,0x8(r1)
     /* 00000018: */    mr r30,r3
-    /* 0000001C: */    li r3,0x5B0
+    /* 0000001C: */    li r3,0x5B1 #0x5B0
     /* 00000020: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
     /* 00000024: */    cmpwi r3,0x0
     /* 00000028: */    mr r31,r3
@@ -58,20 +58,34 @@ loc_B0:
     lwz r10, 0x0(r10)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
     lis r30,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r30,0x0(r30)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r30,0x30(r30)           # | Restore original total score
-    stw r10,0x60C(r30)          # /
-    li r10, 0x0                 # \ Reset advSaveData->earnedCoinsForClear to 0
-    sth r10, 0x4920(r30)        # /
-    lwz r10, 0x4910(r30)        # \ 
-    li r11, 0x4000              # | Reduce score internally by dividing and then call set coins to get new earned coins
+    lwz r30,0x30(r30)       # | Restore original total score
+    stw r10,0x60C(r30)      # /
+    li r10, 0x0             # \ Reset advSaveData->earnedCoinsForClear to 0
+    sth r10, 0x4920(r30)    # /
+    lwz r10, 0x4910(r30)    # Get advSaveData->scoreInCurrentStage
+    lis r12,0x0                               [R_PPC_ADDR16_HA(1, 6, "loc_1A4C")]
+    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(1, 6, "loc_1A4C")]
+    mulli r9,r12,0x14       # \
+    add r5,r30,r9           # | 
+    lwz r9,0xC(r5)          # | (bestScore uses unused field in save data for individual SSE stages)
+    stw r9, 0x104(r31)      # |  
+    cmpw r10, r9            # | gameGlobal->advSaveData->levelSaveData[currentLevel].bestScore = max(bestScore, newScore)
+    blt- loc_noHighScore    # |
+    stw r10,0xC(r5)         # |
+    stw r10, 0x104(r31)     # | Replace totalScore with bestScore
+    li r0, 0x1              # \
+    stw r0,0x5B0(r31)       # / Set isTimeAttackHighScore to True
+loc_noHighScore:  
+    li r11, 0x4000              # \ Reduce score internally by dividing and then call set coins to get new earned coins
     divwu r10, r10, r11         # |
     stw r10, 0x4910(r30)        # /
     bl __unresolved                          [R_PPC_REL24(0, 4, "adKeepManager__getInstance")]
     bl __unresolved                          [R_PPC_REL24(0, 4, "adKeepManager__calculateCoin")]
     lhz r10, 0x4920(r30)        # \ Update earned coin count in menuTask
-    stw r10, 0xFC(r31)          # /
+    stw r10, 0xFC(r31)          # /  
     
-    # TODO: Display total score as best score (but can be overridden)
+    # TODO: Display total score as best score (but can be overridden with a button combo L + R + Y)
+    ## If you hold X should also display on Map
     # TODO: Later handle speedrun time
 loc_notTimeAttack:
     /* 000000B8: */    mr r3,r31
@@ -165,6 +179,7 @@ muAdvResultTask____ct:
     /* 00000218: */    stw r31,0x1AC(r30)
     /* 0000021C: */    stw r31,0x1B0(r30)
     /* 00000220: */    stw r31,0x1B4(r30)
+    stw r31,0x5B0(r30)
     /* 00000224: */    stw r0,0x5A0(r30)
     /* 00000228: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
     /* 0000022C: */    cmpwi r3,0x0
@@ -196,6 +211,14 @@ loc_280:
     /* 0000028C: */    stw r3,0x5AC(r30)
     /* 00000290: */    lwz r6,0x5A8(r30)
     /* 00000294: */    addi r5,r5,0x0                           [R_PPC_ADDR16_LO(34, 5, "loc_10")]
+    ## SSEEX: Get alternate result file for Time Attack
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r12, 0x2
+    bne+ loc_dontShowBestScore
+    lis r5,0x0                               [R_PPC_ADDR16_HA(34, 5, "loc_timeAttackResult")] 
+    addi r5,r5,0x0                           [R_PPC_ADDR16_LO(34, 5, "loc_timeAttackResult")]       
+loc_dontShowBestScore:
     /* 00000298: */    li r4,0x2B
     /* 0000029C: */    bl __unresolved                          [R_PPC_REL24(1, 1, "loc_3C68")]
     /* 000002A0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__loadMenuSound")]
@@ -206,7 +229,7 @@ loc_280:
     /* 000002B4: */    mtlr r0
     /* 000002B8: */    addi r1,r1,0x10
     /* 000002BC: */    blr
-muAdvResultTask__initMsg:
+muAdvResultTask____dt:
     /* 000002C0: */    stwu r1,-0x20(r1)
     /* 000002C4: */    mflr r0
     /* 000002C8: */    cmpwi r3,0x0
@@ -311,7 +334,7 @@ loc_41C:
     /* 00000434: */    mtlr r0
     /* 00000438: */    addi r1,r1,0x20
     /* 0000043C: */    blr
-loc_440:
+muAdvResultTask__initMsg:
     /* 00000440: */    stwu r1,-0x30(r1)
     /* 00000444: */    mflr r0
     /* 00000448: */    li r4,0x2A
@@ -450,6 +473,14 @@ loc_440:
     /* 0000065C: */    li r6,0x0
     /* 00000660: */    li r7,0x0
     /* 00000664: */    li r8,0xFF
+    ## SSEEX: Change colour if new time attack record
+    lwz r12, 0x5B0(r28) 
+    cmpwi r12, 0x1
+    bne+ loc_notTimeAttackNewRecord
+    li r5,0x0
+    li r6,204
+    li r7,0x0
+loc_notTimeAttackNewRecord:
     /* 00000668: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setFontColor")]
     /* 0000066C: */    lwz r5,0x104(r28)
     /* 00000670: */    addi r3,r1,0x8
@@ -640,10 +671,10 @@ loc_910:
     /* 0000092C: */    addi r1,r1,0x20
     /* 00000930: */    blr
 muAdvResultTask__processDefault:
-    /* 00000934: */    stwu r1,-0x10(r1)
+    /* 00000934: */    stwu r1,-0x20(r1) #stwu r1,-0x10(r1)
     /* 00000938: */    mflr r0
-    /* 0000093C: */    stw r0,0x14(r1)
-    /* 00000940: */    stw r31,0xC(r1)
+    /* 0000093C: */    stw r0,0x24(r1) #stw r0,0x14(r1)
+    /* 00000940: */    stw r31,0x1C(r1) #stw r31,0xC(r1)
     /* 00000944: */    mr r31,r3
     /* 00000948: */    addi r3,r3,0x4C
     /* 0000094C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__main")]
@@ -691,10 +722,72 @@ loc_9E0:
     /* 000009E4: */    li r4,0x8
     /* 000009E8: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_8059FF80")]
     /* 000009EC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneRoot__layerUpdateFrame")]
-    /* 000009F0: */    lwz r0,0x14(r1)
-    /* 000009F4: */    lwz r31,0xC(r1)
+    ## SSEEX: Override Time attack highscore if L + R + X input
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r12, 0x2
+    bne+ loc_noOverrideHighScore
+    lwz r3,0x1B8(r31)               # \
+    cmpwi r3, 0x0                   # | Check if menuTask->muMsg is initialized
+    beq- loc_noOverrideHighScore    # /
+    lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
+    lwz r8, 0x0(r8)         [R_PPC_ADDR16_LO(0, 11, "loc_805A0040")] # / Get global gfPadSystem   
+    li r7, 0x0                              # \
+    li r9, 0x46                             # |
+loc_checkForOverrideHighScoreInput:         # |
+    lhzx r5, r9, r8                         # | 
+    cmpwi r5, 0x0460                        # | Check for L + R + X input in each gfPadStatus
+    beq- loc_overrideHighScore              # |
+    addi r9, r9, 0x40                       # |
+    addi r7, r7, 0x1                        # |
+    cmpwi r7, 0x8                           # |
+    ble+ loc_checkForOverrideHighScoreInput # /
+    b loc_noOverrideHighScore
+loc_overrideHighScore:
+    lwz r5, 0x100(r31)     # Get current score
+    lis r11,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r11,0x0(r11)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r11,0x30(r11)               # \
+    lis r12,0x0                               [R_PPC_ADDR16_HA(1, 6, "loc_1A4C")]
+    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(1, 6, "loc_1A4C")]
+    mulli r9,r12,0x14               # |
+    add r6,r11,r9                   # | 
+    lwz r9,0xC(r6)                  # | (bestScore uses unused field in save data for individual SSE stages)
+    stw r9, 0x104(r31)              # |  
+    cmpw r5, r9                     # | gameGlobal->advSaveData->levelSaveData[currentLevel].bestScore = currentScore
+    beq+ loc_noOverrideHighScore    # |
+    stw r5,0xC(r6)                  # /
+    lis r4,0x0                              [R_PPC_ADDR16_HA(34, 5, "loc_28")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(34, 5, "loc_28")]
+    addi r3,r1,0x8      # \
+    crclr 6             # |
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    lwz r3,0x1B8(r31)   # |
+    li r4,0x4           # |
+    li r5,0xFF          # |
+    li r6,0x0           # | Update text
+    li r7,0x0           # |
+    li r8,0xFF          # |
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setFontColor")]
+    lwz r3,0x1B8(r31)   # |
+    addi r5,r1,0x8      # |
+    li r4,0x4           # |
+    crclr 6             # /
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printf")]
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
+    li r4,0x27          # \
+    li r5,-0x1          # |
+    li r6,0x0           # | Play 'save' sound effect
+    li r7,0x0           # |
+    li r8,-0x1          # /
+    bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]
+loc_noOverrideHighScore:
+
+    /* 000009F0: */    lwz r0,0x24(r1) #lwz r0,0x14(r1)
+    /* 000009F4: */    lwz r31,0x1C(r1) #lwz r31,0xC(r1)
     /* 000009F8: */    mtlr r0
-    /* 000009FC: */    addi r1,r1,0x10
+    /* 000009FC: */    addi r1,r1,0x20 #addi r1,r1,0x10
     /* 00000A00: */    blr
 muAdvResultTask__controllProc:
     /* 00000A04: */    stwu r1,-0x60(r1)
@@ -1056,7 +1149,7 @@ loc_F04:
     /* 00000F3C: */    mr r3,r30
     /* 00000F40: */    bl muAdvResultTask__listDisp
     /* 00000F44: */    mr r3,r30
-    /* 00000F48: */    bl loc_440
+    /* 00000F48: */    bl muAdvResultTask__initMsg
     /* 00000F4C: */    li r3,0x2
 loc_F50:
     /* 00000F50: */    lwz r0,0x14(r1)
@@ -1124,6 +1217,19 @@ muAdvResultTask__stepCoinInit:
     /* 00001030: */    bl muAdvResultTask__initDropCoinList
     /* 00001034: */    lwz r0,0xFC(r31)
     /* 00001038: */    stw r0,0x594(r31)
+    ## SSEEX: Play sound effect if new record
+    lwz r12, 0x5B0(r31) 
+    cmpwi r12, 0x1
+    bne+ loc_noTimeAttackNewRecord
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
+    li r4,0x1FD2        # \
+    li r5,-0x1          # |
+    li r6,0x0           # | Play 'New Record!' sound effect
+    li r7,0x0           # |
+    li r8,-0x1          # /
+    bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]
+loc_noTimeAttackNewRecord:
     /* 0000103C: */    lwz r31,0xC(r1)
     /* 00001040: */    lwz r0,0x14(r1)
     /* 00001044: */    mtlr r0

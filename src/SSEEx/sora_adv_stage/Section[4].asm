@@ -927,6 +927,12 @@ loc_B64:
 loc_B68:
         .4byte 0x43300000
         .4byte 0x80000000
+loc_timeAttackStartScores:
+        .int 400000000
+        .int 500000000
+        .int 600000000
+        .int 800000000
+        .int 900000000
 loc_timeAttackDoorPenalty:
         .int 10000
 loc_timeAttackGameOverPenalty:

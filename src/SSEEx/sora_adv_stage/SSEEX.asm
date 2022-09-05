@@ -4,10 +4,7 @@
 # TODO: Impossible mode, 1 stock if holding X at map level selection
 # TODO: Keep track of completion time for speedrunning (check if can use the space in FFFFFFFF in each level's struct), and high score (last field in level's struct maybe or use part of clear percentage since it uses full word for no reason) (although high scores can be farmed from infinite respawns)
 ## While selecting a level hold X for Time Attack, hold Y for Speedrun
-## Maybe do it Sonic style and display score as a combo of speed and score, also try to display speed at Level Clear
-## Use getGameFrameDelta
 ## Show time on HUD
-## Keep track of num gameovers in stage as byte?
 ## Keep track of time attack scores and display best time attack score in results (but can override new score with a button combo regardless if it's best)
 ### Same for speedrun time
 ### Could do regular score too (just start with high number and penalize doors as well as bytans?)
@@ -20,19 +17,39 @@
 # TODO: Load second fighter ahead of time (by setting P2's gmPlayerInitData early in sqAdventure::setAdventureCondition just like in co-op)
 
 # TODO: Investigate putting entirely new level markers on the map
+## Unlock levels similar to characters detecting jumpLevelId
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
 # TODO: Stamina battles?
-# TODO: Disable checkpoints for a NG+
-## Disable Game Overs making game easier with button combo at beginning (or introduce a brand new difficulty option).
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 # TODO: Handle autosave (could potentially use sd save redirect)
+# TODO: Hold R to temporarily set level as incomplete (so can experience cutscenes again)
 
-##############################################
-## SSEEX: Decrease score if time attack is on
-##############################################
+################################################################################
+## SSEEX: Start Time Attack score and decrease every frame if Time attack is on
+################################################################################
+
+loc_stAdventure2____ct_startStage:
+    stfs f1,0xB0(r31)       # Original operation
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r11, 0x1
+    bne+ loc_doNotSetInitialScore
+    li r11, 0x2             # Set global time attack to 2 which means initial score has been set
+    stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r8, 0x5FD(r6)       # Get current stage difficulty
+    li r7, 0x3              # \
+    subi r8, r8, 0x2        # | Get selected difficulty from (currentStageDifficulty - 2) / 3
+    divw r8, r8, r7         # /
+    lis r11,0x0                    [R_PPC_ADDR16_HA(40, 4, "loc_timeAttackStartScores")]
+    addi r11, r11, 0x0             [R_PPC_ADDR16_LO(40, 4, "loc_timeAttackStartScores")]
+    mulli r8, r8, 0x4       # \
+    lwzx r11, r11, r8       # | Set Time Attack score based on difficulty
+    stw r11, 0x4910(r6)     # /
+loc_doNotSetInitialScore:
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToCreate")]
 
 loc_stAdventure2__changeStep_updateOnFrame:
     mr r31,r3               # Original operation
@@ -47,21 +64,6 @@ loc_setScoreToZero:                 # |
     stw r10, 0x4910(r28)            # /
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToChangeStep")]
 
-loc_stAdventure2____ct_startStage:
-    stfs f1,0xB0(r31)       # Original operation
-    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
-    lbz r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
-    cmpwi r11, 0x1
-    bne+ loc_doNotSetInitialScore
-    li r11, 0x2             # Set global time attack to 2 which means initial score has been set
-    stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
-    lis r11, 0x35A4         # \
-    ori r11, r11, 0xE900    # | Set initial score to 900000000
-    stw r11, 0x4910(r6)     # /
-loc_doNotSetInitialScore:
-    b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToCreate")]
-
-    ## TODO: Analyze Bytans to see if can give infinite score
 
 #####################################################################################################################################################
 ## SSEEX: Character unlocks based on lastDoorId and redirect door index based on jumpLevelId with added Flag2 random setting/Flag3 Difficulty Setting 
