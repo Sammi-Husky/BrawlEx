@@ -14,7 +14,9 @@ muAdvSelmapTask__create:
     /* 00000030: */    bl muAdvSelmapTask____ct
     /* 00000034: */    mr r31,r3
 loc_38:
-    /* 00000038: */    mr r3,r31
+    /* 00000038: */    #mr r3,r31
+    b __unresolved                                             [R_PPC_REL24(31, 7, "loc_muAdvSelmapTask__create_initialize")] 
+loc_initialized:
     /* 0000003C: */    mr r4,r30
     /* 00000040: */    bl muAdvSelmapTask__initProc
     /* 00000044: */    mr r3,r31

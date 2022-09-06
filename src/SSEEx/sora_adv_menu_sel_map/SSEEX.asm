@@ -1,6 +1,29 @@
-## SSEEX: Check for unlocks
-
 loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks:
+    
+    ## SSEEX: Put back clear flags if it was adjusted because of Time Attack
+    lwz r10, 0x40(r31)          # \
+    cmpwi r10, 0x0              # | Check if muAdvSelmapState->state == 0x0
+    bne+ loc_noMapSelectActive  # / 
+    lwz r10, 0x4A4(r31)         # \
+    cmpwi r10, 0x3              # | Check if muAdvSelmapState->currentProcessState == 0x3
+    beq- loc_noMapSelectActive  # / 
+    li r10, -1
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
+    lwz r11, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    cmpw r11, r10               # \ Check if there is a prev selected level
+    beq+ loc_noMapSelectActive  # / 
+    stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
+    lwz r9, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
+    lis r8,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r8,0x0(r8)                         [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r8,0x30(r8)     # |
+    mulli r5,r11,0x14   # |
+    add r4,r8,r5        # | gameGlobal->advSaveData->levelSaveData[currentLevel].clearFlag = originalClearFlag
+    stw r9,0x4(r4)      # /
+loc_noMapSelectActive:
+
+    ## SSEEX: Check for unlocks
     bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
     lis r4,0x0                                  [R_PPC_ADDR16_HA(1, 5, "loc_6048")]
     addi r4, r4, 0x0                            [R_PPC_ADDR16_LO(1, 5, "loc_6048")]
@@ -18,7 +41,6 @@ loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks:
     lwz r8,0x0(r8)                         [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r8,0x30(r8)       # |
     lwz r8, 0x260(r8)     # /  get GameGlobal-advSaveData->greatMaze1ClearDifficulty
-
     li r9, 0x0                      # \
     mtctr r10                       # | Loop through Ex save data in order of CSS Id
 loc_checkForNewUnlocks:             # |
@@ -55,27 +77,54 @@ loc_newUnlock:
     b __unresolved                              [R_PPC_REL24(31, 1, "loc_E3C")]
 
 
-
-## SSEEX: Check for override input to later force open difficulty and CSS menu
-loc_muAdvSelmapTask__controllProc_checkIfOverride:
-    ## ble- ->0x806ECD94 (Original operation)
+## SSEEX: Initialize variables
+loc_muAdvSelmapTask__create_initialize:
+    ## op ble- ->0x806ECD94 (Original operation)
     lis r10, 0x4081
     ori r10, r10, 0x0148
     # @ sqAdventure::restartStcok             
     lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
     stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    ## op beq- 0xC (Original operation)
+    lis r10, 0x4182
+    ori r10, r10, 0x000c
+    # @ adAutoSave::create             
+    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
     
-    li r10, -1             # Set prevSequenceIndex to -1 (so don't accidentially return to an old sequenceIndex)
-    lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
-    stw r10, 0x0(r12)                          [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
-    li r10, 0x0
-    stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
+    li r10, 0
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_gameOverEncountered")]
     stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_gameOverEncountered")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_subLevelIndex")]
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
+    li r10, -1             # Set prevSequenceIndex to -1 (so don't accidentially return to an old sequenceIndex)
+    lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
+    stw r10, 0x0(r12)                          [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
+    lwz r11, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    cmpw r11, r10                   # \ Check if there is a prev selected level
+    beq- loc_noPrevSelectedLevel    # /
+    stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
+    lwz r9, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    mulli r5,r11,0x14   # |
+    lwz r3,0x30(r3)     # | gameGlobal->advSaveData->levelSaveData[currentLevel].clearFlag = originalClearFlag
+    add r4,r3,r5        # |
+    stw r9,0x4(r4)      # /
+    bl __unresolved                             [R_PPC_REL24(1, 1, "sqAdventure__calculateClearPercent")]
+loc_noPrevSelectedLevel:
+    mr r3,r31          # Original operation
+    b __unresolved                              [R_PPC_REL24(31, 1, "loc_initialized")]
+
+
+## SSEEX: Check for override input to later force open difficulty and CSS menu
+loc_muAdvSelmapTask__controllProc_checkIfOverride:
+    li r10, 0x0
+    stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     stb r10,0x0(r12)        # Set override characters flag to zero
@@ -111,10 +160,6 @@ loc_noSetTimeAttack:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
 
-    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
-    lwz r0, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
-    cmpwi r0, 0x2                   # \ Check if level was completed
-    bgt+ loc_levelCompleted         # /
     lwz r5, 0x8C(r1)                # \
     andi. r5, r5, 0x0040            # | 
     bne- loc_teamMemberOverride     # |
@@ -122,6 +167,25 @@ loc_noSetTimeAttack:
     andi. r5, r5, 0x0040            # |
     bne- loc_teamMemberOverride     # /
 loc_levelCompleted:
+    cmpwi r11, 0x1                          # \ Check if time attack
+    bne+ loc_dontTempMarkLevelAsIncomplete  # /
+    li r11, 0x2         # \
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    mulli r5,r29,0x14   # |
+    lwz r3,0x30(r3)     # | gameGlobal->advSaveData->levelSaveData[currentLevel].clearFlag = 2
+    add r4,r3,r5        # |
+    stw r11,0x4(r4)     # /
+    # Disable autosave
+    ## op nop
+    lis r10, 0x6000
+    # @ adAutoSave::create             
+    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
+    # TODO: Fix selc selection by loading up a selc file with the right fighters corresponding to the level by setting jumpLevelId to selected level
+loc_dontTempMarkLevelAsIncomplete:
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
+    lwz r0, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
     cmpwi r0,0x1                    # Original operation
     b __unresolved                                             [R_PPC_REL24(31, 1, "loc_noOverride")]  
 loc_teamMemberOverride:
@@ -151,3 +215,4 @@ loc_noTimeAttackRecord:
 # TODO: If Time Attack, temp set level as not being beaten
 ## Can still override to negate that, but won't be counted in best score
 ## How should Great Maze be handled though?
+# TODO: Disqualify post game doors

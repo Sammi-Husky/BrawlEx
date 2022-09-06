@@ -9,7 +9,9 @@ loc_muAdvNameTask__create_patchSoraModules:
     li r10, -1                      # Initialize prevSequenceIndex as -1
     lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
     stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
-    
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
+    stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+
     lis r10, 0x4800
 
     ### Fix Increment Fighter Respawn Index for Ex Characters
@@ -89,5 +91,14 @@ loc_muAdvNameTask__create_patchSoraModules:
     # @ sqAdventure::restartStcok             
     lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
     stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+
+    ### Restore original operation in adAutoSave::create in case it was changed
+
+    ## op beq- 0xC
+    lis r10, 0x4182
+    ori r10, r10, 0x000c
+    # @ adAutoSave::create             
+    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
 
     b __unresolved                           [R_PPC_REL24(28, 1, "loc_finishedPatching")]

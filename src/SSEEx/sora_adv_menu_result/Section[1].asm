@@ -59,10 +59,15 @@ loc_B0:
     lis r30,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r30,0x0(r30)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r30,0x30(r30)       # | Restore original total score
-    stw r10,0x60C(r30)      # /
+    stw r10,0x60C(r30)      # |
+    stw r10, 0x104(r31)     # /
     li r10, 0x0             # \ Reset advSaveData->earnedCoinsForClear to 0
     sth r10, 0x4920(r30)    # /
     lwz r10, 0x4910(r30)    # Get advSaveData->scoreInCurrentStage
+    lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    lbz r12,0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    cmpwi r12, 0x0          # \ Don't save high score if override characters was on
+    bne+ loc_noHighScore    # /
     lis r12,0x0                               [R_PPC_ADDR16_HA(1, 6, "loc_1A4C")]
     lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(1, 6, "loc_1A4C")]
     mulli r9,r12,0x14       # \
@@ -84,8 +89,6 @@ loc_noHighScore:
     lhz r10, 0x4920(r30)        # \ Update earned coin count in menuTask
     stw r10, 0xFC(r31)          # /  
     
-    # TODO: Display total score as best score (but can be overridden with a button combo L + R + Y)
-    ## If you hold X should also display on Map
     # TODO: Later handle speedrun time
 loc_notTimeAttack:
     /* 000000B8: */    mr r3,r31
@@ -422,6 +425,14 @@ muAdvResultTask__initMsg:
     /* 00000590: */    li r5,0x0
     /* 00000594: */    li r6,0x0
     /* 00000598: */    li r7,0x0
+    lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    lbz r12,0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    cmpwi r12, 0x0              # \ Highlight score if override was on
+    beq+ loc_noHighlightScore   # /
+    li r5,0xFF
+    li r6,0x0
+    li r7,0x0
+loc_noHighlightScore:
     /* 0000059C: */    li r8,0xFF
     /* 000005A0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setFontColor")]
     /* 000005A4: */    lis r31,0x0                              [R_PPC_ADDR16_HA(34, 5, "loc_28")]

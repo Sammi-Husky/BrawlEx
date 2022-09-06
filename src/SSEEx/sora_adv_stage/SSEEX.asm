@@ -25,7 +25,7 @@
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 # TODO: Handle autosave (could potentially use sd save redirect)
-# TODO: Hold R to temporarily set level as incomplete (so can experience cutscenes again)
+# TODO: Toggle changing outcomes with R (e.g. choosing Mario instead of Kirby, saving Peach instead of Zelda) if Great Maze has been completed
 
 ################################################################################
 ## SSEEX: Start Time Attack score and decrease every frame if Time attack is on
