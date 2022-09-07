@@ -764,16 +764,6 @@ muAdvSelchrCTask__setMenuData:
     /* 0003E6C8: */    mr r29,r3
     /* 0003E6D0: */    mr r30,r4
 
-    addi r3, r1, 0x60   # \
-    li r4, 0x0          # | Clear base fighter unlock array
-    li r5, 0x28         # /
-    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
-    addi r3, r1, 0x8A   # \
-    lis r4,0x0                          [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
-    addi r4, r4, 0x0                    [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
-    li r5, 0xC9         # | memcopy Ex unlock array to this temp fighter unlock array
-    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] 
-
     lis r22,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     lbz r14, 0x0(r22)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     ## ble- ->0x806ECD94 (Original operation)
@@ -793,9 +783,7 @@ muAdvSelchrCTask__setMenuData:
     lis r19,0x0                         [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r19,0x0(r19)                    [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r20, 0x30(r19)          # | Get GameGlobal->advSaveData->jumpLevelId
-    lwz r6, 0x62C(r20)          # | (if it's 0 then skip)
-    cmpwi r6, 0x0               # |
-    beq+ loc_checkIfOverride    # /
+    lwz r6, 0x62C(r20)          # /
 
     addi r3, r1, 0x3B
     lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrcFilePath")]
@@ -813,8 +801,20 @@ muAdvSelchrCTask__setMenuData:
     addi r3, r1, 0xB
     li r6,0	
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
-    cmpwi r3, 0x0
-    bne+ loc_checkIfOverride
+    mr r15, r3
+    
+    addi r3, r1, 0x60   # \
+    li r4, 0x0          # | Clear base fighter unlock array
+    li r5, 0x28         # /
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_8000443C")]
+    addi r3, r1, 0x8A   # \
+    lis r4,0x0                          [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r4, r4, 0x0                    [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    li r5, 0xC9         # | memcopy Ex unlock array to this temp fighter unlock array
+    bl __unresolved                          [R_PPC_REL24(0, 1, "loc_80004338")] 
+    
+    cmpwi r15, 0x0              # \
+    bne+ loc_checkIfOverride    # / Check if selc file exists
     
     ## b 0x1EC
     lis r10, 0x4800                 # \
@@ -3230,8 +3230,9 @@ loc_4010C:
     nop
     nop
     nop
+    nop 
 
-    # +4
+    # +5
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0
