@@ -1992,6 +1992,7 @@ loc_2C954:
     /* 0002C95C: */    stw r0,0x8(r28)
     /* 0002C960: */    lbz r0,0x14(r3)
     /* 0002C964: */    cmpwi r0,0x0
+SSEEX_tempOverrideRosterChange:
     /* 0002C968: */    bne- loc_2CA80
     /* 0002C96C: */    lwz r4,0x4(r3)
     /* 0002C970: */    mr r3,r28

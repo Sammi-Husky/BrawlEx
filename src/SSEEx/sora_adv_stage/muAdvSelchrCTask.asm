@@ -784,6 +784,8 @@ muAdvSelchrCTask__setMenuData:
     lwz r19,0x0(r19)                    [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r20, 0x30(r19)          # | Get GameGlobal->advSaveData->jumpLevelId
     lwz r6, 0x62C(r20)          # /
+    b __unresolved                                       [R_PPC_REL24(40, 7, "loc_muAdvSelchrCTask__setMenuData_checkForGlobalTimeAttack")]
+loc_checkedForGlobalTimeAttack:
 
     addi r3, r1, 0x3B
     lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_selchrcFilePath")]
@@ -3230,9 +3232,8 @@ loc_4010C:
     nop
     nop
     nop
-    nop 
 
-    # +5
+    # +4
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

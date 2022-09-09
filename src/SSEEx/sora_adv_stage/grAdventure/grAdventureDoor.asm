@@ -463,8 +463,8 @@ loc_2535C:
     /* 00025364: */    stfs f0,0x154(r31)
     /* 00025368: */    b loc_25398
 loc_2536C:
-    /* 0002536C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 6, "loc_15C")]
     /* 00025370: */    lwz r4,0x164(r31)
+    /* 0002536C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 6, "loc_15C")]
     /* 00025374: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(40, 6, "loc_15C")]
     /* 00025378: */    bl stAdventure2__requestStepJump
     /* 0002537C: */    lwz r12,0x3C(r31)

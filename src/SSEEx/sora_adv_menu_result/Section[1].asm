@@ -49,37 +49,50 @@ loc_B0:
     /* 000000B0: */    stw r3,0x11C(r31)
     /* 000000B4: */    li r0,0x3C
     /* 000000BC: */    stw r0,0x48(r31)
-    ## SSEEX: Adjust earned coins if time attack
-    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
-    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
-    cmpwi r12, 0x2
-    bne+ loc_notTimeAttack
+    ## SSEEX: Check if new record and adjust earned coins if time attack
+    lis r11,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r11, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r11, 0x2
+    blt+ loc_notTimeAttack
     lis r10,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
     lwz r10, 0x0(r10)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
     lis r30,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r30,0x0(r30)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r30,0x30(r30)       # | Restore original total score
-    stw r10,0x60C(r30)      # |
-    stw r10, 0x104(r31)     # /
+    stw r10,0x60C(r30)      # /
     li r10, 0x0             # \ Reset advSaveData->earnedCoinsForClear to 0
     sth r10, 0x4920(r30)    # /
     lwz r10, 0x4910(r30)    # Get advSaveData->scoreInCurrentStage
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
+    lwz r12, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    cmpwi r12, 0x1E           # \
+    blt+ loc_notGreatMaze     # | check if Great Maze
+    cmpwi r12, 0x21           # |
+    bgt+ loc_notGreatMaze     # /
+    li r12, 0x1E        # Use first Great Maze entry
+loc_notGreatMaze:
+    mulli r9,r12,0x14       # \
+    add r5,r30,r9           # | get bestScore from unused field in save data for individual SSE stages
+    lwz r9,0xC(r5)          # / 
+    cmpwi r9, 0x0               # \
+    bge+ loc_notNegativeScore   # | min(bestScore, 0)
+    li r9, 0x0                  # |
+loc_notNegativeScore:           # /
+    stw r9, 0x104(r31)      # Store bestScore to print later  
+    cmpw r10, r9            # \ if stageScore < bestScore
+    ble- loc_noHighScore    # /
+    li r0, 0x1              # high score
+    cmpwi r11, 0x3          # \
+    beq+ loc_highScore      # / Check if Global Time Attack was disqualified (i.e. it got set to 3)
     lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     lbz r12,0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
-    cmpwi r12, 0x0          # \ Don't save high score if override characters was on
-    bne+ loc_noHighScore    # /
-    lis r12,0x0                               [R_PPC_ADDR16_HA(1, 6, "loc_1A4C")]
-    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(1, 6, "loc_1A4C")]
-    mulli r9,r12,0x14       # \
-    add r5,r30,r9           # | 
-    lwz r9,0xC(r5)          # | (bestScore uses unused field in save data for individual SSE stages)
-    stw r9, 0x104(r31)      # |  
-    cmpw r10, r9            # | gameGlobal->advSaveData->levelSaveData[currentLevel].bestScore = max(bestScore, newScore)
-    blt- loc_noHighScore    # |
-    stw r10,0xC(r5)         # |
-    stw r10, 0x104(r31)     # | Replace totalScore with bestScore
-    li r0, 0x1              # \
-    stw r0,0x5B0(r31)       # / Set isTimeAttackHighScore to True
+    cmpwi r12, 0x0          # | Don't save high score if override characters was on (also another disqualification clause)
+    bne+ loc_highScore      # /
+    stw r10,0xC(r5)         # \
+    stw r10, 0x104(r31)     # / Replace totalScore with bestScore automatically if it's a valid high score
+    li r0, 0x2              # valid high score
+loc_highScore:
+    stw r0,0x5B0(r31)       # Set isTimeAttackHighScore
 loc_noHighScore:  
     li r11, 0x4000              # \ Reduce score internally by dividing and then call set coins to get new earned coins
     divwu r10, r10, r11         # |
@@ -218,7 +231,7 @@ loc_280:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     cmpwi r12, 0x2
-    bne+ loc_dontShowBestScore
+    blt+ loc_dontShowBestScore
     lis r5,0x0                               [R_PPC_ADDR16_HA(34, 5, "loc_timeAttackResult")] 
     addi r5,r5,0x0                           [R_PPC_ADDR16_LO(34, 5, "loc_timeAttackResult")]       
 loc_dontShowBestScore:
@@ -425,10 +438,15 @@ muAdvResultTask__initMsg:
     /* 00000590: */    li r5,0x0
     /* 00000594: */    li r6,0x0
     /* 00000598: */    li r7,0x0
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r12, 0x3              # \ Check if Global Time Attack has been disqualified
+    beq- loc_highlightScore     # /
     lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     lbz r12,0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     cmpwi r12, 0x0              # \ Highlight score if override was on
     beq+ loc_noHighlightScore   # /
+ loc_highlightScore:
     li r5,0xFF
     li r6,0x0
     li r7,0x0
@@ -486,7 +504,7 @@ loc_noHighlightScore:
     /* 00000664: */    li r8,0xFF
     ## SSEEX: Change colour if new time attack record
     lwz r12, 0x5B0(r28) 
-    cmpwi r12, 0x1
+    cmpwi r12, 0x2
     bne+ loc_notTimeAttackNewRecord
     li r5,0x0
     li r6,204
@@ -737,7 +755,7 @@ loc_9E0:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     cmpwi r12, 0x2
-    bne+ loc_noOverrideHighScore
+    blt+ loc_noOverrideHighScore
     lwz r3,0x1B8(r31)               # \
     cmpwi r3, 0x0                   # | Check if menuTask->muMsg is initialized
     beq- loc_noOverrideHighScore    # /
@@ -758,9 +776,15 @@ loc_overrideHighScore:
     lwz r5, 0x100(r31)     # Get current score
     lis r11,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r11,0x0(r11)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r11,0x30(r11)               # \
-    lis r12,0x0                               [R_PPC_ADDR16_HA(1, 6, "loc_1A4C")]
-    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(1, 6, "loc_1A4C")]
+    lwz r11,0x30(r11)        # get GameGlobal->advSaveData
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
+    lwz r12, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    cmpwi r12, 0x1E           # \
+    blt+ loc_isNotGreatMaze   # | check if Great Maze
+    cmpwi r12, 0x21           # |
+    bgt+ loc_isNotGreatMaze   # /
+    li r12, 0x1E        # Use first Great Maze entry
+loc_isNotGreatMaze:
     mulli r9,r12,0x14               # |
     add r6,r11,r9                   # | 
     lwz r9,0xC(r6)                  # | (bestScore uses unused field in save data for individual SSE stages)
@@ -1230,8 +1254,8 @@ muAdvResultTask__stepCoinInit:
     /* 00001038: */    stw r0,0x594(r31)
     ## SSEEX: Play sound effect if new record
     lwz r12, 0x5B0(r31) 
-    cmpwi r12, 0x1
-    bne+ loc_noTimeAttackNewRecord
+    cmpwi r12, 0x0
+    beq+ loc_noTimeAttackNewRecord
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
     li r4,0x1FD2        # \

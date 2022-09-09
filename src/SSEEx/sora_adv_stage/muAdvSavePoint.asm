@@ -7,7 +7,7 @@ muAdvSavePoint__create:
     /* 00047E5C: */    stw r0,0x14(r1)
     /* 00047E60: */    stw r31,0xC(r1)
     /* 00047E64: */    mr r31,r3
-    # Removes check that Great Maze map exists and level id check
+    ## SSEEX: Removes check that Great Maze map exists and level id check
     /* 00047E68: */    #lwz r3,0x0(r4)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A0348")]
     /* 00047E6C: */    #cmpwi r3,0x0
     /* 00047E70: */    #bne+ loc_47E88 #beq- loc_47E80
@@ -672,9 +672,24 @@ loc_487A4:
     /* 000487B0: */    bne- loc_489EC
     /* 000487B4: */    b loc_48A2C
 loc_487B8:
+    ## SSEEX: Disable Great Maze save during Time Attack
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r12, 0x0
+    bne+ loc_disableGreatMazeSave
     /* 000487B8: */    li r0,0xCB
     /* 000487BC: */    stw r0,0x44(r31)
     /* 000487C0: */    b loc_48A2C
+loc_disableGreatMazeSave:
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
+    li r4,0x3          # \
+    li r5,-0x1         # |
+    li r6,0x0          # | Play 'beep' sound effect
+    li r7,0x0          # |
+    li r8,-0x1         # /
+    bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]
+    b loc_48A2C
 loc_487C4:
     /* 000487C4: */    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 9, "loc_8049E01C")]
     /* 000487C8: */    li r4,0x1

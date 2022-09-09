@@ -180,7 +180,7 @@ loc_stAdventure2__changeStep_changeSequenceIndex:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     cmpwi r11, 0x2          # \ Check if Global Time attack is on
-    bne+ loc_applyPenalty   # /
+    blt+ loc_applyPenalty   # /
     lbz r11, 0x4(27)        # \
     cmpwi r11, 0x3          # |
     beq- loc_applyPenalty   # | Subtract if jumpFlag0 is 0,1 or 3 (only want to reduce going between subsequent rooms and not between cutscenes)
@@ -371,10 +371,43 @@ loc_notNegativeSubLevelIndex3:          # /
 loc_noTlst2:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_bgmConvertToFloat")]
 
+###############################################################################################
+## SSEEX: Force Specific Selc Files After Movie Character Selection C During Global Time Attack 
+###############################################################################################
+loc_muAdvSelchrCTask__setMenuData_checkForGlobalTimeAttack:
+    cmplwi r6, 0x0              # \
+    bne+ loc_dontForceSelcFile  # / Check if jumpLevelId != 0 (which it should be during regular SSE movies)
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r12, 0x1              # \
+    blt+ loc_dontForceSelcFile  # / Check if Global Time Attack is on
+    bl __unresolved                          [R_PPC_REL24(0, 4, "gfSceneManager__getInstance")]
+    lis r4,0x0                                  [R_PPC_ADDR16_HA(1, 5, "loc_7BA0")]
+    addi r4, r4, 0x0                            [R_PPC_ADDR16_LO(1, 5, "loc_7BA0")]
+    bl __unresolved                             [R_PPC_REL24(0, 4, "gfSceneManager__searchSequence")]
+    li r6, 0x0
+    lwz r12, 0x10(r3)   # Get sqAdventure->sequenceIndex
+    cmpwi r12, 405 
+    beq- loc_tabuuFight
+    cmpwi r12, 327
+    beq- loc_entranceToSubspace
+    cmpwi r12, 313
+    bne- loc_dontForceSelcFile
+loc_metaRidleyBossFight:
+    li r6, 0x19
+    b loc_dontForceSelcFile
+loc_entranceToSubspace:
+    li r6, 0x1B
+    b loc_dontForceSelcFile
+loc_tabuuFight:
+    li r6, 0x1D
+loc_dontForceSelcFile:
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_checkedForGlobalTimeAttack")]
+
+
 ##########################################
 ## SSEEX: Load/Save Character Unlock Data
 ##########################################
-
 loc_muAdvLoadTask__onDecided_loadExSave:
     addi r3, r1, 0x38
     lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_advExSaveFilePath")]
@@ -426,3 +459,5 @@ loc_muAdvSaveTask__onDecided_writeExSave:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
     addi r11,r1,0xE0      # Original operation
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_wroteExSave")]
+
+## TODO: Fix index of save (e.g. 25 might not be 25, appears earlier if none in between)

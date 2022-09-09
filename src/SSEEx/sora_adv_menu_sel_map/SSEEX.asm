@@ -5,14 +5,20 @@ loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks:
     cmpwi r10, 0x0              # | Check if muAdvSelmapState->state == 0x0
     bne+ loc_noMapSelectActive  # / 
     lwz r10, 0x4A4(r31)         # \
-    cmpwi r10, 0x3              # | Check if muAdvSelmapState->currentProcessState == 0x3
+    cmpwi r10, 0x3              # | Check if muAdvSelmapState->currentProcessState != 0x3
     beq- loc_noMapSelectActive  # / 
     li r10, -1
     lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
     lwz r11, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
     cmpw r11, r10               # \ Check if there is a prev selected level
-    beq+ loc_noMapSelectActive  # / 
+    beq+ loc_noMapSelectActive  # / (and reset after if there is)
     stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r8, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r8, 0x0               # \ check if Time Attack is active
+    beq+ loc_noMapSelectActive  # /
+    li r8, 0x0         # Deactivate Time Attack
+    stb r8, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
     lwz r9, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
     lis r8,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
@@ -21,6 +27,11 @@ loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks:
     mulli r5,r11,0x14   # |
     add r4,r8,r5        # | gameGlobal->advSaveData->levelSaveData[currentLevel].clearFlag = originalClearFlag
     stw r9,0x4(r4)      # /
+    cmpwi r11, 0x1E                # \
+    blt+ loc_noMapSelectActive     # | check if Great Maze
+    cmpwi r11, 0x21                # |
+    bgt+ loc_noMapSelectActive     # /
+    stw r10, 0x6C0(r8)  # restore advSaveData->greatMazeShadowClearFlags to be all completed again
 loc_noMapSelectActive:
 
     ## SSEEX: Check for unlocks
@@ -85,12 +96,6 @@ loc_muAdvSelmapTask__create_initialize:
     # @ sqAdventure::restartStcok             
     lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
     stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
-    ## op beq- 0xC (Original operation)
-    lis r10, 0x4182
-    ori r10, r10, 0x000c
-    # @ adAutoSave::create             
-    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
     
     li r10, 0
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_gameOverEncountered")]
@@ -99,14 +104,17 @@ loc_muAdvSelmapTask__create_initialize:
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r8, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    stb r10, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     li r10, -1             # Set prevSequenceIndex to -1 (so don't accidentially return to an old sequenceIndex)
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_prevSequenceIndex")]
     stw r10, 0x0(r12)                          [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
     lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
     lwz r11, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
-    cmpw r11, r10                   # \ Check if there is a prev selected level
-    beq- loc_noPrevSelectedLevel    # /
     stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
+    cmpwi r8, 0x0                # \ Check if Time Attack was on for previous level
+    beq+ loc_noPrevTimeAttack    # /
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
     lwz r9, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
@@ -115,14 +123,38 @@ loc_muAdvSelmapTask__create_initialize:
     lwz r3,0x30(r3)     # | gameGlobal->advSaveData->levelSaveData[currentLevel].clearFlag = originalClearFlag
     add r4,r3,r5        # |
     stw r9,0x4(r4)      # /
+    cmpwi r11, 0x1E                           # \
+    blt+ loc_noRestoreGreatMazeClearFlags     # | check if Great Maze
+    cmpwi r11, 0x21                           # |
+    bgt+ loc_noRestoreGreatMazeClearFlags     # /
+    stw r10, 0x6C0(r3)  # restore advSaveData->greatMazeShadowClearFlags to be all completed again
+loc_noRestoreGreatMazeClearFlags:
     bl __unresolved                             [R_PPC_REL24(1, 1, "sqAdventure__calculateClearPercent")]
-loc_noPrevSelectedLevel:
+loc_noPrevTimeAttack:
     mr r3,r31          # Original operation
     b __unresolved                              [R_PPC_REL24(31, 1, "loc_initialized")]
 
 
 ## SSEEX: Check for override input to later force open difficulty and CSS menu
 loc_muAdvSelmapTask__controllProc_checkIfOverride:
+    ## op beq- 0xC (Original operation)
+    lis r8, 0x4182
+    ori r8, r8, 0x000c
+    # @ adAutoSave::create             
+    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
+    stw r8,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
+    ## op bne- 0x118 (Original operation)
+    lis r8, 0x4082
+    ori r9, r8, 0x0118
+    # @ sqAdventure::setNext
+    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
+    stw r9,0x0(r12)                         [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
+    ## op bne- 0x10 (Original operation)
+    ori r9, r8, 0x0010
+    # @ stLoaderInfoAdventure::entryEntity            
+    lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
+    stw r9,0x0(r12)                         [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
+
     li r10, 0x0
     stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
@@ -133,18 +165,33 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stw r0, -0x4(r12)               # Store selected level clear
     stw r29, -0x8(r12)              # Store selected level
     
+    li r11, 0x0                     # \
+    cmpwi r0, 0x4                   # | Check if level is fully completed (Time Attack can only be activated if full clear)
+    bne+ loc_noSetTimeAttack        # / 
     lwz r5, 0x8C(r1)                # \
     andi. r5, r5, 0x0400            # | 
     bne- loc_setTimeAttack          # |
     lwz r5, 0xCC(r1)                # | Check for X input in each gfPadStatus
     andi. r5, r5, 0x0400            # |
     bne- loc_setTimeAttack          # /
-    li r11, 0x0                    # Don't set time attack
     b loc_noSetTimeAttack 
 loc_setTimeAttack:
     lwz r11, 0x60C(r3)             # Get total score and store to restore later
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
     stw r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
+    cmpwi r29, 0x1E                 # \
+    blt+ loc_dontResetGreatMaze     # | check if Great Maze
+    cmpwi r29, 0x21                 # |
+    bgt+ loc_dontResetGreatMaze     # /
+    li r10, 0x0         # \ reset advSaveData->greatMazeShadowClearFlags
+    stw r10, 0x6C0(r3)  # /
+loc_dontResetGreatMaze:
+    ## op b 0x10 (allow score to be displayed in HUD)
+    lis r10, 0x4800
+    ori r10, r10, 0x0010
+    # @ stLoaderInfoAdventure::entryEntity            
+    lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
     li r4,0x1EFB        # \
@@ -182,7 +229,14 @@ loc_levelCompleted:
     # @ adAutoSave::create             
     lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
     stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
-    # TODO: Fix selc selection by loading up a selc file with the right fighters corresponding to the level by setting jumpLevelId to selected level
+    stw r29, 0x62C(r3)  # Set advSaveData->jumpLevelId to selected level (so selc file can be used to load roster as if save wasn't completed)
+    # Disable roster data being changed upon level being beaten
+    ## op b 0x220
+    lis r10, 0x4800
+    ori r10, r10, 0x0220
+    # @ sqAdventure::setNext
+    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
 loc_dontTempMarkLevelAsIncomplete:
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
     lwz r0, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]
@@ -202,17 +256,35 @@ loc_teamMemberOverride:
     bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]                    
     b __unresolved                                             [R_PPC_REL24(31, 1, "loc_1768")]
 
+loc_muAdvSelmapTask__mainStepSelectInit_onExitToStage:
+    li r11, 0x0           # \
+    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r12,0x0(r12)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r12,0x30(r12)     # | set gameGlobal->advSaveData->jumpLevelId to 0
+    stw r11,0x62C(r12)    # /
+    lwz r31,0x1C8(r30)  # Original operation
+    b __unresolved                                             [R_PPC_REL24(31, 1, "loc_onExitingToStage")]
 
+
+## SSEEX: Display time attack score instead of total score
 loc_muAdvSelMapTask__loc_2264_displayTimeAttackScore:
     li r5, 0x0
-    lwz r9,0xC(r30)                 # Get time attack score for selected level
+    lwz r9,0xC(r30)           # Get time attack score for selected level (which is normally an unused field in a level's save data)
+    cmpwi r25, 0x1E           # \
+    blt+ loc_notGreatMaze     # | check if Great Maze
+    cmpwi r25, 0x21           # |
+    bgt+ loc_notGreatMaze     # /
+    li r12, 0x1E        # \
+    mulli r12,r12,0x14  # | Get Time Attack record from first Great Maze level
+    add r12,r27,r12     # |
+    lwz r9,0xC(r12)     # /
+loc_notGreatMaze:
     cmpwi r9, 0x0                   # \ Check if time attack has been done before for the level (otherwise display 0)
     blt- loc_noTimeAttackRecord     # /
     mr r5, r9
 loc_noTimeAttackRecord:
     b __unresolved                                             [R_PPC_REL24(31, 1, "loc_displayedTimeAttackScore")]
 
-# TODO: If Time Attack, temp set level as not being beaten
-## Can still override to negate that, but won't be counted in best score
-## How should Great Maze be handled though?
-# TODO: Disqualify post game doors
+
+## TODO: Disable do you want to save prompt after quitting
+## TODO: Introduce new level Time Attack jump bone setting (one that only resets score if it's a Global Time Attack)

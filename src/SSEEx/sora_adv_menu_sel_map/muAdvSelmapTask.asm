@@ -2433,17 +2433,17 @@ loc_2240:
     /* 0000225C: */    addi r1,r1,0xE0
     /* 00002260: */    blr
 muAdvSelmapTask__loc_2264:
-    /* 00002264: */    stwu r1,-0x60(r1)
+    /* 00002264: */    stwu r1,-0x64(r1) #stwu r1,-0x60(r1)
     /* 00002268: */    mflr r0
-    /* 0000226C: */    stw r0,0x64(r1)
-    /* 00002270: */    addi r11,r1,0x60
-    /* 00002274: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
+    /* 0000226C: */    stw r0,0x68(r1) #stw r0,0x64(r1)
+    /* 00002270: */    addi r11,r1,0x64 #addi r11,r1,0x60
+    /* 00002274: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_25")]
     /* 00002278: */    li r0,0x0
     /* 0000227C: */    lis r5,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     /* 00002280: */    stw r0,0x14(r1)
     /* 00002284: */    mr r31,r3
     /* 00002288: */    lwz r5,0x0(r5)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    /* 0000228C: */    mr r26,r4
+    /* 0000228C: */    mr r25,r4 #mr r26,r4
     /* 00002290: */    stw r0,0x18(r1)
     /* 00002294: */    sth r0,0x1C(r1)
     /* 00002298: */    stw r0,0x8(r1)
@@ -2454,11 +2454,11 @@ muAdvSelmapTask__loc_2264:
     /* 000022AC: */    mr r3,r31
     /* 000022B0: */    bl muAdvSelmapTask__drawMapCurSor
     /* 000022B4: */    lwz r3,0x1C0(r31)
-    /* 000022B8: */    mr r5,r26
+    /* 000022B8: */    mr r5,r25 #mr r5,r26
     /* 000022BC: */    li r4,0x1
     /* 000022C0: */    li r6,0x0
     /* 000022C4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printIndex")]
-    /* 000022C8: */    xoris r0,r26,0x8000
+    /* 000022C8: */    xoris r0,r25,0x8000 #xoris r0,r26,0x8000
     /* 000022CC: */    lis r29,0x4330
     /* 000022D0: */    stw r0,0x24(r1)
     /* 000022D4: */    lis r28,0x0                              [R_PPC_ADDR16_HA(31, 4, "loc_F0")]
@@ -2471,7 +2471,7 @@ muAdvSelmapTask__loc_2264:
     /* 000022F0: */    fsubs f1,f1,f2
     /* 000022F4: */    fadds f1,f0,f1
     /* 000022F8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__setFrameTex")]
-    /* 000022FC: */    mulli r0,r26,0x14
+    /* 000022FC: */    mulli r0,r25,0x14 #mulli r0,r26,0x14
     /* 00002300: */    lwz r26,0x1D0(r31)
     /* 00002304: */    stw r29,0x28(r1)
     /* 00002308: */    lfd f1,0x0(r28)                          [R_PPC_ADDR16_LO(31, 4, "loc_F0")]
@@ -2523,11 +2523,11 @@ loc_displayedTimeAttackScore:
     /* 000023AC: */    li r4,0x6
     /* 000023B0: */    crclr 6
     /* 000023B4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printf")]
-    /* 000023B8: */    addi r11,r1,0x60
-    /* 000023BC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
-    /* 000023C0: */    lwz r0,0x64(r1)
+    /* 000023B8: */    addi r11,r1,0x64 #addi r11,r1,0x60
+    /* 000023BC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_25")]
+    /* 000023C0: */    lwz r0,0x68(r1) #lwz r0,0x64(r1)
     /* 000023C4: */    mtlr r0
-    /* 000023C8: */    addi r1,r1,0x60
+    /* 000023C8: */    addi r1,r1,0x64 #addi r1,r1,0x60
     /* 000023CC: */    blr
 muAdvSelmapTask__drawMapParts:
     /* 000023D0: */    stwu r1,-0x20(r1)
@@ -3225,7 +3225,9 @@ muAdvSelmapTask__mainStepSelectInit:
     /* 00002DA4: */    stw r31,0xC(r1)
     /* 00002DA8: */    stw r30,0x8(r1)
     /* 00002DAC: */    mr r30,r3
-    /* 00002DB0: */    lwz r31,0x1C8(r3)
+    /* 00002DB0: */    #lwz r31,0x1C8(r3)
+    b __unresolved                                             [R_PPC_REL24(31, 7, "loc_muAdvSelmapTask__mainStepSelectInit_onExitToStage")] 
+loc_onExitingToStage:
     /* 00002DB4: */    mr r3,r31
     /* 00002DB8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuObject__getNumFrameNode")]
     /* 00002DBC: */    lwz r3,0x14(r31)

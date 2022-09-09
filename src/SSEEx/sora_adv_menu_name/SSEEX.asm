@@ -11,8 +11,10 @@ loc_muAdvNameTask__create_patchSoraModules:
     stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_prevSequenceIndex")]
     lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevel")]
     stw r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevel")]
-
+ 
+    lis r11, 0x6000
     lis r10, 0x4800
+    lis r8, 0x4082
 
     ### Fix Increment Fighter Respawn Index for Ex Characters
 
@@ -60,12 +62,18 @@ loc_muAdvNameTask__create_patchSoraModules:
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchOne")]
 
     ## op nop
-    lis r9, 0x6000
     # @ IfAdvPause::topMenuMain
     lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchTwo")]
-    stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchTwo")]
+    stw r11, 0x0(r12)                       [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchTwo")]
     lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchThree")]
-    stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchThree")]
+    stw r11, 0x0(r12)                       [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchThree")]
+
+    ### Allow IfAdvMngr->scoreInCurrentStage to update during VS Boss so score in HUD can be updated
+
+    ## op nop
+    # @ stLoaderInfoAdventure::processBegin
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(27, 1, "SSEEX_patchFive")]
+    stw r11, 0x0(r12)                       [R_PPC_ADDR16_LO(27, 1, "SSEEX_patchFive")]
 
     ### Change score formatter to always show 9 digits (fixes issue when score is decreased)
     
@@ -86,19 +94,35 @@ loc_muAdvNameTask__create_patchSoraModules:
     ### Restore original operation in sqAdventure::restartStcok in case it was changed
 
     ## ble- ->0x806ECD94 (Original operation)
-    lis r10, 0x4081
-    ori r10, r10, 0x0148
+    lis r9, 0x4081
+    ori r9, r9, 0x0148
     # @ sqAdventure::restartStcok             
     lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
 
     ### Restore original operation in adAutoSave::create in case it was changed
 
-    ## op beq- 0xC
-    lis r10, 0x4182
-    ori r10, r10, 0x000c
+    ## op beq- 0xC (Original operation)
+    lis r9, 0x4182
+    ori r9, r9, 0x000c
     # @ adAutoSave::create             
     lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
+    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
+
+    ### Restore original operation in sqAdventure::setNext in case it was changed 
+
+    ## op bne- 0x118 (Original operation)
+    ori r9, r8, 0x0118
+    # @ sqAdventure::setNext
+    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
+    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
+
+    ### Restore original operation in stLoaderInfoAdventure::entryEntity in case it was changed
+
+    ## op bne- 0x10 (Original operation)
+    ori r9, r8, 0x0010
+    # @ stLoaderInfoAdventure::entryEntity            
+    lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
+    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
 
     b __unresolved                           [R_PPC_REL24(28, 1, "loc_finishedPatching")]
