@@ -416,7 +416,10 @@ loc_muAdvLoadTask__onDecided_loadExSave:
     addi r5,r5,0x0                          [R_PPC_ADDR16_LO(0, 1, "loc_sdPath")]
     lis r6, 0x8040      # \ Get build folder from FPC
     ori r6, r6, 0x6920  # /
-    lwz r7, 0x1414(r31) # Get selected save file index
+    lwz r7, 0x1414(r31) # \ 
+    mulli r7,r7,0x58    # | get advSaveLoadEntries[selectedIndex].slotNumber   
+    add r7,r31,r7       # |
+    lhz r7,0x202(r7)    # /
     #crclr 6
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
     lis r5,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
@@ -439,8 +442,7 @@ loc_muAdvSaveTask__onDecided_writeExSave:
     addi r4, r4, 0x2    # Omit first formatter from path (which was for "sd:")
     lis r5, 0x8040      # \ Get build folder from FPC
     ori r5, r5, 0x6920  # /
-    lwz r6, 0x1414(r18) # \ Get selected save file index (add one since no auto save option)
-    addi r6, r6, 0x1    # /
+    mr r6, r31          # get save slot number
     #crclr 6
     bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
     addi r3, r1, 0x10
