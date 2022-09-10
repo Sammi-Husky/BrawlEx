@@ -1,13 +1,8 @@
 
 # TODO: 242 spaces
 
-# TODO: Impossible mode, 1 stock if holding X at map level selection
-# TODO: Keep track of completion time for speedrunning (check if can use the space in FFFFFFFF in each level's struct), and high score (last field in level's struct maybe or use part of clear percentage since it uses full word for no reason) (although high scores can be farmed from infinite respawns)
-## While selecting a level hold X for Time Attack, hold Y for Speedrun
-## Show time on HUD
-## Keep track of time attack scores and display best time attack score in results (but can override new score with a button combo regardless if it's best)
-### Same for speedrun time
-### Could do regular score too (just start with high number and penalize doors as well as bytans?)
+# TODO: Impossible mode while holding a button on intense (if level is completed), 1 stock if holding a button at map level selection (can use space in the other Great Maze save entries to keep track of completion)
+# TODO: Show time on HUD for speedrunning (Hold Y for speedrun on map)
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
 # TODO: Investigate Lucas up throw on enemy crash
@@ -196,6 +191,7 @@ loc_applyPenalty:           # /
     stw r10, 0x4910(r28)    # Set scoreInCurrentStage with applied penalty
     
     ## Check for Time Attack info in jump bone Format: $$<decrementer><set(=) or add(+)><target score> e.g. $$9+000010000
+    ### TODO: Introduce new setting that resets score based on difficulty if Global Time Attack
     lhz r0, 0xC(r27)        # \
     cmpwi r0, 0x2424        # | Check first two char of jump bone is "$$"
     bne+ loc_noTimeAttack   # /

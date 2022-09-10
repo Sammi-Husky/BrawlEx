@@ -154,6 +154,11 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     # @ stLoaderInfoAdventure::entryEntity            
     lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
     stw r9,0x0(r12)                         [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
+    ## op li r31, 0x0 (Original operation)
+    lis r9, 0x3be0
+    # @ IfAdvPause::main          
+    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableSavePrompt")]
+    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableSavePrompt")]
 
     li r10, 0x0
     stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
@@ -186,12 +191,20 @@ loc_setTimeAttack:
     li r10, 0x0         # \ reset advSaveData->greatMazeShadowClearFlags
     stw r10, 0x6C0(r3)  # /
 loc_dontResetGreatMaze:
-    ## op b 0x10 (allow score to be displayed in HUD)
+    ## op b 0x10 (allow score to be displayed in HUD during VS Boss)
     lis r10, 0x4800
     ori r10, r10, 0x0010
     # @ stLoaderInfoAdventure::entryEntity            
     lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
     stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
+
+    ## op li r31, 0x4 (temporarily disable save prompt after quit)
+    lis r10, 0x3be0
+    ori r10, r10, 0x0004
+    # @ IfAdvPause::main          
+    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableSavePrompt")]
+    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableSavePrompt")]
+
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
     li r4,0x1EFB        # \
@@ -284,7 +297,3 @@ loc_notGreatMaze:
     mr r5, r9
 loc_noTimeAttackRecord:
     b __unresolved                                             [R_PPC_REL24(31, 1, "loc_displayedTimeAttackScore")]
-
-
-## TODO: Disable do you want to save prompt after quitting
-## TODO: Introduce new level Time Attack jump bone setting (one that only resets score if it's a Global Time Attack)

@@ -14330,3 +14330,4 @@
 8010c18c SSEEX_patchFour
 8059e66b SSEEX_patchFive
 8015b510 SSEEX_tempDisableAutosaves
+80109e88 SSEEX_tempDisableSavePrompt

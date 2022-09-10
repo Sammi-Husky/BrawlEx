@@ -125,4 +125,12 @@ loc_muAdvNameTask__create_patchSoraModules:
     lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
     stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
 
+    ### Restore original operation in IfAdvPause::main in case it was changed
+
+    ## op li r31, 0x0 (Original operation)
+    lis r9, 0x3be0
+    # @ IfAdvPause::main          
+    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableSavePrompt")]
+    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableSavePrompt")]
+
     b __unresolved                           [R_PPC_REL24(28, 1, "loc_finishedPatching")]
