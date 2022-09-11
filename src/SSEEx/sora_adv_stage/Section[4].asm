@@ -927,6 +927,10 @@ loc_B64:
 loc_B68:
         .4byte 0x43300000
         .4byte 0x80000000
+loc_postGameVsDoorIds:
+        .4byte 0x12000103
+        .4byte 0x22000203
+        .4byte 0x27020102
 loc_timeAttackStartScores:
         .int 400000000
         .int 500000000

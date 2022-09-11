@@ -1,10 +1,10 @@
 muAdvResultTask__create:
-    /* 00000000: */    stwu r1,-0x10(r1)
+    /* 00000000: */    stwu r1,-0xF0(r1) #stwu r1,-0x10(r1)
     /* 00000004: */    mflr r0
+    /* 0000000C: */    stw r0,0xF4(r1) #stw r0,0x14(r1)
+    /* 00000010: */    stw r31,0xEC(r1) #stw r31,0xC(r1)
+    /* 00000014: */    stw r30,0xE8(r1) #stw r30,0x8(r1)
     /* 00000008: */    li r4,0x2A
-    /* 0000000C: */    stw r0,0x14(r1)
-    /* 00000010: */    stw r31,0xC(r1)
-    /* 00000014: */    stw r30,0x8(r1)
     /* 00000018: */    mr r30,r3
     /* 0000001C: */    li r3,0x5B1 #0x5B0
     /* 00000020: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -49,6 +49,36 @@ loc_B0:
     /* 000000B0: */    stw r3,0x11C(r31)
     /* 000000B4: */    li r0,0x3C
     /* 000000BC: */    stw r0,0x48(r31)
+
+    ## Load temp save if right after Post Game Vs Battle
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_isAdvExSaveInitialized")]
+    lbz r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_isAdvExSaveInitialized")]
+    cmpwi r10, 0x1                      # \
+    beq+ loc_dontLoadTempAdvExSaveFile  # | Check if AdvExSave is initialized (i.e. whether or not this is after a post game Vs fight)
+    li r10, 0x1                         # /
+    stb r10, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_isAdvExSaveInitialized")]
+    addi r3, r1, 0x38
+    lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_advExSaveFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_advExSaveFilePath")]
+    lis r5,0x0                              [R_PPC_ADDR16_HA(0, 1, "loc_sdPath")]
+    addi r5,r5,0x0                          [R_PPC_ADDR16_LO(0, 1, "loc_sdPath")]
+    lis r6, 0x8040      # \ Get build folder from FPC
+    ori r6, r6, 0x6920  # /
+    li r7, 99
+    #crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    lis r5,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r5, r5, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    addi r3, r1, 0x8
+	addi r4, r1, 0x38	
+    li r6, 0x0
+	li r7, 0x0	
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIORequest__setReadParam1")]
+    addi r3, r1, 0x8
+    li r6,0	
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
+loc_dontLoadTempAdvExSaveFile:
+
     ## SSEEX: Check if new record and adjust earned coins if time attack
     lis r11,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r11, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
@@ -104,12 +134,13 @@ loc_noHighScore:
     
     # TODO: Later handle speedrun time
 loc_notTimeAttack:
+
     /* 000000B8: */    mr r3,r31
-    /* 000000C0: */    lwz r31,0xC(r1)
-    /* 000000C4: */    lwz r30,0x8(r1)
-    /* 000000C8: */    lwz r0,0x14(r1)
+    /* 000000C0: */    lwz r31,0xEC(r1) #lwz r31,0xC(r1)
+    /* 000000C4: */    lwz r30,0xE8(r1)  #lwz r30,0x8(r1)
+    /* 000000C8: */    lwz r0,0xF4(r1) #lwz r0,0x14(r1)
     /* 000000CC: */    mtlr r0
-    /* 000000D0: */    addi r1,r1,0x10
+    /* 000000D0: */    addi r1,r1,0xF0 #addi r1,r1,0x10
     /* 000000D4: */    blr
 muAdvResultTask____ct:
     /* 000000D8: */    stwu r1,-0x10(r1)

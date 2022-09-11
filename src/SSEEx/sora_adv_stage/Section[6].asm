@@ -2795,6 +2795,12 @@ loc_29F0:
         .4byte 0x00000000
         .4byte 0x00000000
         .4byte 0x00000000
+loc_subLevelIndex:
+        .byte 0x00
+loc_decrementSublevelUponGameOver:
+        .byte 0x00
+loc_isAdvExSaveInitialized:
+        .byte 0x00      # Bool for if Ex save will be properly initialized (used if sora_adv_stage ever unloads like in post game vs battles, need to know if should use temp save)
 loc_overrideSelectedLevel:
         .4byte 0x00000000
 loc_overrideSelectedLevelClear:
@@ -2820,16 +2826,14 @@ loc_overrideCharactersCSSIds:
         .byte 0x00
 loc_prevSequenceIndex:
         .4byte 0xFFFFFFFF
-loc_subLevelIndex:
-        .byte 0x00
-loc_decrementSublevelUponGameOver:
-        .byte 0x00
 loc_timeAttackDecrementer:
         .byte 0x00
 loc_isGlobalTimeAttack:
         .byte 0x00
 loc_originalTotalScore:
         .4byte 0x00000000
+loc_gameOverEncountered:
+        .byte 0x00
 loc_advExSaveData:
         .byte 0x00      # 0x2A
         .byte 0x00      # 0x2B
@@ -3276,8 +3280,6 @@ loc_smashdownCSSData:
         .byte 0x00      # 0xF0
         .byte 0x00      # 0xF1
         .byte 0x00      # 0xF2
-loc_gameOverEncountered:
-        .byte 0x00
 
 # TODO: Last level id specifically for gauntlet saves which gets updated upon savepoint
 # When level id is 0x0 in adsj while in a savepoint it will take you to last gauntlet save, otherwise will drop you back in current level

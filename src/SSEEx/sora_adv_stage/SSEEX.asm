@@ -3,6 +3,7 @@
 
 # TODO: Impossible mode while holding a button on intense (if level is completed), 1 stock if holding a button at map level selection (can use space in the other Great Maze save entries to keep track of completion)
 # TODO: Show time on HUD for speedrunning (Hold Y for speedrun on map)
+# TODO: Show song title on HUD (when stage starts as well as on pause)
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
 # TODO: Investigate Lucas up throw on enemy crash
@@ -19,8 +20,13 @@
 # TODO: Stamina battles?
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
-# TODO: Handle autosave (could potentially use sd save redirect)
+# TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
 # TODO: Toggle changing outcomes with R (e.g. choosing Mario instead of Kirby, saving Peach instead of Zelda) if Great Maze has been completed
+
+# TODO: Temp Ex save before post game fights and then reload upon finishing
+
+.set advExSaveSize, 0xC9
+.set tempAdvExSaveSize, 0xC9
 
 ################################################################################
 ## SSEEX: Start Time Attack score and decrease every frame if Time attack is on
@@ -57,6 +63,26 @@ loc_stAdventure2__changeStep_updateOnFrame:
     li r10, 0x0                     # |
 loc_setScoreToZero:                 # |
     stw r10, 0x4910(r28)            # /
+#     lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
+#     lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
+#     lwz r3, 0x108(r12)      # ifAdvMngr->ifCenter
+#     cmpwi r3, 0x0
+#     beq- loc_ifCenterNotInitialized
+#     lbz r10, 0x0(r3)
+#     rlwinm. r10, r10, 25, 31, 31
+#     bne- loc_ifCenterTimeNotInitialized  
+#     li r10, 0x1
+#     lwz r4, 0x44(r12)
+#     li r5, 0x2
+#     li r6, 0x1
+#     li r7, 0x0
+#     li r8, 0x0
+#     bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__startMelee")]
+#     b loc_ifCenterNotInitialized
+# loc_ifCenterTimeNotInitialized:
+#     li r4, 0x1
+#     bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__updateTimeFast")]
+# loc_ifCenterNotInitialized:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToChangeStep")]
 
 
@@ -169,6 +195,45 @@ loc_dontRedirect:
 # Useful if want to put sequenceIndex so that character selection happens after movie or end stage
 
 loc_stAdventure2__changeStep_changeSequenceIndex:
+
+    ## Create a temp Ex save if before post game fight (since sora_adv_stage isn't present then) 
+    lwz r12, 0x0(r27) # get lastDoorId
+    lis r11,0x0                             [R_PPC_ADDR16_HA(40, 4, "loc_postGameVsDoorIds")]
+    addi r11,r11,0x0                        [R_PPC_ADDR16_LO(40, 4, "loc_postGameVsDoorIds")]
+    li r9, 0x3          # number of post game vs battles in Brawl (3)
+    mtctr r9
+loc_checkForPostGameVsDoorIds:          # \
+    lwz r10, 0x0(r11)                   # |
+    cmpw r10, r12                       # |
+    beq- loc_createTempSave             # | Check if door id is a post game vs battle
+    addi r11, r11, 0x4                  # | (assumes this doesn't get edited)
+    bdnz loc_checkForPostGameVsDoorIds  # |
+    b loc_dontCreateTempExSave          # /
+loc_createTempSave:  
+    addi r3, r1, 0x38
+    lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_advExSaveFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_advExSaveFilePath")]
+    addi r4, r4, 0x2    # Omit first formatter from path (which was for "sd:")
+    lis r5, 0x8040      # \ Get build folder from FPC
+    ori r5, r5, 0x6920  # /
+    li r6, 99          # use a normally not accessible save slot number as temp slot name
+    #crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    addi r3, r1, 0x8
+    li r5, 0
+    stw r5, 0x4(r3)
+    stw r5, 0x10(r3)
+    lis r4,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r4, r4, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    stw r4, 0xC(r3)				    # Location to write
+    li r4, tempAdvExSaveSize	    # Save data file Size
+    stw r4, 0x8(r3)
+    li  r4, -1
+    stw r4, 0x14(r3)
+    addi r4, r1, 0x38
+    stw r4, 0(r3)
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
+loc_dontCreateTempExSave: 
     
     ## Reduce score if Global Time attack is on (to penalize strat of entering levels multiple times to grind enemies for score)
     lwz r10, 0x4910(r28)    # Get advSaveData->scoreInCurrentStage
@@ -176,7 +241,7 @@ loc_stAdventure2__changeStep_changeSequenceIndex:
     lbz r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     cmpwi r11, 0x2          # \ Check if Global Time attack is on
     blt+ loc_applyPenalty   # /
-    lbz r11, 0x4(27)        # \
+    lbz r11, 0x4(r27)        # \
     cmpwi r11, 0x3          # |
     beq- loc_applyPenalty   # | Subtract if jumpFlag0 is 0,1 or 3 (only want to reduce going between subsequent rooms and not between cutscenes)
     cmpwi r11, 0x2          # |
@@ -191,7 +256,7 @@ loc_applyPenalty:           # /
     stw r10, 0x4910(r28)    # Set scoreInCurrentStage with applied penalty
     
     ## Check for Time Attack info in jump bone Format: $$<decrementer><set(=) or add(+)><target score> e.g. $$9+000010000
-    ### TODO: Introduce new setting that resets score based on difficulty if Global Time Attack
+    ### TODO: Introduce new setting that resets score based on difficulty if Global Time Attack / resets speedrun timer (also would disqualify Time Attack high score)
     lhz r0, 0xC(r27)        # \
     cmpwi r0, 0x2424        # | Check first two char of jump bone is "$$"
     bne+ loc_noTimeAttack   # /
@@ -448,7 +513,7 @@ loc_muAdvSaveTask__onDecided_writeExSave:
     lis r4,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
     addi r4, r4, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
     stw r4, 0xC(r3)				    # Location to write
-    li r4, 0xC9						# Save data file Size
+    li r4, advExSaveSize			# Save data file Size
     stw r4, 0x8(r3)
     li  r4, -1
     stw r4, 0x14(r3)
@@ -457,5 +522,3 @@ loc_muAdvSaveTask__onDecided_writeExSave:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
     addi r11,r1,0xE0      # Original operation
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_wroteExSave")]
-
-## TODO: Fix index of save (e.g. 25 might not be 25, appears earlier if none in between)
