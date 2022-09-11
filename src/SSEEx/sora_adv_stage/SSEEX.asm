@@ -2,6 +2,7 @@
 # TODO: 242 spaces
 
 # TODO: Impossible mode while holding a button on intense (if level is completed), 1 stock if holding a button at map level selection (can use space in the other Great Maze save entries to keep track of completion)
+## Must activate time attack first, make time attack enum be 3, 4 and 5 (for disqualification), impossible mode 1 and 2 
 # TODO: Show time on HUD for speedrunning (Hold Y for speedrun on map)
 # TODO: Show song title on HUD (when stage starts as well as on pause)
 
@@ -28,9 +29,9 @@
 .set advExSaveSize, 0xC9
 .set tempAdvExSaveSize, 0xC9
 
-################################################################################
-## SSEEX: Start Time Attack score and decrease every frame if Time attack is on
-################################################################################
+#####################################################################################################################
+## SSEEX: Start Time Attack score and decrease every frame if Time attack is on and display and update speedrun timer
+#####################################################################################################################
 
 loc_stAdventure2____ct_startStage:
     stfs f1,0xB0(r31)       # Original operation
@@ -63,26 +64,36 @@ loc_stAdventure2__changeStep_updateOnFrame:
     li r10, 0x0                     # |
 loc_setScoreToZero:                 # |
     stw r10, 0x4910(r28)            # /
-#     lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
-#     lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
-#     lwz r3, 0x108(r12)      # ifAdvMngr->ifCenter
-#     cmpwi r3, 0x0
-#     beq- loc_ifCenterNotInitialized
-#     lbz r10, 0x0(r3)
-#     rlwinm. r10, r10, 25, 31, 31
-#     bne- loc_ifCenterTimeNotInitialized  
-#     li r10, 0x1
-#     lwz r4, 0x44(r12)
-#     li r5, 0x2
-#     li r6, 0x1
-#     li r7, 0x0
-#     li r8, 0x0
-#     bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__startMelee")]
-#     b loc_ifCenterNotInitialized
-# loc_ifCenterTimeNotInitialized:
-#     li r4, 0x1
-#     bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__updateTimeFast")]
-# loc_ifCenterNotInitialized:
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_speedrunTimer")]
+    lwz r4, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
+    cmpwi r4, -1                    # \
+    beq- loc_dontIncrementScore     # | increment timer
+    addi r4, r4, 0x1                # /
+    stw r4, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
+loc_dontIncrementScore:
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_displaySpeedrunTimer")]
+    lbz r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_displaySpeedrunTimer")]
+    cmpwi r10, 0x0                      # \ Check if should display speedrun timer
+    beq+ loc_dontDisplaySpeedrunTimer   # /
+    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
+    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
+    lwz r3, 0x108(r12)      # IfAdvMngr->IfCenter
+    cmpwi r3, 0x0                       # \ Check if IfCenter has been initialized
+    beq- loc_dontDisplaySpeedrunTimer   # /
+    lbz r10, 0x0(r3)                    # \
+    rlwinm. r10, r10, 25, 31, 31        # | Check if IfCenter with timer has started (it's 0 when called by IfAdvMngr)
+    bne- loc_updateSpeedrunTimeDisplay  # /
+    li r10, 0x1         # \
+    lwz r4, 0x44(r12)   # |
+    li r5, 0x2          # | Call IfCenter::startMelee with same parameters as All Star mode so timer is displayed
+    li r6, 0x1          # |
+    li r7, 0x0          # |
+    li r8, 0x0          # /
+    bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__startMelee")]
+    b loc_dontDisplaySpeedrunTimer
+loc_updateSpeedrunTimeDisplay:
+    bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__updateTimeFast")]
+loc_dontDisplaySpeedrunTimer:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToChangeStep")]
 
 
@@ -257,6 +268,7 @@ loc_applyPenalty:           # /
     
     ## Check for Time Attack info in jump bone Format: $$<decrementer><set(=) or add(+)><target score> e.g. $$9+000010000
     ### TODO: Introduce new setting that resets score based on difficulty if Global Time Attack / resets speedrun timer (also would disqualify Time Attack high score)
+    ### TODO: Have another timer besides speedrun timer that can be manipulated and set to 0 for certain timer criteria
     lhz r0, 0xC(r27)        # \
     cmpwi r0, 0x2424        # | Check first two char of jump bone is "$$"
     bne+ loc_noTimeAttack   # /

@@ -73,4 +73,7 @@ loc_128:
         .4byte 0x00000000
 loc_timeAttackResult:
         .asciz "menu2/sc_adv_result_timeattack.pac"
-        .balign 4        
+        .balign 4    
+loc_speedrunFormat:
+        .asciz "%d:%d:%d"
+        .balign 4 

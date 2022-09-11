@@ -104,6 +104,8 @@ loc_muAdvSelmapTask__create_initialize:
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_subLevelIndex")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_decrementSublevelUponGameOver")]
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_speedrunTimer")]
+    stw r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r8, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     stb r10, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
@@ -135,7 +137,9 @@ loc_noPrevTimeAttack:
     b __unresolved                              [R_PPC_REL24(31, 1, "loc_initialized")]
 
 
-## SSEEX: Check for override input to later force open difficulty and CSS menu
+## SSEEX: Check for override input to later force open difficulty and CSS menu 
+### Check for Time Attack (if level is full cleared) to temp set level as uncleared (if override is also selected then level does not get temp set as uncleared)
+### Check for whether or not to display Speedrun Timer
 loc_muAdvSelmapTask__controllProc_checkIfOverride:
     ## op beq- 0xC (Original operation)
     lis r8, 0x4182
@@ -169,17 +173,26 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stb r10,0x2(r12)        # Set override character amount to zero
     stw r0, -0x4(r12)               # Store selected level clear
     stw r29, -0x8(r12)              # Store selected level
-    
-    li r11, 0x0                     # \
+
+    lwz r5, 0x8C(r1)        # \ Get gfPadStatuses for P1 and P2
+    lwz r6, 0xCC(r1)        # /    
+    andi. r9, r5, 0x0800                # \
+    bne- loc_setDisplaySpeedrunTimer    # | Check for Y input in each gfPadStatus
+    andi. r9, r6, 0x0800                # |
+    beq+ loc_noSetDisplaySpeedrunTimer  # /
+loc_setDisplaySpeedrunTimer:
+    li r10, 0x1                 # Set to display time attack
+loc_noSetDisplaySpeedrunTimer:
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_displaySpeedrunTimer")]
+    stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_displaySpeedrunTimer")]
+
+    li r10, 0x0                     # \
     cmpwi r0, 0x4                   # | Check if level is fully completed (Time Attack can only be activated if full clear)
     bne+ loc_noSetTimeAttack        # / 
-    lwz r5, 0x8C(r1)                # \
-    andi. r5, r5, 0x0400            # | 
-    bne- loc_setTimeAttack          # |
-    lwz r5, 0xCC(r1)                # | Check for X input in each gfPadStatus
-    andi. r5, r5, 0x0400            # |
-    bne- loc_setTimeAttack          # /
-    b loc_noSetTimeAttack 
+    andi. r9, r5, 0x0400            # \ 
+    bne- loc_setTimeAttack          # | Check for X input in each gfPadStatus
+    andi. r9, r5, 0x0400            # |
+    beq+ loc_noSetTimeAttack        # /
 loc_setTimeAttack:
     lwz r11, 0x60C(r3)             # Get total score and store to restore later
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
@@ -213,12 +226,12 @@ loc_dontResetGreatMaze:
     li r7,0x0           # |
     li r8,-0x1          # /
     bl __unresolved                          [R_PPC_REL24(0, 4, "sndSystem__playSERem")]    
-    li r11, 0x1                    # Set time attack
+    li r10, 0x1                    # Set time attack
 loc_noSetTimeAttack:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
-    stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
+    stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
-    stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    stb r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
 
     lwz r5, 0x8C(r1)                # \
     andi. r5, r5, 0x0040            # | 
@@ -227,7 +240,7 @@ loc_noSetTimeAttack:
     andi. r5, r5, 0x0040            # |
     bne- loc_teamMemberOverride     # /
 loc_levelCompleted:
-    cmpwi r11, 0x1                          # \ Check if time attack
+    cmpwi r10, 0x1                          # \ Check if time attack
     bne+ loc_dontTempMarkLevelAsIncomplete  # /
     li r11, 0x2         # \
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]

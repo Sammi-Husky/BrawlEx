@@ -132,7 +132,7 @@ loc_noHighScore:
     lhz r10, 0x4920(r30)        # \ Update earned coin count in menuTask
     stw r10, 0xFC(r31)          # /  
     
-    # TODO: Later handle speedrun time
+    # TODO: Later handle speedrun time 
 loc_notTimeAttack:
 
     /* 000000B8: */    mr r3,r31
@@ -400,7 +400,7 @@ muAdvResultTask__initMsg:
     /* 0000047C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__create")]
     /* 00000480: */    stw r3,0x1B8(r28)
     /* 00000484: */    li r4,0x100
-    /* 00000488: */    li r5,0x8
+    /* 00000488: */    li r5,0x8 #0x8 #0xA
     /* 0000048C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__allocMsgBuf")]
     /* 00000490: */    lis r30,0x1
     /* 00000494: */    lwz r3,0x5A8(r28)
@@ -471,6 +471,8 @@ muAdvResultTask__initMsg:
     /* 00000598: */    li r7,0x0
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r12, 0x0              # \ Check if Global Time Attack
+    beq- loc_noHighlightScore   # /
     cmpwi r12, 0x3              # \ Check if Global Time Attack has been disqualified
     beq- loc_highlightScore     # /
     lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
@@ -584,6 +586,33 @@ loc_notTimeAttackNewRecord:
     /* 00000708: */    li r4,0x7
     /* 0000070C: */    crclr 6
     /* 00000710: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printf")]
+    # lwz r5,0x59C(r28)
+    # lis r30,0x0                              [R_PPC_ADDR16_HA(34, 4, "loc_30")]
+    # lwz r3,0x1B8(r28)
+    # li r4,0x8
+    # lwz r29,0x268(r5)
+    # li r6,0x7
+    # lfs f1,0x0(r30)                          [R_PPC_ADDR16_LO(34, 4, "loc_30")]
+    # lwz r5,0x10(r29)
+    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__attachScnMdlSimple")]
+    # lwz r3,0x1B8(r28)
+    # li r4,0x8
+    # li r5,0x1
+    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setAlignMode")]
+    # lwz r3,0x1B8(r28)
+    # li r4,0x8
+    # li r5,0x0
+    # li r6,0x0
+    # li r7,0x0
+    # li r8,0xFF
+    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setFontColor")]
+    # lwz r3,0x1B8(r28)
+    # li r4,0x8
+    # li r5,0x3
+    # li r6,0x0
+    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printIndex")]
+
+
     /* 00000714: */    lwz r0,0x34(r1)
     /* 00000718: */    lwz r31,0x2C(r1)
     /* 0000071C: */    lwz r30,0x28(r1)

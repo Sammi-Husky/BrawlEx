@@ -2830,6 +2830,10 @@ loc_timeAttackDecrementer:
         .byte 0x00
 loc_isGlobalTimeAttack:
         .byte 0x00
+loc_displaySpeedrunTimer:
+        .byte 0x00
+loc_speedrunTimer:
+        .4byte 0x00000000
 loc_originalTotalScore:
         .4byte 0x00000000
 loc_gameOverEncountered:
