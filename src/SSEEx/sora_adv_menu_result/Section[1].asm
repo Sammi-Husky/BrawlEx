@@ -400,7 +400,7 @@ muAdvResultTask__initMsg:
     /* 0000047C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__create")]
     /* 00000480: */    stw r3,0x1B8(r28)
     /* 00000484: */    li r4,0x100
-    /* 00000488: */    li r5,0x8 #0x8 #0xA
+    /* 00000488: */    li r5,0xA #0x8
     /* 0000048C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__allocMsgBuf")]
     /* 00000490: */    lis r30,0x1
     /* 00000494: */    lwz r3,0x5A8(r28)
@@ -586,33 +586,78 @@ loc_notTimeAttackNewRecord:
     /* 00000708: */    li r4,0x7
     /* 0000070C: */    crclr 6
     /* 00000710: */    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printf")]
-    # lwz r5,0x59C(r28)
-    # lis r30,0x0                              [R_PPC_ADDR16_HA(34, 4, "loc_30")]
-    # lwz r3,0x1B8(r28)
-    # li r4,0x8
-    # lwz r29,0x268(r5)
-    # li r6,0x7
-    # lfs f1,0x0(r30)                          [R_PPC_ADDR16_LO(34, 4, "loc_30")]
-    # lwz r5,0x10(r29)
-    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__attachScnMdlSimple")]
-    # lwz r3,0x1B8(r28)
-    # li r4,0x8
-    # li r5,0x1
-    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setAlignMode")]
-    # lwz r3,0x1B8(r28)
-    # li r4,0x8
-    # li r5,0x0
-    # li r6,0x0
-    # li r7,0x0
-    # li r8,0xFF
-    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setFontColor")]
-    # lwz r3,0x1B8(r28)
-    # li r4,0x8
-    # li r5,0x3
-    # li r6,0x0
-    # bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printIndex")]
+    ## SSEEX: Print time
+    ### (Had to add tex bones to sc_adv_result.pac, position them in the anim, add line for "Time" in msg misc data)
+    lis r12,0x0                              [R_PPC_ADDR16_HA(40, 6, "loc_displaySpeedrunTimer")]
+    lbz r12,0x0(r12)                         [R_PPC_ADDR16_LO(40, 6, "loc_displaySpeedrunTimer")]
+    cmpwi r12, 0x0                      # \ Check if should display speedrun timer
+    beq+ loc_dontDisplaySpeedrunTimer   # /
+    lwz r5,0x59C(r28)
+    lis r30,0x0                              [R_PPC_ADDR16_HA(34, 4, "loc_30")]
+    lwz r3,0x1B8(r28)
+    li r4,0x8
+    lwz r29,0x268(r5)
+    li r6,0x7
+    lfs f1,0x0(r30)                          [R_PPC_ADDR16_LO(34, 4, "loc_30")]
+    lwz r5,0x10(r29)
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__attachScnMdlSimple")]
+    lwz r3,0x1B8(r28)
+    li r4,0x8
+    li r5,0x1
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setAlignMode")]
+    lwz r3,0x1B8(r28)
+    li r4,0x8
+    li r5,0x0
+    li r6,0x0
+    li r7,0x0
+    li r8,0xFF
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setFontColor")]
+    lwz r3,0x1B8(r28)
+    li r4,0x8
+    li r5,0x3
+    li r6,0x0
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printIndex")]
 
-
+    lis r6,0x0                               [R_PPC_ADDR16_HA(34, 4, "loc_30")]
+    lwz r3,0x1B8(r28)
+    lfs f1,0x0(r6)                           [R_PPC_ADDR16_LO(34, 4, "loc_30")]
+    li r4,0x9
+    lwz r5,0x10(r29)
+    li r6,0x8
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__attachScnMdlSimple")]
+    lwz r3,0x1B8(r28)
+    li r4,0x9
+    li r5,0x0
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setAlignMode")]
+    lwz r3,0x1B8(r28)
+    li r4,0x9
+    li r5,0x0
+    li r6,0x0
+    li r7,0x0
+    li r8,0xFF
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__setFontColor")]
+    lwz r5,0xFC(r28)
+    addi r3,r1,0x8
+    lis r4,0x0                              [R_PPC_ADDR16_HA(34, 5, "loc_speedrunFormat")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(34, 5, "loc_speedrunFormat")]
+    lis r9,0x0                              [R_PPC_ADDR16_HA(40, 6, "loc_speedrunTimer")]
+    lwz 10,0x0(9)                           [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
+    li r5,3600          # \
+    li r6,60            # |
+    divwu r5,r10,r5     # | char timeStr[10]; 
+    mulli r9,r5,3600    # | unsigned int minutes = elapsedFrames / 3600;
+    subf r9,r9,r10      # | unsigned int seconds = (elapsedFrames -(3600*minutes))/60;
+    divwu r6,r9,r6      # | unsigned int frames = (elapsedFrames - (3600*minutes) - (seconds*60));
+    mulli r7,r6,60      # | sprintf(timeStr, "%d:%d:%d", minutes, seconds, frames);
+    subf r7,r7,r9       # | 
+    crxor 6,6,6         # / 
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    lwz r3,0x1B8(r28)
+    addi r5,r1,0x8
+    li r4,0x9
+    crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "MuMsg__printf")]
+loc_dontDisplaySpeedrunTimer:
     /* 00000714: */    lwz r0,0x34(r1)
     /* 00000718: */    lwz r31,0x2C(r1)
     /* 0000071C: */    lwz r30,0x28(r1)
