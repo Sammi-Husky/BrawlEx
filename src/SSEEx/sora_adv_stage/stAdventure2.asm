@@ -2026,7 +2026,7 @@ stAdventure2__changeStep:
     /* 00001D98: */    mflr r0
     /* 00001D9C: */    stw r0,0xF4(r1) #stw r0,0x24(r1)
     /* 00001DA0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
-    /* 00001DA4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
+    /* 00001DA4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_26")]
     /* 00001DA8: */    lwz r28,0x524(r3) #lwz r6,0x524(r3)
     /* 00001DAC: */    #mr r31,r3
     b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_updateOnFrame")]
@@ -2204,7 +2204,7 @@ loc_changeSequenceIndex:
     b __unresolved                                             [R_PPC_REL24(40, 7, "loc_stAdventure2__changeStep_changeSequenceIndex")]
 loc_1FE0:
     /* 00001FE0: */    addi r11,r1,0xF0 #addi r11,r1,0x20
-    /* 00001FE4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]
+    /* 00001FE4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_26")]
     /* 00001FE8: */    lwz r0,0xF4(r1) #lwz r0,0x24(r1)
     /* 00001FEC: */    mtlr r0
     /* 00001FF0: */    addi r1,r1,0xF0 #addi r1,r1,0x20

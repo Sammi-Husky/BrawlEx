@@ -106,6 +106,8 @@ loc_muAdvSelmapTask__create_initialize:
     stb r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_decrementSublevelUponGameOver")]
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_speedrunTimer")]
     stw r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_coinCount")]
+    stw r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_coinCount")]
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r8, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
     stb r10, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]

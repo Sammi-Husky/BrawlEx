@@ -3,7 +3,6 @@
 
 # TODO: Impossible mode while holding a button on intense (if level is completed), 1 stock if holding a button at map level selection (can use space in the other Great Maze save entries to keep track of completion)
 ## Must activate time attack first, make time attack enum be 3, 4 and 5 (for disqualification), impossible mode 1 and 2 
-# TODO: Show time on HUD for speedrunning (Hold Y for speedrun on map)
 # TODO: Show song title on HUD (when stage starts as well as on pause)
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
@@ -23,8 +22,6 @@
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 # TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
 # TODO: Toggle changing outcomes with R (e.g. choosing Mario instead of Kirby, saving Peach instead of Zelda) if Great Maze has been completed
-
-# TODO: Temp Ex save before post game fights and then reload upon finishing
 
 .set advExSaveSize, 0xC9
 .set tempAdvExSaveSize, 0xC9
@@ -64,13 +61,20 @@ loc_stAdventure2__changeStep_updateOnFrame:
     li r10, 0x0                     # |
 loc_setScoreToZero:                 # |
     stw r10, 0x4910(r28)            # /
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_timer")]
+    lwz r4, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_timer")]
+    cmpwi r4, -1                    # \
+    beq- loc_dontIncrementTimer     # | increment timer
+    addi r4, r4, 0x1                # /
+    stw r4, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_timer")]
+loc_dontIncrementTimer:
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_speedrunTimer")]
     lwz r4, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
-    cmpwi r4, -1                    # \
-    beq- loc_dontIncrementScore     # | increment timer
-    addi r4, r4, 0x1                # /
+    cmpwi r4, -1                        # \
+    beq- loc_dontIncrementSpeedrunTimer # | increment timer
+    addi r4, r4, 0x1                    # /
     stw r4, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
-loc_dontIncrementScore:
+loc_dontIncrementSpeedrunTimer:
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_displaySpeedrunTimer")]
     lbz r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_displaySpeedrunTimer")]
     cmpwi r10, 0x0                      # \ Check if should display speedrun timer
@@ -94,7 +98,66 @@ loc_dontIncrementScore:
 loc_updateSpeedrunTimeDisplay:
     bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__updateTimeFast")]
 loc_dontDisplaySpeedrunTimer:
+    ## TODO: Transfer coins from p2 to p1
+    li r29, 0x0
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    li r4, 0x1                      # \
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    mr r4, r3                       # |
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getOwner")]
+    lwz r4, 0x0(r3)                 # | Get number of coins from P2
+    cmpwi r4, -1                    # |
+    beq- loc_dontGetP2Coins         # |
+    lwz r9, 0x5c(r4)                # /
+    li r10, 0x0                     # \ Set p2 coins to 0
+    stw r10, 0x5c(r4)               # /
+    cmpwi r9, 0x0                   # \
+    blt- loc_dontGetP2Coins         # | Check if p2 coins was >= 0
+    mr r29, r9                      # /
+loc_dontGetP2Coins:
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    li r4, 0x0                      # \
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    mr r4, r3                       # |
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getOwner")]
+    lwz r10, 0x0(r3)                 # | Get number of coins from P1
+    cmpwi r10, -1                    # |
+    beq- loc_dontDisplayNumCoins    # |
+    lwz r4, 0x5c(r10)                # /
+    add r4, r4, r29                 # \ Add P2 coins to P1
+    stw r4, 0x5c(r10)               # /
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_coinCount")]
+    lwz r8, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_coinCount")]
+    cmpwi r4, 0x0                   # \ Only display if have at least one coin
+    bne- loc_displayNumCoins        # /
+    cmpwi r8, 0x0                   # \ Also display if had coins in previous stage
+    beq+ loc_dontDisplayNumCoins    # / 
+loc_displayNumCoins:
+    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
+    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
+    lwz r3, 0xE8(r12)       # IfAdvMngr->IfPlayer
+    cmpwi r3, 0x0                   # \ Check if IfPlayer has been initialized
+    beq- loc_dontDisplayNumCoins    # /
+    lwz r9, 0xC(r3)            # \
+    cmpwi r9, 0x2              # | Check if first time going through (so can add coins from previous stage)
+    beq+ loc_dontPrepareCoins  # /
+    mr r4, r8           # \
+    stw r4, 0x5c(r10)   # / Add coins from previous stage
+    li r9, 0x2          # \ Set to display coin number
+    stw r9, 0xC(r3)     # /
+loc_dontPrepareCoins:
+    bl __unresolved                          [R_PPC_REL24(0, 4, "IfPlayer__updateStockCoin")]
+loc_dontDisplayNumCoins:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToChangeStep")]
+
+    ## TODO: add coins to earned coins in results
+    ## TODO: Lose coins upon death / gameover?
 
 
 #####################################################################################################################################################
@@ -141,15 +204,57 @@ loc_gameOverLessThanDifficulty:             # /
     rlwinm r29,r29,0,0,23   # \ lastDoorId = (lastDoorId & 0xFFFFFF00) + jumpLevelId
     add r29,r29,r0          # /
     # Check for resource using jump bone string Format: <resource><mode>-<amount> e.g. S1-000000400 (Modes: 1 check for resource, 2 check for resource and subtract cost, 3 check for resource and wipe, 4 wipe if not satisfied, 5 spend regardless, 6 wipe regardless)
-    # TODO: Total Score, Stock, HP, Coin, Time Note: For stock, IfAdvMngr::removeStock might be useful to update the UI
     lbz r30, 0xD(r27)               # \    
     rlwinm r30,r30,0,28,31          # | Check if Score flag > 0 (which signifies to check score) (just take right digit of char (e.g. "2" -> 32 -> 2))
     cmpwi r30, 0x0                  # | 
     beq+ loc_noScoreRequirement     # /
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    li r4, 0x0                      # \
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    mr r4, r3
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getOwner")]
+    lwz r26, 0x0(r3)                # / Get ftOwner->ftOwnerData of first player                    
     addi r3, r27, 0xC + 3           # Get score requirement from jump bone
     bl __unresolved                 [R_PPC_REL24(0, 4, "strtoul__atoi")]
-    lwz r10, 0x4910(r28)            # \
-    cmpw r10, r3                    # | Check if current score >= score requirement
+    lbz r11, 0xC(r27)               # Get which resource from you to char
+    cmpwi r11, 0x53                 # \
+    beq- loc_useResourceScore       # / Check if char is "S"
+    cmpwi r11, 0x54                 # \
+    beq- loc_useResourceTotalScore  # / Check if char is "T"
+    cmpwi r11, 0x46                 # \
+    beq- loc_useResourceTime        # / Check if char is "F"
+    cmpwi r11, 0x4C                 # \
+    beq- loc_useResourceLives       # / Check if char is "L"
+    cmpwi r11, 0x50                 # \
+    beq- loc_useResourcePercent     # / Check if char is "P"
+    cmpwi r11, 0x43                 # \
+    bne+ loc_noScoreRequirement     # / Check if char is "C"
+loc_useResourceCoin:
+    lwz r10, 0x5C(r26)              # Get ftOwnerData.numCoins
+    b loc_checkResource
+loc_useResourceScore:
+    lwz r10, 0x4910(r28)            # Get advSaveData->currentScoreInStage
+    b loc_checkResource
+loc_useResourceTotalScore:
+    lwz r10, 0x60C(r28)             # Get advSaveData->totalScore
+    b loc_checkResource
+loc_useResourceTime:
+    lis r10,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_timer")]
+    lwz r10, 0x0(r10)               [R_PPC_ADDR16_LO(40, 6, "loc_timer")]
+    b loc_checkResource
+loc_useResourceLives:
+    lbz r10, 0x5FA(r28)             # Get advSaveData->numberReserveStocks
+    b loc_checkResource
+loc_useResourcePercent:             
+    lfs f0, 0x24(r26)               # \
+    fctiwz f0,f0                    # | Get ftOwnerData.damage as int
+    stfd f0, 0x8(r1)                # |
+    lwz r10, 0xC(r1)                # /
+loc_checkResource:
+    cmpw r10, r3                    # \ Check if current score >= score requirement
     blt- loc_scoreRequirementNotMet # /
     addi r29, r29, 0x1              # Increment door id
     cmpwi r30, 0x5                  # \
@@ -170,7 +275,20 @@ loc_scoreRequirementNotMet:         # \
 loc_resetScore:                     # |
     li r10, 0x0                     # /
 loc_setNewScore:
+    cmpwi r11, 0x53                 # \ Check if char is "S"
+    beq- loc_setResourceScore       # /
+    cmpwi r11, 0x4C                 # \
+    beq- loc_setResourceLives       # / Check if char is "L"
+    cmpwi r11, 0x43                 # \
+    bne+ loc_noScoreRequirement     # / Check if char is "C"
+loc_setResourceCoin:
+    stw r10, 0x5C(r26)              # Set new coin count
+    b loc_noScoreRequirement
+loc_setResourceScore:
     stw r10, 0x4910(r28)            # Set new score
+    b loc_noScoreRequirement
+loc_setResourceLives:
+    stb r10, 0x5FA(r28)             # Set number of lives
 loc_noScoreRequirement:
     # Check if should add based on difficulty as well as random
     lbz r0, 0x7(r27)                    # \
@@ -206,6 +324,19 @@ loc_dontRedirect:
 # Useful if want to put sequenceIndex so that character selection happens after movie or end stage
 
 loc_stAdventure2__changeStep_changeSequenceIndex:
+    ## Save coin count so can be reapplied at next stage (since it gets wiped otherwise)
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    li r4, 0x0                      # \
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    mr r4, r3
+    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getOwner")]
+    lwz r3, 0x0(r3)                 # | Get ftOwner->ftOwnerData.coinCount of first player  
+    lwz r3, 0x5C(r3)                # /
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_coinCount")]
+    stw r3, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_coinCount")]
 
     ## Create a temp Ex save if before post game fight (since sora_adv_stage isn't present then) 
     lwz r12, 0x0(r27) # get lastDoorId
@@ -266,20 +397,39 @@ loc_dontCreateTempExSave:
 loc_applyPenalty:           # /
     stw r10, 0x4910(r28)    # Set scoreInCurrentStage with applied penalty
     
-    ## Check for Time Attack info in jump bone Format: $$<decrementer><set(=) or add(+)><target score> e.g. $$9+000010000
-    ### TODO: Introduce new setting that resets score based on difficulty if Global Time Attack / resets speedrun timer (also would disqualify Time Attack high score)
-    ### TODO: Have another timer besides speedrun timer that can be manipulated and set to 0 for certain timer criteria
+    ## Check for Time Attack info in jump bone Format: $$<reset><decrementer><set(=) or add(+)><target score> e.g. $$*9+000010000
     lhz r0, 0xC(r27)        # \
     cmpwi r0, 0x2424        # | Check first two char of jump bone is "$$"
     bne+ loc_noTimeAttack   # /
-    addi r3, r27, 0xC + 4
+    addi r3, r27, 0xC + 5
     bl __unresolved                 [R_PPC_REL24(0, 4, "strtoul__atoi")]
     lwz r10, 0x4910(r28)    # Get current score
-    lbz r0, 0xF(r27)        # \
-    cmpwi r0, 0x3D          # | Set score if fourth char is "="
-    beq+ loc_setScore       # /
+    lbz r0, 0x10(r27)       # Get option from firth char    
+    lbz r5, 0xE(r27)        # Get option from third char
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    cmpwi r11, 0x0
+    bne+ loc_globalTimeAttack
+    cmpwi r0, 0x3D          # \ 
+    beq- loc_setScore       # / Set score if firth char is "="
     cmpwi r0, 0x2B          # \
-    bne+ loc_dontSetScore   # | Add to score if fourth char is "+"
+    beq- loc_addScore       # / Add to score if firth char is "+"
+    b loc_dontSetScore
+loc_globalTimeAttack:
+    cmpwi r5, 0x2A          # \
+    bne+ loc_dontSetScore   # / Reset score if third char  is "*" and is Time Attack
+    li r11, 0x3             # Set global time attack to 3 which means initial score has been set (but score is disqualified since it's not on main path)
+    stb r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
+    lbz r8, 0x5FD(r28)      # Get current stage difficulty
+    li r7, 0x3              # \
+    subi r8, r8, 0x2        # | Get selected difficulty from (currentStageDifficulty - 2) / 3
+    divw r8, r8, r7         # /
+    lis r11,0x0                    [R_PPC_ADDR16_HA(40, 4, "loc_timeAttackStartScores")]
+    addi r11, r11, 0x0             [R_PPC_ADDR16_LO(40, 4, "loc_timeAttackStartScores")]
+    mulli r8, r8, 0x4       # \
+    lwzx r3, r11, r8        # / Set Time Attack score based on difficulty
+    b loc_setScore
+loc_addScore:
     add r3, r3, r10         # |
     lis r10, 0x3b9b         # |
     subi r10, r10, 0x3601   # | max(99999999, addedScore)
@@ -289,7 +439,20 @@ loc_applyPenalty:           # /
 loc_setScore: 
     stw r3, 0x4910(r28)     # Set new score
 loc_dontSetScore:
-    lbz r3, 0xE(r27)        # \ Get decrementer value (just take right digit of char (e.g. "2" -> 32 -> 2))
+    li r10, 0x0                     
+    cmpwi r5, 0x2A                  # \ Reset both timers if third char is "*" 
+    bne+ loc_dontResetBothTimers    # /
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_speedrunTimer")]
+    stw r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_speedrunTimer")]
+    b loc_resetTimer
+loc_dontResetBothTimers:
+    cmpwi r5, 0x21                  # \ Reset both timers if third char is "!" 
+    bne+ loc_dontResetTimer         # /
+loc_resetTimer:
+    lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_timer")]
+    stw r10, 0x0(r12)               [R_PPC_ADDR16_LO(40, 6, "loc_timer")] 
+loc_dontResetTimer:
+    lbz r3, 0xF(r27)        # \ Get decrementer value (just take right digit of char (e.g. "2" -> 32 -> 2))
     rlwinm r3,r3,0,28,31    # /
     lis r12,0x0                   [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
     stb r3, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
