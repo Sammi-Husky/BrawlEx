@@ -155,11 +155,6 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     # @ sqAdventure::setNext
     lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
     stw r9,0x0(r12)                         [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
-    ## op bne- 0x10 (Original operation)
-    ori r9, r8, 0x0010
-    # @ stLoaderInfoAdventure::entryEntity            
-    lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
-    stw r9,0x0(r12)                         [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
     ## op li r31, 0x0 (Original operation)
     lis r9, 0x3be0
     # @ IfAdvPause::main          
@@ -206,13 +201,6 @@ loc_setTimeAttack:
     li r10, 0x0         # \ reset advSaveData->greatMazeShadowClearFlags
     stw r10, 0x6C0(r3)  # /
 loc_dontResetGreatMaze:
-    ## op b 0x10 (allow score to be displayed in HUD during VS Boss)
-    lis r10, 0x4800
-    ori r10, r10, 0x0010
-    # @ stLoaderInfoAdventure::entryEntity            
-    lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
-
     ## op li r31, 0x4 (temporarily disable save prompt after quit)
     lis r10, 0x3be0
     ori r10, r10, 0x0004

@@ -52,15 +52,26 @@ loc_doNotSetInitialScore:
 
 loc_stAdventure2__changeStep_updateOnFrame:
     mr r31,r3               # Original operation
+    lis r26,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
+    lwz r26,0x0(r26)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
     lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
     lwz r10, 0x4910(r28)            # \
     cmpwi r10, r12                  # |
     sub r10, r10, r12               # |
-    bge+ loc_setScoreToZero         # | Decrement score
+    bge+ loc_noSetScoreToZero       # | Decrement score
     li r10, 0x0                     # |
-loc_setScoreToZero:                 # |
+loc_noSetScoreToZero:               # |
     stw r10, 0x4910(r28)            # /
+    cmpwi r12, 0x0          # \ Check if score is decrementing (i.e/ Time Attack)
+    beq+ loc_notTimeAttack  # /
+    stw r10, 0x50(r26)      # Update IfAdvMngr->scoreInCurrentStage (since doesn't get updated in boss battles)
+    lwz r8, 0x104(r26)      # \
+    cmpwi r8, 0x0           # | Check if IfAdvMngr->IfAdvGauge is initialized
+    beq- loc_notTimeAttack  # /
+    li r9, 0x1         # \ set IfAdvGauge->shouldDrawScore to True (since it gets turned off during Boss Battles)
+    stb r9, 0x361(r8)  # /
+loc_notTimeAttack:
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_timer")]
     lwz r4, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_timer")]
     cmpwi r4, -1                    # \
@@ -79,16 +90,14 @@ loc_dontIncrementSpeedrunTimer:
     lbz r10, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_displaySpeedrunTimer")]
     cmpwi r10, 0x0                      # \ Check if should display speedrun timer
     beq+ loc_dontDisplaySpeedrunTimer   # /
-    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
-    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
-    lwz r3, 0x108(r12)      # IfAdvMngr->IfCenter
+    lwz r3, 0x108(r26)      # IfAdvMngr->IfCenter
     cmpwi r3, 0x0                       # \ Check if IfCenter has been initialized
     beq- loc_dontDisplaySpeedrunTimer   # /
     lbz r10, 0x0(r3)                    # \
     rlwinm. r10, r10, 25, 31, 31        # | Check if IfCenter with timer has started (it's 0 when called by IfAdvMngr)
     bne- loc_updateSpeedrunTimeDisplay  # /
     li r10, 0x1         # \
-    lwz r4, 0x44(r12)   # |
+    lwz r4, 0x44(r26)   # |
     li r5, 0x2          # | Call IfCenter::startMelee with same parameters as All Star mode so timer is displayed
     li r6, 0x1          # |
     li r7, 0x0          # |
@@ -98,7 +107,6 @@ loc_dontIncrementSpeedrunTimer:
 loc_updateSpeedrunTimeDisplay:
     bl __unresolved                          [R_PPC_REL24(0, 4, "IfCenter__updateTimeFast")]
 loc_dontDisplaySpeedrunTimer:
-    ## TODO: Transfer coins from p2 to p1
     li r29, 0x0
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
@@ -126,10 +134,10 @@ loc_dontGetP2Coins:
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getOwner")]
-    lwz r10, 0x0(r3)                 # | Get number of coins from P1
-    cmpwi r10, -1                    # |
+    lwz r10, 0x0(r3)                # | Get number of coins from P1
+    cmpwi r10, -1                   # |
     beq- loc_dontDisplayNumCoins    # |
-    lwz r4, 0x5c(r10)                # /
+    lwz r4, 0x5c(r10)               # /
     add r4, r4, r29                 # \ Add P2 coins to P1
     stw r4, 0x5c(r10)               # /
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_coinCount")]
@@ -139,9 +147,7 @@ loc_dontGetP2Coins:
     cmpwi r8, 0x0                   # \ Also display if had coins in previous stage
     beq+ loc_dontDisplayNumCoins    # / 
 loc_displayNumCoins:
-    lis r12,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
-    lwz r12,0x0(r12)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
-    lwz r3, 0xE8(r12)       # IfAdvMngr->IfPlayer
+    lwz r3, 0xE8(r26)       # IfAdvMngr->IfPlayer
     cmpwi r3, 0x0                   # \ Check if IfPlayer has been initialized
     beq- loc_dontDisplayNumCoins    # /
     lwz r9, 0xC(r3)            # \

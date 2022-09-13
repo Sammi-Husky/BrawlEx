@@ -72,13 +72,6 @@ loc_muAdvNameTask__create_patchSoraModules:
     lis r12, 0x0                            [R_PPC_ADDR16_HA(0, 1, "SSEEX_patchThree")]
     stw r11, 0x0(r12)                       [R_PPC_ADDR16_LO(0, 1, "SSEEX_patchThree")]
 
-    ### Allow IfAdvMngr->scoreInCurrentStage to update during VS Boss so score in HUD can be updated
-
-    ## op nop
-    # @ stLoaderInfoAdventure::processBegin
-    lis r12, 0x0                            [R_PPC_ADDR16_HA(27, 1, "SSEEX_patchFive")]
-    stw r11, 0x0(r12)                       [R_PPC_ADDR16_LO(27, 1, "SSEEX_patchFive")]
-
     ### Change score formatter to always show 9 digits (fixes issue when score is decreased)
     
     ## subi r4, r13, 23989
@@ -120,14 +113,6 @@ loc_muAdvNameTask__create_patchSoraModules:
     # @ sqAdventure::setNext
     lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
     stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
-
-    ### Restore original operation in stLoaderInfoAdventure::entryEntity in case it was changed
-
-    ## op bne- 0x10 (Original operation)
-    ori r9, r8, 0x0010
-    # @ stLoaderInfoAdventure::entryEntity            
-    lis r12,0x0                             [R_PPC_ADDR16_HA(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
-    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(27, 1, "SSEEX_tempEnableScoreDisplayOnVsBoss")]
 
     ### Restore original operation in IfAdvPause::main in case it was changed
 
