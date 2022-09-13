@@ -142,19 +142,19 @@ loc_dontGetP2Coins:
     stw r4, 0x5c(r10)               # /
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_coinCount")]
     lwz r8, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_coinCount")]
-    cmpwi r4, 0x0                   # \ Only display if have at least one coin
-    bne- loc_displayNumCoins        # /
-    cmpwi r8, 0x0                   # \ Also display if had coins in previous stage
-    beq+ loc_dontDisplayNumCoins    # / 
-loc_displayNumCoins:
     lwz r3, 0xE8(r26)       # IfAdvMngr->IfPlayer
     cmpwi r3, 0x0                   # \ Check if IfPlayer has been initialized
     beq- loc_dontDisplayNumCoins    # /
-    lwz r9, 0xC(r3)            # \
-    cmpwi r9, 0x2              # | Check if first time going through (so can add coins from previous stage)
-    beq+ loc_dontPrepareCoins  # /
+    lwz r9, 0xC(r3)                 # \ 
+    cmpwi r9, 0x2                   # | Check if IfPlayer has been changed already to display coins
+    beq+ loc_displayNumCoins        # /
+    cmpwi r4, 0x0                   # \ Display if have at least one coin
+    bne- loc_displayNumCoins        # /
+    cmpwi r8, 0x0                   # \ Also display if had coins in previous stage
+    beq+ loc_dontDisplayNumCoins    # / 
     mr r4, r8           # \
-    stw r4, 0x5c(r10)   # / Add coins from previous stage
+    stw r4, 0x5c(r10)   # / Get coins from previous stage
+loc_displayNumCoins:
     li r9, 0x2          # \ Set to display coin number
     stw r9, 0xC(r3)     # /
 loc_dontPrepareCoins:
