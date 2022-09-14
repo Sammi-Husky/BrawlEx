@@ -19,9 +19,9 @@ loc_38:
     /* 00000040: */    stw r0,0x44(r31)
     /* 00000044: */    rlwinm r4,r0,0,24,31
     /* 00000048: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenuController__init")]
-    /* 0000004C: */    lwz r3,0x4(r30)
+    /* 0000004C: */    #lwz r3,0x4(r30)
     /* 00000050: */    lwz r0,0x8(r30)
-    /* 00000054: */    stw r3,0xFC(r31)
+    /* 00000054: */    #stw r3,0xFC(r31)
     /* 00000058: */    lwz r3,0xC(r30)
     /* 0000005C: */    stw r0,0x100(r31)
     /* 00000060: */    lwz r0,0x10(r30)
@@ -79,6 +79,10 @@ loc_B0:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__readFile")]
 loc_dontLoadTempAdvExSaveFile:
 
+    lis r30,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r30,0x0(r30)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r30,0x30(r30)     # get GameGlobal->advSaveData
+
     ## SSEEX: Check if new record and adjust earned coins if time attack
     lis r11,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r11, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
@@ -86,10 +90,8 @@ loc_dontLoadTempAdvExSaveFile:
     blt+ loc_notTimeAttack
     lis r10,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
     lwz r10, 0x0(r10)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
-    lis r30,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    lwz r30,0x0(r30)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    lwz r30,0x30(r30)       # | Restore original total score
-    stw r10,0x60C(r30)      # /
+     
+    stw r10,0x60C(r30)      # / Restore original total score
     li r10, 0x0             # \ Reset advSaveData->earnedCoinsForClear to 0
     sth r10, 0x4920(r30)    # /
     lwz r10, 0x4910(r30)    # Get advSaveData->scoreInCurrentStage
@@ -131,9 +133,15 @@ loc_noHighScore:
     bl __unresolved                          [R_PPC_REL24(0, 4, "adKeepManager__calculateCoin")]
     lhz r10, 0x4920(r30)        # \ Update earned coin count in menuTask
     stw r10, 0xFC(r31)          # /  
-    
-    # TODO: Later handle speedrun time 
 loc_notTimeAttack:
+
+    ## Add collected coins to coin score
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_coinCount")]
+    lwz r12, 0x0(r12)                       [R_PPC_ADDR16_LO(40, 6, "loc_coinCount")]
+    lhz r10, 0x4920(r30)    # \
+    add r10, r12, r10       # | Add collected coins to advSaveData->earnedCoinsForClear
+    sth r10, 0x4920(r30)    # | And update amount for visual in results screen
+    stw r10, 0xFC(r31)      # /
 
     /* 000000B8: */    mr r3,r31
     /* 000000C0: */    lwz r31,0xEC(r1) #lwz r31,0xC(r1)

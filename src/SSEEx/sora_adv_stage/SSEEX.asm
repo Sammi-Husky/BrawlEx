@@ -17,7 +17,7 @@
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
-# TODO: Stamina battles?
+# TODO: Stamina battles? (maybe can use jump string bone to set it up)
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 # TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
@@ -111,7 +111,7 @@ loc_dontDisplaySpeedrunTimer:
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     li r4, 0x1                      # \
-    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryId")]
     mr r4, r3                       # |
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
@@ -129,7 +129,7 @@ loc_dontGetP2Coins:
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     li r4, 0x0                      # \
-    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryId")]
     mr r4, r3                       # |
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
@@ -161,9 +161,6 @@ loc_dontPrepareCoins:
     bl __unresolved                          [R_PPC_REL24(0, 4, "IfPlayer__updateStockCoin")]
 loc_dontDisplayNumCoins:
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_returnToChangeStep")]
-
-    ## TODO: add coins to earned coins in results
-    ## TODO: Lose coins upon death / gameover?
 
 
 #####################################################################################################################################################
@@ -217,7 +214,7 @@ loc_gameOverLessThanDifficulty:             # /
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     li r4, 0x0                      # \
-    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryId")]
     mr r4, r3
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
@@ -334,7 +331,7 @@ loc_stAdventure2__changeStep_changeSequenceIndex:
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     li r4, 0x0                      # \
-    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryIdFromIndex")]
+    bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryId")]
     mr r4, r3
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]

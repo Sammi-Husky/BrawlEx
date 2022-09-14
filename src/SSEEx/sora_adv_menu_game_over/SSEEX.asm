@@ -29,6 +29,10 @@ loc_setScoreToZero:         # |
 loc_applyPenalty:           # /
     stw r10, 0x4910(r26)    # Set scoreInCurrentStage with applied penalty
 
+    ## Set coin count to 0
+    lis r11,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
+    stw r28, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
+
     ## Decrement sublevel upon game over and change game mode if needed based on new jumpLevelId
     lwz r9, 0x628(r26)          # Get current lastDoorId
     mr r8, r9
