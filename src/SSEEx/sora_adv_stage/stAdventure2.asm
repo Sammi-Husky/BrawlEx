@@ -7412,7 +7412,9 @@ loc_6B00:
     /* 00006B28: */    stfs f0,0x2A8(r31)
     /* 00006B2C: */    stfs f0,0x304(r31)
 loc_6B30:
-    /* 00006B30: */    lwz r0,0x24(r1)
+    b __unresolved                                       [R_PPC_REL24(40, 7, "loc_stAdventure2__initForGameMode_initStamina")]
+loc_initializedStamina:
+    /* 00006B30: */    #lwz r0,0x24(r1)
     /* 00006B34: */    lwz r31,0x1C(r1)
     /* 00006B38: */    lwz r30,0x18(r1)
     /* 00006B3C: */    lwz r29,0x14(r1)

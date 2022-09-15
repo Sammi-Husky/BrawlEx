@@ -200,6 +200,7 @@ loc_setTimeAttack:
     bgt+ loc_dontResetGreatMaze     # /
     li r10, 0x0         # \ reset advSaveData->greatMazeShadowClearFlags
     stw r10, 0x6C0(r3)  # /
+    # TODO: Also reset the colored switchs in Factory area and anywhere else it might have saved? Need to see what controls that
 loc_dontResetGreatMaze:
     ## op li r31, 0x4 (temporarily disable save prompt after quit)
     lis r10, 0x3be0

@@ -3,6 +3,7 @@
 
 # TODO: Impossible mode while holding a button on intense (if level is completed), 1 stock if holding a button at map level selection (can use space in the other Great Maze save entries to keep track of completion)
 ## Must activate time attack first, make time attack enum be 3, 4 and 5 (for disqualification), impossible mode 1 and 2 
+## Make it have 1hp too?
 # TODO: Show song title on HUD (when stage starts as well as on pause)
 
 # TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
@@ -17,11 +18,13 @@
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
-# TODO: Stamina battles? (maybe can use jump string bone to set it up)
+# TODO: Stamina battles? (maybe can use jump string bone to set it up) as well as other stuff like Giant and such
+## Gets set in stLoaderPlayer::descEntry
+## Maybe manage custom rules in initForGameMode (apply to ftOwner)
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 # TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
-# TODO: Toggle changing outcomes with R (e.g. choosing Mario instead of Kirby, saving Peach instead of Zelda) if Great Maze has been completed
+# TODO: For coin, modify code @ 8081BC74 in All Star VS to check if user has coins and wipe if they don't (and then implement dropping coins upon death)
 
 .set advExSaveSize, 0xC9
 .set tempAdvExSaveSize, 0xC9
@@ -700,3 +703,40 @@ loc_muAdvSaveTask__onDecided_writeExSave:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
     addi r11,r1,0xE0      # Original operation
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_wroteExSave")]
+
+##########################
+## WIP: Test Setup Stamina
+##########################
+loc_stAdventure2__initForGameMode_initStamina:
+    # lis r31,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    # lwz r31,0x0(r31)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    # lwz r31,0x8(r31)
+    # #li r10, 300        # \ Set startingDamage (Need to Investigate damage being reset to 0 on respawn despite having an initial startDamage (might be same thing as clear/[ftOwner] experienced with coins, look at All Star Vs)
+    # #sth r10, 0xba(r31) # /
+    # li r10, 0x1         # \ Set starting hp
+    # sth r10, 0xbc(r31)  # /
+    # li r10, 0x90        # \ Set 0x1c to 90 like in Stamina Mode
+    # stb r10, 0xB4(r31)  # /
+    # li r10, 0x1
+    # lis r12,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    # lwz r12,0x0(r12)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    # stb r10, 0x6d(r12)  # set ftManager->isStamina to True
+    # lbz r8,0xc(r31)             # \
+    # lbz r9,0xb(r31)             # |
+    # lbz r10,0x9(r31)            # |
+    # rlwinm r8,r8,0x0,0x19,0x17  # |
+    # ori r9,r9,0x20              # |
+    # rlwimi r10,r0,0x5,0x18,0x1a # |
+    # stb r8,0xc(r31)             # | Stuff taken from sqSpMelee::setupSpMelee for stamina mode
+    # rlwinm r9,r9,0x0,0x1e, 0x1c # |
+    # rlwinm r8,r10,0x0,0x1f,0x1d # |
+    # stb r9,0xb(r31)             # |
+    # stb r8,0x9(r31)             # |
+    # stw r3,0x20(r31)            # |
+    # lbz r8,0xa(r31)             # |
+    # rlwinm r8,r8,0x0,0x19,0x17  # |
+    # stb r8,0xa(r31)             # /
+    lwz r0,0x24(r1)     # Original operation
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_initializedStamina")]
+
+    
