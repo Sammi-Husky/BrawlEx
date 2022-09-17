@@ -1,3 +1,4 @@
+## TODO: Could optimize code space by putting every calculation of difficulty number in it's own function?
 stAdventure2__create:
     /* 00000070: */    stwu r1,-0x10(r1)
     /* 00000074: */    mflr r0
@@ -3635,24 +3636,27 @@ loc_3468:
     /* 00003470: */    bne- loc_3478
     /* 00003474: */    li r29,0x1
 loc_3478:
-    /* 00003478: */    lbz r4,0x14(r4)
+    /* 00003478: */    lbz r4,0x14(r4)      # playerNumber
     /* 0000347C: */    cmpwi r30,0x0
     /* 00003480: */    lwz r31,0x8(r7)
     /* 00003484: */    mulli r0,r4,0x5C
     /* 00003488: */    add r3,r31,r0
     /* 0000348C: */    addi r28,r3,0x98
-    /* 00003490: */    beq- loc_385C
+    /* 00003490: */    bne- loc_setFighterData #beq- loc_385C
+    cmpwi r29,0x0       # \ SSEEX: Enable all parameters to change based on difficulty (not just knockback multiplier)
+    beq- loc_389C       # /
+ loc_setFighterData:
     /* 00003494: */    mr r3,r28
     /* 00003498: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gmPlayerInitData__gmInitPlayerDataDefault")]
     /* 0000349C: */    lbz r3,0x0(r27)
     /* 000034A0: */    li r0,0x1
     /* 000034A4: */    stb r3,0x0(r28)
     /* 000034A8: */    stb r0,0x1(r28)
-    /* 000034AC: */    lbz r0,0x14(r27)
+    /* 000034AC: */    lbz r0,0x14(r27)     
     /* 000034B0: */    stb r0,0x8(r28)
-    /* 000034B4: */    lbz r0,0x1(r27)
+    /* 000034B4: */    lbz r0,0x1(r27)      # stockCount
     /* 000034B8: */    stb r0,0x4(r28)
-    /* 000034BC: */    lbz r25,0x2(r27)
+    /* 000034BC: */    lbz r25,0x2(r27)     # costume ID
     /* 000034C0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "muMenu__exchangeGmCharacterKind2MuSelchkind")]
     /* 000034C4: */    cmpwi r3,0x28
     /* 000034C8: */    bne- loc_34D4
@@ -3668,18 +3672,18 @@ loc_34DC:
     /* 000034E8: */    stb r0,0x9(r28)
     /* 000034EC: */    lbz r0,0x4(r27)
     /* 000034F0: */    stb r0,0xA(r28)
-    /* 000034F4: */    lbz r0,0x6(r27)
+    /* 000034F4: */    lbz r0,0x6(r27)    # ?
     /* 000034F8: */    lbz r3,0x1B(r28)
     /* 000034FC: */    rlwimi r3,r0,5,26,26
     /* 00003500: */    stb r3,0x1B(r28)
-    /* 00003504: */    lbz r0,0x7(r27)
+    /* 00003504: */    lbz r0,0x7(r27) # is Metal
     /* 00003508: */    rlwimi r3,r0,4,27,27
     /* 0000350C: */    rlwinm r3,r3,0,29,27
     /* 00003510: */    stb r3,0x1B(r28)
-    /* 00003514: */    lbz r0,0x9(r27)
+    /* 00003514: */    lbz r0,0x9(r27) # is Spycloak
     /* 00003518: */    rlwimi r3,r0,2,29,29
     /* 0000351C: */    stb r3,0x1B(r28)
-    /* 00003520: */    lbz r0,0xA(r27)
+    /* 00003520: */    lbz r0,0xA(r27)  # is Low Gravity   # TODO? Have more options for gravity
     /* 00003524: */    rlwimi r3,r0,1,30,30
     /* 00003528: */    rlwinm. r0,r3,31,31,31
     /* 0000352C: */    stb r3,0x1B(r28)
@@ -3687,37 +3691,40 @@ loc_34DC:
     /* 00003534: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_60")]
     /* 00003538: */    lfs f0,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_60")]
     /* 0000353C: */    stfs f0,0x48(r28)
+    # TODO: Can probs cram more options like Spicy Curry/Reflector with abusing bitflags, 0xC doesn't seem used for anything, same with 0x16?
+    # TODO: Check if this works with p1/p2, if not make it work, maybe as an external file calling this
+    # TODO: Check if random is supported, support if it is not
 loc_3540:
-    /* 00003540: */    lbz r3,0xB(r27)
+    /* 00003540: */    lbz r3,0xB(r27)                  # \
     /* 00003544: */    lbz r0,0x1B(r28)
     /* 00003548: */    rlwimi r0,r3,0,31,31
     /* 0000354C: */    stb r0,0x1B(r28)
-    /* 00003550: */    lbz r3,0xB(r27)
+    /* 00003550: */    lbz r3,0xB(r27)                  # / is NoVoice
     /* 00003554: */    neg r0,r3
     /* 00003558: */    or r0,r0,r3
     /* 0000355C: */    rlwinm r0,r0,1,31,31
     /* 00003560: */    stb r0,0x1A(r28)
-    /* 00003564: */    lbz r0,0x10(r27)
+    /* 00003564: */    lbz r0,0x10(r27)                 # Use stamina health
     /* 00003568: */    lbz r3,0x1C(r28)
     /* 0000356C: */    rlwimi r3,r0,7,24,24
     /* 00003570: */    stb r3,0x1C(r28)
-    /* 00003574: */    lbz r0,0x11(r27)
+    /* 00003574: */    lbz r0,0x11(r27)         # ?
     /* 00003578: */    rlwimi r3,r0,6,25,25
     /* 0000357C: */    rlwinm r0,r3,0,27,25
     /* 00003580: */    stb r0,0x1C(r28)
     /* 00003584: */    rlwinm r0,r3,0,28,25
-    /* 00003588: */    lbz r4,0xD(r27)
+    /* 00003588: */    lbz r4,0xD(r27)          # ?
     /* 0000358C: */    lbz r3,0x1D(r28)
     /* 00003590: */    rlwimi r3,r4,7,24,24
     /* 00003594: */    ori r4,r3,0x40
     /* 00003598: */    stb r4,0x1D(r28)
-    /* 0000359C: */    lbz r3,0xF(r27)
+    /* 0000359C: */    lbz r3,0xF(r27)          # ?
     /* 000035A0: */    rlwimi r4,r3,5,26,26
     /* 000035A4: */    stb r4,0x1D(r28)
     /* 000035A8: */    stb r0,0x1C(r28)
-    /* 000035AC: */    lbz r0,0x14(r27)
+    /* 000035AC: */    lbz r0,0x14(r27)         # ?
     /* 000035B0: */    stb r0,0x2(r28)
-    /* 000035B4: */    lbz r0,0x15(r27)
+    /* 000035B4: */    li r0, 0x1 # lbz r0,0x15(r27)     # \ CostumeType: Normal/isDark/isFake
     /* 000035B8: */    cmplwi r0,0x1
     /* 000035BC: */    bne- loc_35D8
     /* 000035C0: */    lbz r0,0x1D(r28)
@@ -3727,16 +3734,16 @@ loc_3540:
     /* 000035D0: */    ori r0,r0,0x8
     /* 000035D4: */    stb r0,0x1B(r28)
 loc_35D8:
-    /* 000035D8: */    lbz r0,0x15(r27)
+    /* 000035D8: */    li r0, 0x1 #lbz r0,0x15(r27)     # /
     /* 000035DC: */    cmplwi r0,0x2
     /* 000035E0: */    bne- loc_35F0
     /* 000035E4: */    lbz r0,0x1D(r28)
     /* 000035E8: */    ori r0,r0,0x8
     /* 000035EC: */    stb r0,0x1D(r28)
 loc_35F0:
-    /* 000035F0: */    lhz r0,0x18(r27)
+    /* 000035F0: */    lhz r0,0x18(r27)     # startDamage
     /* 000035F4: */    sth r0,0x22(r28)
-    /* 000035F8: */    lhz r0,0x1A(r27)
+    /* 000035F8: */    lhz r0,0x1A(r27)     # hitPointMax
     /* 000035FC: */    sth r0,0x24(r28)
     /* 00003600: */    lhz r0,0x1C(r27)
     /* 00003604: */    sth r0,0x26(r28)
@@ -3878,7 +3885,7 @@ loc_37DC:
     /* 000037E0: */    cmpwi r0,0x0
     /* 000037E4: */    bne- loc_3850
     /* 000037E8: */    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_58D8")]
-    /* 000037EC: */    addi r5,r27,0x50
+    /* 000037EC: */    addi r5,r27,0x50 # Trigger data
     /* 000037F0: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_58D8")]
     /* 000037F4: */    li r4,0x0
     /* 000037F8: */    bl __unresolved                          [R_PPC_REL24(27, 1, "stTriggerMng__createTrigger1")]
@@ -3908,22 +3915,22 @@ loc_3850:
     /* 00003854: */    addi r0,r3,0x1
     /* 00003858: */    stb r0,0x590(r26)
 loc_385C:
-    /* 0000385C: */    cmpwi r30,0x0
-    /* 00003860: */    bne- loc_386C
-    /* 00003864: */    cmpwi r29,0x0
-    /* 00003868: */    beq- loc_389C
+    /* 0000385C: */    #cmpwi r30,0x0
+    /* 00003860: */    #bne- loc_386C
+    /* 00003864: */    #cmpwi r29,0x0
+    /* 00003868: */    #beq- loc_389C
 loc_386C:
     /* 0000386C: */    lbz r0,0x12(r27)
     /* 00003870: */    stb r0,0x1E(r28)
     /* 00003874: */    lbz r0,0x13(r27)
     /* 00003878: */    stb r0,0x1F(r28)
-    /* 0000387C: */    lhz r0,0x20(r27)
+    /* 0000387C: */    lhz r0,0x20(r27) # glowAttack
     /* 00003880: */    sth r0,0x28(r28)
-    /* 00003884: */    lhz r0,0x22(r27)
+    /* 00003884: */    lhz r0,0x22(r27) # glowDefense
     /* 00003888: */    sth r0,0x2A(r28)
-    /* 0000388C: */    lfs f0,0x24(r27)
+    /* 0000388C: */    lfs f0,0x24(r27) # attackReactionMul
     /* 00003890: */    stfs f0,0x34(r28)
-    /* 00003894: */    lfs f0,0x28(r27)
+    /* 00003894: */    lfs f0,0x28(r27) # damageReactionMul
     /* 00003898: */    stfs f0,0x38(r28)
 loc_389C:
     /* 0000389C: */    addi r11,r1,0x50
@@ -3933,6 +3940,8 @@ loc_389C:
     /* 000038AC: */    mtlr r0
     /* 000038B0: */    addi r1,r1,0x50
     /* 000038B4: */    blr
+    nop 
+    nop
 GameGlobal__getGlobalVsMeleeCondition:
     /* 000038B8: */    lwz r3,0x8(r3)
     /* 000038BC: */    blr

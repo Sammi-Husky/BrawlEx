@@ -21,6 +21,7 @@
 # TODO: Stamina battles? (maybe can use jump string bone to set it up) as well as other stuff like Giant and such
 ## Gets set in stLoaderPlayer::descEntry
 ## Maybe manage custom rules in initForGameMode (apply to ftOwner)
+# TODO: Introduce Multi Man Brawl 7 player battles?
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 # TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
@@ -707,6 +708,7 @@ loc_muAdvSaveTask__onDecided_writeExSave:
 ##########################
 ## WIP: Test Setup Stamina
 ##########################
+## TODO: Should check if this is just an option in the adventure params
 loc_stAdventure2__initForGameMode_initStamina:
     # lis r31,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     # lwz r31,0x0(r31)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
