@@ -57,6 +57,13 @@ loc_muAdvNameTask__create_patchSoraModules:
     lis r12, 0x0                            [R_PPC_ADDR16_HA(1, 1, "SSEEX_patchFour")]
     stw r9, 0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_patchFour")]
     
+    ### Disable sqAdventure->initialSlotId from being set (so sqAdventure->setCondition can use selected id)
+    
+    ## op nop
+    # @ sqAdventure::setNext
+    lis r12, 0x0                            [R_PPC_ADDR16_HA(1, 1, "SSEEX_patchFive")]
+    stw r11, 0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_patchFive")]
+
     ### Always Make Back to Map Option Available in SSE Pause Screen
 
     ## b 0x18
