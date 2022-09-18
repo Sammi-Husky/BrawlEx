@@ -2604,7 +2604,6 @@ loc_2D1F8:
     /* 0002D200: */    cmpwi r0,0x0
     /* 0002D204: */    ble- loc_2D224
     /* 0002D208: */    lwz r0,0x0(r3)
-SSEEX_patchFive:
     /* 0002D20C: */    stw r0,0x14(r28)
     /* 0002D210: */    stb r23,0x23(r28)
     /* 0002D214: */    lbz r3,0x4924(r29)
@@ -2643,6 +2642,7 @@ loc_2D288:
     /* 0002D28C: */    cmpwi r3,0x0
     /* 0002D290: */    blt- loc_2D3AC
     /* 0002D294: */    cmpwi r3,0x33
+SSEEX_patchFive:
     /* 0002D298: */    bge- loc_2D3AC
     /* 0002D29C: */    lwz r4,0x24(r28)
     /* 0002D2A0: */    lwz r0,0x50(r4)
