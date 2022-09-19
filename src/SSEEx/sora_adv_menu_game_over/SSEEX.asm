@@ -1,6 +1,7 @@
 .set levelIdForVsFighter, 0x5A
 .set levelIdForVsBoss, 0x50
 .set levelIdForVsZako, 0x46
+.set levelIdForVsSavePoint, 0x46
 
 .set subLevelIdForGameOverCondition, 0x1E
 .set doorIndexUponGameOverCondition, 0xFF
@@ -108,7 +109,12 @@ loc_checkIfVsBoss:
 loc_checkIfVsZako:
     cmplwi r5, levelIdForVsZako      # Check if level id is in the desired range
     blt+ loc_setGameMode
-    li r0, 0x1          # Set game mode to VS Zako
+    li r0, 0x1          # \ Set game mode to VS Zako
+    b loc_setGameMode   # /
+loc_checkIfSavepoint:
+    cmplwi r5, levelIdForVsSavePoint
+    blt+ loc_setGameMode    # \ Set game mode to Savepoint
+    li r0, 0x4              # /
 loc_setGameMode:
     stb r0, 0x604(r26)  # Apply game mode to advSaveData->advGameMode
     ## TODO: Check why score wasn't reset
