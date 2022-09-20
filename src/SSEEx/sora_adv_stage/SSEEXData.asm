@@ -43,7 +43,7 @@ loc_AddedTeamMemberCSSIds:
         .byte 0x2D      # Roy
         .byte 0x2F      # Knuckles
         .byte 0x32      # Ridley
-        .byte 0x40      # Dark Samus
+        .byte 0x33      # Dark Samus
         .byte 0x32      # Ridley
         .byte 0x32      # Ridley
         .byte 0x00      # 42
@@ -425,7 +425,7 @@ loc_stepJumpIdCSSIdUnlockCriteria:
         .4byte 0x00000002       # 0x30 - Giga Bowser
         .4byte 0x00000000       # 0x31
         .4byte 0x00000002       # 0x32 - Ridley
-        .4byte 0x00000000       # 0x33
+        .4byte 0x00000000       # 0x33 - Waluigi
         .4byte 0x00000000       # 0x34
         .4byte 0x00000000       # 0x35 - Warioman
         .4byte 0x00000000       # 0x36
@@ -438,7 +438,7 @@ loc_stepJumpIdCSSIdUnlockCriteria:
         .4byte 0x00000000       # 0x3D
         .4byte 0x00000000       # 0x3E
         .4byte 0x00000000       # 0x3F
-        .4byte 0x28900104       # 0x40 - Dark Samus
+        .4byte 0x00000000       # 0x40 - Dark Samus
         .4byte 0x00000000       # 0x41
         .4byte 0x00000000       # 0x42
         .4byte 0x00000000       # 0x43
@@ -617,3 +617,9 @@ loc_stepJumpIdCSSIdUnlockCriteria:
         .4byte 0x00000000       # 0xF0
         .4byte 0x00000000       # 0xF1
         .4byte 0x00000000       # 0xF2
+
+# TODO: Allow picking up trophy as an unlock criteria based on trophy id 
+## stActTriggerCreateItem
+## Make Trophy always appear by modifying TriggerData (0xC) in GITM to 0x00000100
+## Is last bytes unused? could use as unlock criteria for SSEEX
+## stActTriggerCreateItem::eventGetItem gets called when item is picked up
