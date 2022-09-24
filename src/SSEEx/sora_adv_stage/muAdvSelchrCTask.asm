@@ -495,39 +495,42 @@ muAdvSelchrCTask__initProc:
     /* 0003E418: */    stwu r1,-0x20(r1)
     /* 0003E41C: */    mflr r0
     /* 0003E420: */    stw r0,0x24(r1)
-    /* 0003E424: */    stw r31,0x1C(r1)
-    /* 0003E428: */    mr r31,r3
-    /* 0003E42C: */    stw r30,0x18(r1)
+    /* 0003E424: */    #stw r31,0x1C(r1)
+    /* 0003E42C: */    #stw r30,0x18(r1)
+    /* 0003E438: */    #stw r29,0x14(r1)
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_27")]
     /* 0003E430: */    lis r30,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_17A88")]
     /* 0003E434: */    addi r30,r30,0x0                         [R_PPC_ADDR16_LO(40, 5, "loc_17A88")]
-    /* 0003E438: */    stw r29,0x14(r1)
+    /* 0003E428: */    mr r31,r3
     /* 0003E43C: */    mr r29,r4
     /* 0003E440: */    stw r5,muAdvSelchrCTask_0xC58(r3)
     /* 0003E444: */    stw r6,muAdvSelchrCTask_0xC5C(r3)
 
-    /* 0003E44C: */    lwz r7,0x4(r29)
-    /* 0003E464: */    stw r7,0x6FC(r31)
+    /* 0003E44C: */    lwz r27,0x4(r29)
+    /* 0003E464: */    stw r27,0x6FC(r31)
 
     ## SSEEX: Put back level clear flag (as it was previously modified by muAdvDifficultyTask__mainStepSelectedMain if override was selected
     ## And override amount of characters to pick
-    lis r12,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
-    addi r12, r12, 0x0                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
-    lbz r6,0x0(r12)                         
+    lis r28,0x0                             [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    addi r28, r28, 0x0                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    lbz r6,0x0(r28)                         
     cmpwi r6, 0x1
     blt+ loc_overrideMemberAmountFinished
     bne- loc_finishedSettingOverrideState
     li r6, 0x2                          # Set flag to 2 to ensure level clear flag can't get reset again when a muAdvSelchrCTask is created (i.e. only will happen on map screen)
-    stb r6,0x0(r12)                         
+    stb r6,0x0(r28)                         
 loc_finishedSettingOverrideState:    
     ## lwz r0, 0x4(r3)    (Original operation)             
-    lis r5, 0x8003
-    ori r5, r5, 0x0004
+    lis r4, 0x8003
+    ori r4, r4, 0x0004
     # @ scAdvMap::selDiffProc
-    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
-    stw r5,0x0(r12)                         [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
+    addi r3, r3, 0x0                       [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideNewAdvMapState")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")]  
 
-    lwz r10,-0x8(r12)       # Get selectedLevel                  
-    lwz r6,-0x4(r12)        # Get clear flag
+    lwz r10,-0x8(r28)       # Get selectedLevel                  
+    lwz r6,-0x4(r28)        # Get clear flag
     cmpwi r10, 0xA                          # \
     bne+ loc_notLakeShore                   # |
     li r0, 0x4                              # | Set number of members to pick to four if it's Lake Shore (since it's two otherwise)
@@ -549,10 +552,10 @@ loc_finishedSettingOverrideState:
     bge- loc_setNumMembersToSelectToFour    # | 
     b loc_characterAmountFromLevelSet       # |
 loc_setNumMembersToSelectToTwo:             # |
-    li r7,0x2                               # |
+    li r27,0x2                               # |
     b loc_characterAmountFromLevelSet       # |
 loc_setNumMembersToSelectToFour:            # |
-    li r7,0x4                               # /
+    li r27,0x4                               # /
 
 loc_characterAmountFromLevelSet:
     lis r8,0x0              [R_PPC_ADDR16_HA(0, 11, "loc_805A0040")] # \         
@@ -571,22 +574,22 @@ loc_checkForMemberAmountOverride:           # |
     ble+ loc_checkForMemberAmountOverride   # /
     b loc_overrideMemberAmountFinished 
 loc_setMemberAmountTen:
-    li r7, 0xA              # Max characters result struct holds
+    li r27, 0xA              # Max characters result struct holds
     b loc_setMemberAmountOverride
 loc_setMemberAmountTwo:
-    li r7, 0x2              # So that can stay playing the same characters during co-op
+    li r27, 0x2              # So that can stay playing the same characters during co-op
 loc_setMemberAmountOverride:
-    stw r7,0x6FC(r31)                       # Set number of members to pick
+    stw r27,0x6FC(r31)                       # Set number of members to pick
     li r10, 0x1
-    stb r10, 0x1(r12)                       # Set override character amount flag
+    stb r10, 0x1(r28)                       # Set override character amount flag
 
 loc_overrideMemberAmountFinished:                   
     lwz r0, 0x10(r29)                       # \
     cmpwi r0, 0x0                           # |
     blt+ loc_notCoop                        # | Subtract 1 if coop since coop selects one less for P1
-    subi r7, r7, 0x1                        # |
+    subi r27, r27, 0x1                        # |
 loc_notCoop:                                # /
-    stb r7, muAdvSelchrCTask_desiredNumMembersToSelect(r3)
+    stb r27, muAdvSelchrCTask_desiredNumMembersToSelect(r3)
     /* 0003E448: */    bl muAdvSelchrCTask__setMenuData
 
     /* 0003E450: */    li r3,0x0
@@ -666,9 +669,11 @@ loc_3E560:
     /* 0003E56C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__readRequest")]
 loc_3E570:
     /* 0003E570: */    lwz r0,0x24(r1)
-    /* 0003E574: */    lwz r31,0x1C(r1)
-    /* 0003E578: */    lwz r30,0x18(r1)
-    /* 0003E57C: */    lwz r29,0x14(r1)
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_27")]
+    /* 0003E574: */    #lwz r31,0x1C(r1)
+    /* 0003E578: */    #lwz r30,0x18(r1)
+    /* 0003E57C: */    #lwz r29,0x14(r1)
     /* 0003E580: */    mtlr r0
     /* 0003E584: */    addi r1,r1,0x20
     /* 0003E588: */    blr
@@ -767,11 +772,12 @@ muAdvSelchrCTask__setMenuData:
     lis r22,0x0                            [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
     lbz r14, 0x0(r22)                      [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
     ## ble- ->0x806ECD94 (Original operation)
-    lis r10, 0x4081
-    ori r10, r10, 0x0148
+    lis r4, 0x4081
+    ori r4, r4, 0x0148
     # @ sqAdventure::restartStcok             
-    lis r21,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
-    stw r10,0x0(r21)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    addi r3, r3, 0x0                      [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")] 
 
     ## SSEEX: Check for .selc file if jumpLevelId is not 0x0 (which signifies custom cutscene followed by custom level)
     li r10, 0xFF                              # \ Default number of stocks (0xFF) signifies no .selc file
@@ -819,10 +825,12 @@ loc_checkedForGlobalTimeAttack:
     bne+ loc_checkIfOverride    # / Check if selc file exists
     
     ## b 0x1EC
-    lis r10, 0x4800                 # \
-    ori r10, r10, 0x01EC            # | Skip adding stocks
+    lis r4, 0x4800                 # \
+    ori r4, r4, 0x01EC            # | Skip adding stocks
     # @ sqAdventure::restartStcok             
-    stw r10,0x0(r21)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    addi r3, r3, 0x0                      [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")] 
 
     lbz r10, 0x159(r1)                          # \ Set roster mode from selc file
     stb r10, muAdvSelchrCTask_rosterMode(r29)   # /
@@ -3230,10 +3238,8 @@ loc_4010C:
     
     nop
     nop
-    nop
-    nop
 
-    # +4
+    # +2
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

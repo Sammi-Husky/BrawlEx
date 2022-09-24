@@ -706,12 +706,14 @@ loc_9E0:
     /* 000009F0: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfFileIOHandle__release")]
 loc_9F4:
     ## ble- ->0x806ECD94 (Original operation)
-    lis r10, 0x4081
-    ori r10, r10, 0x0148
+    lis r4, 0x4081
+    ori r4, r4, 0x0148
     # @ sqAdventure::restartStcok             
-    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    addi r3, r3, 0x0                      [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")] 
 
+    stw r10,0x0(r12)                       
     lwz r0, 0x36C(r25)
     cmpwi r0, 0x0
     beq+ loc_normalTable
@@ -721,10 +723,12 @@ loc_9F4:
     beq+ loc_exSelbNotFound # /
 
     ## b 0x1EC
-    lis r10, 0x4800                 # \
-    ori r10, r10, 0x01EC            # | Skip adding stocks
+    lis r4, 0x4800                 # \
+    ori r4, r4, 0x01EC            # | Skip adding stocks
     # @ sqAdventure::restartStcok             
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    addi r3, r3, 0x0                      [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")] 
 
     addi r27, r29, 0x4      # Set pointer to character table from file
     lbz r31, 0x0(r29)       # Get number of members to select from .selb file
@@ -3377,11 +3381,8 @@ muAdvSelchrBTask__mainStepZombieMain:
     nop
     nop
     nop
-    nop
-    nop
-    nop
 
-    # +30
+    # +27
 
 muAdvSelchrBTask__isSelected:
     /* 00002BAC: */    lwz r0,0xB4(r3)

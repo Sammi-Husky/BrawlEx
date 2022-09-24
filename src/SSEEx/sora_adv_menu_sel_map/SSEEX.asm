@@ -91,11 +91,12 @@ loc_newUnlock:
 ## SSEEX: Initialize variables
 loc_muAdvSelmapTask__create_initialize:
     ## op ble- ->0x806ECD94 (Original operation)
-    lis r10, 0x4081
-    ori r10, r10, 0x0148
+    lis r4, 0x4081
+    ori r4, r4, 0x0148
     # @ sqAdventure::restartStcok             
-    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideAddStocks")]
+    addi r3, r3, 0x0                       [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")]   
     
     li r10, 0
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_gameOverEncountered")]
@@ -143,24 +144,34 @@ loc_noPrevTimeAttack:
 ### Check for Time Attack (if level is full cleared) to temp set level as uncleared (if override is also selected then level does not get temp set as uncleared)
 ### Check for whether or not to display Speedrun Timer
 loc_muAdvSelmapTask__controllProc_checkIfOverride:
-    ## op beq- 0xC (Original operation)
-    lis r8, 0x4182
-    ori r8, r8, 0x000c
-    # @ adAutoSave::create             
-    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
-    stw r8,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
-    ## op bne- 0x118 (Original operation)
-    lis r8, 0x4082
-    ori r9, r8, 0x0118
-    # @ sqAdventure::setNext
-    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
-    stw r9,0x0(r12)                         [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
-    ## op li r31, 0x0 (Original operation)
-    lis r9, 0x3be0
-    # @ IfAdvPause::main          
-    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableSavePrompt")]
-    stw r9,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableSavePrompt")]
+    lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
+    addi r12,r12,0x0                           [R_PPC_ADDR16_LO(40, 6, "loc_overrideCharactersFlag")]
+    stw r0, -0x4(r12)               # Store selected level clear
 
+    ## op beq- 0xC (Original operation)
+    lis r4, 0x4182
+    ori r4, r4, 0x000c
+    # @ adAutoSave::create             
+    lis r3,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
+    addi r3, r3, 0x0                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")]                   
+    ## op bne- 0x118 (Original operation)
+    lis r4, 0x4082
+    ori r4, r4, 0x0118
+    # @ sqAdventure::setNext
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
+    addi r3, r3, 0x0                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")]                       
+    ## op li r31, 0x0 (Original operation)
+    lis r4, 0x3be0
+    # @ IfAdvPause::main          
+    lis r3,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableSavePrompt")]
+    addi r3, r3, 0x0                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableSavePrompt")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")]                     
+
+    lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    lwz r3,0x30(r3)        # Get GameGlobal->advSaveData
     li r10, 0x0
     stw r10, 0x62C(r3)     # Set jumpLevelID to 0 (so can use when determining whether to force play a custom video if jumpLevelID is not 0 (when first jump flag is 3))
     lis r12,0x0                                [R_PPC_ADDR16_HA(40, 6, "loc_overrideCharactersFlag")]
@@ -168,7 +179,6 @@ loc_muAdvSelmapTask__controllProc_checkIfOverride:
     stb r10,0x0(r12)        # Set override characters flag to zero
     stb r10,0x1(r12)        # Set override character amount flag to zero
     stb r10,0x2(r12)        # Set override character amount to zero
-    stw r0, -0x4(r12)               # Store selected level clear
     stw r29, -0x8(r12)              # Store selected level
 
     lwz r5, 0x8C(r1)        # \ Get gfPadStatuses for P1 and P2
@@ -203,11 +213,12 @@ loc_setTimeAttack:
     # TODO: Also reset the colored switchs in Factory area and anywhere else it might have saved? Need to see what controls that
 loc_dontResetGreatMaze:
     ## op li r31, 0x4 (temporarily disable save prompt after quit)
-    lis r10, 0x3be0
-    ori r10, r10, 0x0004
+    lis r4, 0x3be0
+    ori r4, r4, 0x0004
     # @ IfAdvPause::main          
-    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableSavePrompt")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableSavePrompt")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableSavePrompt")]
+    addi r3, r3, 0x0                       [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableSavePrompt")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")]      
 
     lis r3,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A01D0")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A01D0")]
@@ -240,20 +251,23 @@ loc_levelCompleted:
     lwz r3,0x30(r3)     # | gameGlobal->advSaveData->levelSaveData[currentLevel].clearFlag = 2
     add r4,r3,r5        # |
     stw r11,0x4(r4)     # /
+    stw r29, 0x62C(r3)  # Set advSaveData->jumpLevelId to selected level (so selc file can be used to load roster as if save wasn't completed)
+
     # Disable autosave
     ## op nop
-    lis r10, 0x6000
+    lis r4, 0x6000
     # @ adAutoSave::create             
-    lis r12,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
-    stw r29, 0x62C(r3)  # Set advSaveData->jumpLevelId to selected level (so selc file can be used to load roster as if save wasn't completed)
+    lis r3,0x0                             [R_PPC_ADDR16_HA(0, 1, "SSEEX_tempDisableAutosaves")]
+    addi r3, r3, 0x0                       [R_PPC_ADDR16_LO(0, 1, "SSEEX_tempDisableAutosaves")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")] 
     # Disable roster data being changed upon level being beaten
     ## op b 0x220
-    lis r10, 0x4800
-    ori r10, r10, 0x0220
+    lis r4, 0x4800
+    ori r4, r4, 0x0220
     # @ sqAdventure::setNext
-    lis r12,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
-    stw r10,0x0(r12)                        [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
+    lis r3,0x0                             [R_PPC_ADDR16_HA(1, 1, "SSEEX_tempOverrideRosterChange")]
+    addi r3, r3, 0x0                       [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideRosterChange")]
+    bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")] 
 loc_dontTempMarkLevelAsIncomplete:
     lis r12,0x0                     [R_PPC_ADDR16_HA(40, 6, "loc_overrideSelectedLevelClear")]
     lwz r0, 0x0(r12)                [R_PPC_ADDR16_LO(40, 6, "loc_overrideSelectedLevelClear")]

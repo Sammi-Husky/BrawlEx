@@ -15,6 +15,7 @@
 
 # TODO: Investigate putting entirely new level markers on the map
 ## Unlock levels similar to characters detecting jumpLevelId
+## Seems to be setup in initDisp
 # TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
@@ -23,9 +24,11 @@
 ## Maybe manage custom rules in initForGameMode (apply to ftOwner)
 # TODO: Introduce Multi Man Brawl 7 player battles?
 # TODO: If '.param' is in the jump bone, then load VS stage
+## Happens in setAdventureMeleeCondition
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
 # TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
 # TODO: For coin, modify code @ 8081BC74 in All Star VS to check if user has coins and wipe if they don't (and then implement dropping coins upon death)
+# TODO: Make sublevel id above 0x1A (z) just use hex instead for the file name, make ids above 0x99 use hex in the file name
 
 .set advExSaveSize, 0xC9
 .set tempAdvExSaveSize, 0xC9
@@ -710,35 +713,40 @@ loc_muAdvSaveTask__onDecided_writeExSave:
 ##########################
 ## TODO: Should check if this is just an option in the adventure params
 loc_stAdventure2__initForGameMode_initStamina:
-    # lis r31,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
-    # lwz r31,0x0(r31)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
-    # lwz r31,0x8(r31)
-    # #li r10, 300        # \ Set startingDamage (Need to Investigate damage being reset to 0 on respawn despite having an initial startDamage (might be same thing as clear/[ftOwner] experienced with coins, look at All Star Vs)
-    # #sth r10, 0xba(r31) # /
-    # li r10, 0x1         # \ Set starting hp
-    # sth r10, 0xbc(r31)  # /
-    # li r10, 0x90        # \ Set 0x1c to 90 like in Stamina Mode
-    # stb r10, 0xB4(r31)  # /
-    # li r10, 0x1
-    # lis r12,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
-    # lwz r12,0x0(r12)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
-    # stb r10, 0x6d(r12)  # set ftManager->isStamina to True
-    # lbz r8,0xc(r31)             # \
-    # lbz r9,0xb(r31)             # |
-    # lbz r10,0x9(r31)            # |
-    # rlwinm r8,r8,0x0,0x19,0x17  # |
-    # ori r9,r9,0x20              # |
-    # rlwimi r10,r0,0x5,0x18,0x1a # |
-    # stb r8,0xc(r31)             # | Stuff taken from sqSpMelee::setupSpMelee for stamina mode
-    # rlwinm r9,r9,0x0,0x1e, 0x1c # |
-    # rlwinm r8,r10,0x0,0x1f,0x1d # |
-    # stb r9,0xb(r31)             # |
-    # stb r8,0x9(r31)             # |
-    # stw r3,0x20(r31)            # |
-    # lbz r8,0xa(r31)             # |
-    # rlwinm r8,r8,0x0,0x19,0x17  # |
-    # stb r8,0xa(r31)             # /
+    #lis r31,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
+    #lwz r31,0x0(r31)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
+    #lwz r31,0x8(r31)
+    ##li r10, 300        # \ Set startingDamage (Need to Investigate damage being reset to 0 on respawn despite having an initial startDamage (might be same thing as clear/[ftOwner] experienced with coins, look at All Star Vs)
+    ##sth r10, 0xba(r31) # /
+    #li r10, 0xA         # \ Set starting hp
+    #sth r10, 0xbc(r31)  # /
+    #li r10, 0x90        # \ Set 0x1c to 90 like in Stamina Mode
+    #stb r10, 0xB4(r31)  # /
+    #li r10, 0x1
+    #lis r12,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
+    #lwz r12,0x0(r12)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
+    ##stb r10, 0x6d(r12)  # set ftManager->isStamina to True
+    #lbz r8,0xc(r31)             # \
+    #lbz r9,0xb(r31)             # |
+    #lbz r10,0x9(r31)            # |
+    #rlwinm r8,r8,0x0,0x19,0x17  # |
+    #ori r9,r9,0x20              # |
+    #rlwimi r10,r0,0x5,0x18,0x1a # |
+    #stb r8,0xc(r31)             # | Stuff taken from sqSpMelee::setupSpMelee for stamina mode
+    #rlwinm r9,r9,0x0,0x1e, 0x1c # |
+    #rlwinm r8,r10,0x0,0x1f,0x1d # |
+    #stb r9,0xb(r31)             # |
+    #stb r8,0x9(r31)             # |
+    #stw r3,0x20(r31)            # |
+    #lbz r8,0xa(r31)             # |
+    #rlwinm r8,r8,0x0,0x19,0x17  # |
+    #stb r8,0xa(r31)             # /
     lwz r0,0x24(r1)     # Original operation
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_initializedStamina")]
 
-    
+SSEEX__patchInstruction:
+    stw r4, 0x0(r3)
+    addi r4, r3, 0x4
+    subi r3, r3, 0x4
+    b __unresolved                           [R_PPC_REL24(0, 1, "flushcache__TRK_flush_cache")]
+

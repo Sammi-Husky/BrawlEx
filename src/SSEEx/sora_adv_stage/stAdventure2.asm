@@ -3637,12 +3637,12 @@ loc_3468:
     /* 00003474: */    li r29,0x1
 loc_3478:
     /* 00003478: */    lbz r4,0x14(r4)      # playerNumber
-    /* 0000347C: */    cmpwi r30,0x0
+    /* 0000347C: */    #cmpwi r30,0x0
     /* 00003480: */    lwz r31,0x8(r7)
     /* 00003484: */    mulli r0,r4,0x5C
     /* 00003488: */    add r3,r31,r0
     /* 0000348C: */    addi r28,r3,0x98
-    /* 00003490: */    bne- loc_setFighterData #beq- loc_385C
+    /* 00003490: */    #bne- loc_setFighterData #beq- loc_385C
     cmpwi r29,0x0       # \ SSEEX: Enable all parameters to change based on difficulty (not just knockback multiplier)
     beq- loc_389C       # /
  loc_setFighterData:
@@ -3675,30 +3675,31 @@ loc_34DC:
     /* 000034F4: */    lbz r0,0x6(r27)    # ?
     /* 000034F8: */    lbz r3,0x1B(r28)
     /* 000034FC: */    rlwimi r3,r0,5,26,26
-    /* 00003500: */    stb r3,0x1B(r28)
+    /* 00003500: */    #stb r3,0x1B(r28)    # redundant
     /* 00003504: */    lbz r0,0x7(r27) # is Metal
     /* 00003508: */    rlwimi r3,r0,4,27,27
     /* 0000350C: */    rlwinm r3,r3,0,29,27
-    /* 00003510: */    stb r3,0x1B(r28)
+    /* 00003510: */    #stb r3,0x1B(r28)    # redundant
     /* 00003514: */    lbz r0,0x9(r27) # is Spycloak
     /* 00003518: */    rlwimi r3,r0,2,29,29
-    /* 0000351C: */    stb r3,0x1B(r28)
+    /* 0000351C: */    #stb r3,0x1B(r28)     # redundant
     /* 00003520: */    lbz r0,0xA(r27)  # is Low Gravity   # TODO? Have more options for gravity
     /* 00003524: */    rlwimi r3,r0,1,30,30
     /* 00003528: */    rlwinm. r0,r3,31,31,31
-    /* 0000352C: */    stb r3,0x1B(r28)
+    /* 0000352C: */    #stb r3,0x1B(r28)    # redundant
     /* 00003530: */    beq- loc_3540
-    /* 00003534: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_60")]
-    /* 00003538: */    lfs f0,0x0(r3)                           [R_PPC_ADDR16_LO(40, 4, "loc_60")]
+    /* 00003534: */    lis r10,0x0                               [R_PPC_ADDR16_HA(40, 4, "loc_60")]
+    /* 00003538: */    lfs f0,0x0(r10)                           [R_PPC_ADDR16_LO(40, 4, "loc_60")]
     /* 0000353C: */    stfs f0,0x48(r28)
     # TODO: Can probs cram more options like Spicy Curry/Reflector with abusing bitflags, 0xC doesn't seem used for anything, same with 0x16?
-    # TODO: Check if this works with p1/p2, if not make it work, maybe as an external file calling this
+    # TODO: Check if this works with p1/p2 (also need to not increment stAdventure2->numPlayers, enable it even on non vs fighter as well probs not add to trigger), if not make it work, maybe as an external file calling this
+    ## Seems to just replace p1 as cpu, so need option to not make it do that
     # TODO: Check if random is supported, support if it is not
 loc_3540:
-    /* 00003540: */    lbz r3,0xB(r27)                  # \
-    /* 00003544: */    lbz r0,0x1B(r28)
-    /* 00003548: */    rlwimi r0,r3,0,31,31
-    /* 0000354C: */    stb r0,0x1B(r28)
+    /* 00003540: */    lbz r4,0xB(r27) #lbz r3,0xB(r27) # \
+    /* 00003544: */    #lbz r0,0x1B(r28)
+    /* 00003548: */    rlwimi r3,r4,0,31,31 #rlwimi r0,r3,0,31,31
+    /* 0000354C: */    stb r3,0x1B(r28) #stb r0,0x1B(r28)
     /* 00003550: */    lbz r3,0xB(r27)                  # / is NoVoice
     /* 00003554: */    neg r0,r3
     /* 00003558: */    or r0,r0,r3
@@ -3706,25 +3707,27 @@ loc_3540:
     /* 00003560: */    stb r0,0x1A(r28)
     /* 00003564: */    lbz r0,0x10(r27)                 # Use stamina health
     /* 00003568: */    lbz r3,0x1C(r28)
+    srawi r6, r0, 1     
     /* 0000356C: */    rlwimi r3,r0,7,24,24
-    /* 00003570: */    stb r3,0x1C(r28)
+    /* 00003570: */    #stb r3,0x1C(r28)        # redundant
     /* 00003574: */    lbz r0,0x11(r27)         # ?
     /* 00003578: */    rlwimi r3,r0,6,25,25
-    /* 0000357C: */    rlwinm r0,r3,0,27,25
-    /* 00003580: */    stb r0,0x1C(r28)
+    /* 0000357C: */    #rlwinm r0,r3,0,27,25    # \ redundant
+    /* 00003580: */    #stb r0,0x1C(r28)        # /
     /* 00003584: */    rlwinm r0,r3,0,28,25
     /* 00003588: */    lbz r4,0xD(r27)          # ?
-    /* 0000358C: */    lbz r3,0x1D(r28)
-    /* 00003590: */    rlwimi r3,r4,7,24,24
-    /* 00003594: */    ori r4,r3,0x40
-    /* 00003598: */    stb r4,0x1D(r28)
+    /* 0000358C: */    lbz r3,0x1D(r28)       
+    /* 00003590: */    rlwimi r3,r4,7,24,24   
+    /* 00003594: */    ori r4,r3,0x40           
+    /* 00003598: */    #stb r4,0x1D(r28)        # redundant
     /* 0000359C: */    lbz r3,0xF(r27)          # ?
     /* 000035A0: */    rlwimi r4,r3,5,26,26
     /* 000035A4: */    stb r4,0x1D(r28)
+    or r0, r0, r6       # Get other bits to support isRabbitCap, isFlower, isCurry, isRelector (shift right first)
     /* 000035A8: */    stb r0,0x1C(r28)
     /* 000035AC: */    lbz r0,0x14(r27)         # ?
     /* 000035B0: */    stb r0,0x2(r28)
-    /* 000035B4: */    li r0, 0x1 # lbz r0,0x15(r27)     # \ CostumeType: Normal/isDark/isFake
+    /* 000035B4: */    lbz r0,0x15(r27)     # \ CostumeType: Normal/isDark/isFake
     /* 000035B8: */    cmplwi r0,0x1
     /* 000035BC: */    bne- loc_35D8
     /* 000035C0: */    lbz r0,0x1D(r28)
@@ -3734,7 +3737,7 @@ loc_3540:
     /* 000035D0: */    ori r0,r0,0x8
     /* 000035D4: */    stb r0,0x1B(r28)
 loc_35D8:
-    /* 000035D8: */    li r0, 0x1 #lbz r0,0x15(r27)     # /
+    /* 000035D8: */    lbz r0,0x15(r27)     # /
     /* 000035DC: */    cmplwi r0,0x2
     /* 000035E0: */    bne- loc_35F0
     /* 000035E4: */    lbz r0,0x1D(r28)
@@ -3749,7 +3752,7 @@ loc_35F0:
     /* 00003604: */    sth r0,0x26(r28)
     /* 00003608: */    lfs f0,0x2C(r27)
     /* 0000360C: */    stfs f0,0x40(r28)
-    /* 00003610: */    lbz r0,0x5(r27)
+    /* 00003610: */    lbz r0,0x5(r27)      # isTeamMember (TODO: Allow other teams, make second digit the team number)
     /* 00003614: */    cmpwi r0,0x0
     /* 00003618: */    bne- loc_3628
     /* 0000361C: */    li r0,0x1
@@ -3912,7 +3915,7 @@ loc_37DC:
     /* 0000384C: */    bl __unresolved                          [R_PPC_REL24(27, 1, "stTrigger__setPluralTrigger")]
 loc_3850:
     /* 00003850: */    lbz r3,0x590(r26)
-    /* 00003854: */    addi r0,r3,0x1
+    /* 00003854: */    addi r0,r3,0x1       
     /* 00003858: */    stb r0,0x590(r26)
 loc_385C:
     /* 0000385C: */    #cmpwi r30,0x0
@@ -3942,6 +3945,18 @@ loc_389C:
     /* 000038B4: */    blr
     nop 
     nop
+    nop
+    nop 
+    nop
+    nop
+    nop
+    nop 
+    nop
+    nop
+
+    nop
+
+    # +11
 GameGlobal__getGlobalVsMeleeCondition:
     /* 000038B8: */    lwz r3,0x8(r3)
     /* 000038BC: */    blr
@@ -7215,6 +7230,7 @@ loc_67FC:
     /* 00006828: */    lwz r4,0x524(r31)
     /* 0000682C: */    cmpwi r4,0x0
     /* 00006830: */    beq- loc_6840
+    # TODO: Have special time limit settings e.g. -1, -2. -1 continue timer from last stage, -2 freeze timer
     /* 00006834: */    lwz r0,0xF0(r3)
     /* 00006838: */    mulli r0,r0,0x3C
     /* 0000683C: */    stw r0,0x61C(r4)
