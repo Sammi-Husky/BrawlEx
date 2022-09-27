@@ -589,7 +589,9 @@ loc_overrideMemberAmountFinished:
     blt+ loc_notCoop                        # | Subtract 1 if coop since coop selects one less for P1
     subi r27, r27, 0x1                        # |
 loc_notCoop:                                # /
-    stb r27, muAdvSelchrCTask_desiredNumMembersToSelect(r3)
+    stb r27, muAdvSelchrCTask_desiredNumMembersToSelect(r31)
+    mr r3, r31
+    mr r4, r29
     /* 0003E448: */    bl muAdvSelchrCTask__setMenuData
 
     /* 0003E450: */    li r3,0x0
@@ -3236,10 +3238,8 @@ loc_4010C:
     /* 0004011C: */    addi r1,r1,0x60
     /* 00040120: */    blr
     
-    nop
-    nop
-
-    # +2
+    #nop
+    # +0
 muAdvSelchrCTask__moveCharCursor:
     /* 00040124: */    stwu r1,-0x20(r1)
     /* 00040128: */    mflr r0

@@ -419,17 +419,17 @@ loc_stepJumpIdCSSIdUnlockCriteria:
         .4byte 0x00000000       # 0x2A
         .4byte 0x00000000       # 0x2B
         .4byte 0x00000000       # 0x2C
-        .4byte 0x28900104       # 0x2D - Roy
-        .4byte 0x00000000       # 0x2E - Mewtwo
-        .4byte 0x00000001       # 0x2F - Knuckles
+        .4byte 0x00000002       # 0x2D - Roy
+        .4byte 0x00000002       # 0x2E - Mewtwo
+        .4byte 0x00000002       # 0x2F - Knuckles
         .4byte 0x00000002       # 0x30 - Giga Bowser
         .4byte 0x00000000       # 0x31
         .4byte 0x00000002       # 0x32 - Ridley
-        .4byte 0x00000000       # 0x33 - Waluigi
+        .4byte 0x00000002       # 0x33 - Waluigi
         .4byte 0x00000000       # 0x34
-        .4byte 0x00000000       # 0x35 - Warioman
+        .4byte 0x00000002       # 0x35 - Warioman
         .4byte 0x00000000       # 0x36
-        .4byte 0x00000000       # 0x37 - Sopo
+        .4byte 0x00000001       # 0x37 - Sopo
         .4byte 0x00000000       # 0x38
         .4byte 0x00000000       # 0x39
         .4byte 0x00000000       # 0x3A
@@ -618,6 +618,7 @@ loc_stepJumpIdCSSIdUnlockCriteria:
         .4byte 0x00000000       # 0xF1
         .4byte 0x00000000       # 0xF2
 
+# TODO: Silent always unlock option
 # TODO: Allow picking up trophy as an unlock criteria based on trophy id 
 ## stActTriggerCreateItem
 ## Make Trophy always appear by modifying TriggerData (0xC) in GITM to 0x00000100

@@ -6,7 +6,7 @@ loc_slotTrophyIds:
         .4byte 0x00000001      # 0x36
         .4byte 0x00000001      # 0x37
         .4byte 0x00000184      # 0x38 - Ridley
-        .4byte 0x00000001      # 0x39
+        .4byte 0x000000FF      # 0x39 - Waluigi
         .4byte 0x00000001      # 0x3A
         .4byte 0x00000001      # 0x3B
         .4byte 0x00000001      # 0x3C
