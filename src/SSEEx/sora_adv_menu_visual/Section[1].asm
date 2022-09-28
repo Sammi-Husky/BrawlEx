@@ -713,7 +713,6 @@ loc_9F4:
     addi r3, r3, 0x0                      [R_PPC_ADDR16_LO(1, 1, "SSEEX_tempOverrideAddStocks")]
     bl __unresolved                        [R_PPC_REL24(40, 7, "SSEEX__patchInstruction")] 
 
-    stw r10,0x0(r12)                       
     lwz r0, 0x36C(r25)
     cmpwi r0, 0x0
     beq+ loc_normalTable
