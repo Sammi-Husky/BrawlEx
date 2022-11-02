@@ -29,6 +29,9 @@
 # TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
 # TODO: For coin, modify code @ 8081BC74 in All Star VS to check if user has coins and wipe if they don't (and then implement dropping coins upon death)
 # TODO: Make sublevel id above 0x1A (z) just use hex instead for the file name, make ids above 0x99 use hex in the file name
+# TODO: Investigate Wii crashing issues
+# TODO: Make door not be able to entered by putting requirements in potentially unused door, investigate three pin door
+
 
 .set advExSaveSize, 0xC9
 .set tempAdvExSaveSize, 0xC9
@@ -61,6 +64,8 @@ loc_stAdventure2__changeStep_updateOnFrame:
     mr r31,r3               # Original operation
     lis r26,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A0320")]
     lwz r26,0x0(r26)                          [R_PPC_ADDR16_LO(0, 11, "loc_805A0320")]
+    cmpwi r26, 0x0                  # \ Check if IfAdvMngr is null
+    beq- loc_dontDisplayNumCoins    # /
     lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_timeAttackDecrementer")]
     lbz r12, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_timeAttackDecrementer")]
     lwz r10, 0x4910(r28)            # \
