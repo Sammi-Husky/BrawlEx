@@ -1008,92 +1008,25 @@ loc_E80:
         .4byte 0x00000000
 loc_E84:
         .4byte 0x3F800000
-loc_E88:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_E90:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_E98:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EA0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EA8:
-        .4byte 0x3C8EFA35
-loc_EAC:
-        .4byte 0x00000000
-loc_EB0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EB8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EC0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EC8:
-        .4byte 0x3F800000
-loc_ECC:
-        .4byte 0x00000000
-loc_ED0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_ED8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EE0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EE8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_EF0:
-        .4byte 0x00000000
-loc_EF4:
-        .4byte 0x3F800000
-loc_EF8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_F00:
-        .4byte 0x42B40000
-        .4byte 0x00000000
-loc_F08:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_F10:
-        .4byte 0x00000000
-        .4byte 0xBD23D70A
-        .4byte 0x3E4CCCCD
-        .4byte 0x00000000
-loc_F20:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_F28:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_F30:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_F38:
-        .4byte 0x00000000
-        .4byte 0x3C8EFA35
-        .4byte 0x3F800000
-        .4byte 0x3FC90FDB
-        .4byte 0x40000000
-        .4byte 0x3727C5AC
-        .4byte 0x00800000
-        .4byte 0x3C23D70A
-        .4byte 0xC0490FDB
-        .4byte 0x40C90FDB
-        .4byte 0x40490FDB
-        .4byte 0xBF800000
-        .4byte 0x43300000
-        .4byte 0x00000000
-loc_F70:
-        .4byte 0x00000000
-        .4byte 0x00000000
+
+.include "./Enemies/rodata/emBoobas.asm"
+.include "./Enemies/rodata/emSiralamos.asm"
+.include "./Enemies/rodata/emRoada.asm"
+.include "./Enemies/rodata/emKiller.asm"
+.include "./Enemies/rodata/emPopperam.asm"
+.include "./Enemies/rodata/emPacci.asm"
+.include "./Enemies/rodata/emJyakeel.asm"
+.include "./Enemies/rodata/emAroaros.asm"
+.include "./Enemies/rodata/emCymal.asm"
+.include "./Enemies/rodata/emDeathpod.asm"
+.include "./Enemies/rodata/emDekakuribo.asm"
+.include "./Enemies/rodata/emBucyulus.asm"
+.include "./Enemies/rodata/emBotron.asm"
+.include "./Enemies/rodata/emGyraan.asm"
+.include "./Enemies/rodata/emMite.asm"
+.include "./Enemies/rodata/emPrim.asm"
+.include "./Enemies/rodata/emCataguard.asm"
+
 loc_F78:
         .4byte 0x3C8EFA35
         .4byte 0x3F900000
@@ -1160,164 +1093,38 @@ loc_102C:
 loc_1030:
         .4byte 0xBF800000
         .4byte 0x00000000
-loc_1038:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1040:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1048:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1050:
-        .4byte 0x43300000
-        .4byte 0x80000000
-loc_1058:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1060:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1068:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1070:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1078:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1080:
-        .4byte 0x00000000
-loc_1084:
-        .4byte 0x42B40000
-loc_1088:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1090:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1098:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10A0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10A8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10B0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10B8:
-        .4byte 0x40000000
-loc_10BC:
-        .4byte 0x00000000
-loc_10C0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10C8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10D0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10D8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10E0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10E8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10F0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_10F8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1100:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1108:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1110:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1118:
-        .4byte 0x42C80000
-        .4byte 0x3F800000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1128:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1130:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1138:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1140:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1148:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1150:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1158:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1160:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1168:
-        .4byte 0xBF800000
-        .4byte 0x3F800000
-        .4byte 0x3C8EFA35
-loc_1174:
-        .4byte 0x00000000
-loc_1178:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1180:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1188:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1190:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_1198:
-        .4byte 0x3C8EFA35
-loc_119C:
-        .4byte 0x3F800000
-loc_11A0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_11A8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_11B0:
-        .4byte 0x00000000
-loc_11B4:
-        .4byte 0x3F800000
-loc_11B8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_11C0:
-        .4byte 0x00000000
-loc_11C4:
-        .4byte 0x3F800000
-loc_11C8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_11D0:
-        .4byte 0x00000000
-loc_bytanScoreTimeAttackMultiplier:
-        .float 0.25
+
+
+.include "./Enemies/rodata/emKuribo.asm"
+.include "./Enemies/rodata/emFlows.asm"
+.include "./Enemies/rodata/emTautau.asm"
+.include "./Enemies/rodata/emShelly.asm"
+.include "./Enemies/rodata/emTeckin.asm"
+.include "./Enemies/rodata/emSpar.asm"
+.include "./Enemies/rodata/emHammerbros.asm"
+.include "./Enemies/rodata/emKokkon.asm"
+.include "./Enemies/rodata/emBombhead.asm"
+.include "./Enemies/rodata/emNgagog.asm"
+.include "./Enemies/rodata/emFaulong.asm"
+.include "./Enemies/rodata/emBitan.asm"
+.include "./Enemies/rodata/emPatapata.asm"
+.include "./Enemies/rodata/emJdus.asm"
+.include "./Enemies/rodata/emGhamgha.asm"
+.include "./Enemies/rodata/emRobobeam.asm"
+.include "./Enemies/rodata/emRobodistance.asm"
+.include "./Enemies/rodata/emRobohoming.asm"
+.include "./Enemies/rodata/emRobopunch.asm"
+.include "./Enemies/rodata/emArman.asm"
+.include "./Enemies/rodata/emGalfire.asm"
+.include "./Enemies/rodata/emBosspackun.asm"
+.include "./Enemies/rodata/emGhamghabase.asm"
+.include "./Enemies/rodata/emGalleom.asm"
+.include "./Enemies/rodata/emRidley.asm"
+.include "./Enemies/rodata/emRayquaza.asm"
+.include "./Enemies/rodata/emDuon.asm"
+.include "./Enemies/rodata/emPorky.asm"
+.include "./Enemies/rodata/emMetaridley.asm"
+.include "./Enemies/rodata/emFalconflyer.asm"
+.include "./Enemies/rodata/emTaboo.asm"
+.include "./Enemies/rodata/emMasterhand.asm"
+.include "./Enemies/rodata/emCrazyhand.asm"
