@@ -214,160 +214,25 @@ loc_298:
         .4byte 0x00000000
 loc_2A4:
         .4byte 0x00000000
-loc_2A8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_2B4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_2C0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_2CC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_2D8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_2E4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_2F0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_2FC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_308:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_310:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_318:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_324:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_330:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_33C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_348:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_354:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_360:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_368:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_370:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_37C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_388:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_394:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3A0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3AC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3B8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3C4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3D0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3DC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3E8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_3F4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_400:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_408:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_410:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_41C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_428:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_434:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_440:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_44C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_458:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_464:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
+
+.include "./Enemies/bss/emBoobas.asm"
+.include "./Enemies/bss/emSiralamos.asm"
+.include "./Enemies/bss/emRoada.asm"
+.include "./Enemies/bss/emKiller.asm"
+.include "./Enemies/bss/emPopperam.asm"
+.include "./Enemies/bss/emPacci.asm"
+.include "./Enemies/bss/emJyakeel.asm"
+.include "./Enemies/bss/emAroaros.asm"
+.include "./Enemies/bss/emCymal.asm"
+.include "./Enemies/bss/emDeathpod.asm"
+.include "./Enemies/bss/emDekakuribo.asm"
+.include "./Enemies/bss/emBucyulus.asm"
+.include "./Enemies/bss/emBotron.asm"
+.include "./Enemies/bss/emGyraan.asm"
+.include "./Enemies/bss/emMite.asm"
+.include "./Enemies/bss/emPrim.asm"
+.include "./Enemies/bss/emCataguard.asm"
+
 loc_470:
         .4byte 0x00000000
         .4byte 0x00000000
@@ -422,273 +287,37 @@ loc_504:
         .4byte 0x00000000
         .4byte 0x00000000
         .4byte 0x00000000
-loc_538:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_544:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_550:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_55C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_568:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_574:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_580:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_58C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_598:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5A4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5B0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5BC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5C8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5D4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5E0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5EC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_5F8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_604:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_610:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_61C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_628:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_634:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_640:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_64C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_658:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_660:
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_668:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_674:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_680:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_68C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_698:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6A4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6B0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6BC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6C8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6D4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6E0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6EC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_6F8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_704:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_710:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_71C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_728:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_734:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_740:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_74C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_758:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_764:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_770:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_77C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_788:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_794:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7A0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7AC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7B8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7C4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7D0:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7DC:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7E8:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_7F4:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_800:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_80C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_818:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_824:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_830:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_83C:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_848:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
-loc_854:
-        .4byte 0x00000000
-        .4byte 0x00000000
-        .4byte 0x00000000
+
+.include "./Enemies/bss/emKuribo.asm"
+.include "./Enemies/bss/emFlows.asm"
+.include "./Enemies/bss/emTautau.asm"
+.include "./Enemies/bss/emShelly.asm"
+.include "./Enemies/bss/emTeckin.asm"
+.include "./Enemies/bss/emSpar.asm"
+.include "./Enemies/bss/emHammerbros.asm"
+.include "./Enemies/bss/emKokkon.asm"
+.include "./Enemies/bss/emBombhead.asm"
+.include "./Enemies/bss/emNgagog.asm"
+.include "./Enemies/bss/emFaulong.asm"
+.include "./Enemies/bss/emBitan.asm"
+.include "./Enemies/bss/emPatapata.asm"
+.include "./Enemies/bss/emJdus.asm"
+.include "./Enemies/bss/emGhamgha.asm"
+.include "./Enemies/bss/emRobobeam.asm"
+.include "./Enemies/bss/emRobodistance.asm"
+.include "./Enemies/bss/emRobohoming.asm"
+.include "./Enemies/bss/emRobopunch.asm"
+.include "./Enemies/bss/emArman.asm"
+.include "./Enemies/bss/emGalfire.asm"
+.include "./Enemies/bss/emBosspackun.asm"
+.include "./Enemies/bss/emGhamghabase.asm"
+.include "./Enemies/bss/emGalleom.asm"
+.include "./Enemies/bss/emRidley.asm"
+.include "./Enemies/bss/emRayquaza.asm"
+.include "./Enemies/bss/emDuon.asm"
+.include "./Enemies/bss/emPorky.asm"
+.include "./Enemies/bss/emMetaridley.asm"
+.include "./Enemies/bss/emFalconflyer.asm"
+.include "./Enemies/bss/emTaboo.asm"
+.include "./Enemies/bss/emMasterhand.asm"
+.include "./Enemies/bss/emCrazyhand.asm"
