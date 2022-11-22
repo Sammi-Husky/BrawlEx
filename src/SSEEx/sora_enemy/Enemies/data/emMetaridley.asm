@@ -1341,3 +1341,30 @@ loc_1C78C:
         .4byte 0x6F756368
         .4byte 0x47726F75
         .4byte 0x6E642020
+loc_1C7BC:
+        .4byte 0x0A006361
+        .4byte 0x6C6C2077
+        .4byte 0x6E656D4D
+        .4byte 0x65746172
+        .4byte 0x69646C65
+        .4byte 0x7950726F
+        .4byte 0x633A3A4E
+        .4byte 0x6F726D61
+        .4byte 0x6C42756C
+        .4byte 0x6C657446
+        .4byte 0x6C792020
+loc_1C7E8:
+        .4byte 0x0A006361
+        .4byte 0x6C6C2077
+        .4byte 0x6E656D4D
+        .4byte 0x65746172
+        .4byte 0x69646C65
+        .4byte 0x7950726F
+        .4byte 0x633A3A4E
+        .4byte 0x6F726D61
+        .4byte 0x6C42756C
+        .4byte 0x6C657444
+        .4byte 0x69736170
+        .4byte 0x70656172
+        .4byte 0x20200A00
+        .4byte 0x00000000

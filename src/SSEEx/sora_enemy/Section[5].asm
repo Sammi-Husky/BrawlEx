@@ -8295,35 +8295,6 @@ loc_ED0C:
 .include "./Enemies/data/emDuon.asm"
 .include "./Enemies/data/emPorky.asm"
 .include "./Enemies/data/emMetaridley.asm"
-
-loc_1C7BC:
-        .4byte 0x0A006361
-        .4byte 0x6C6C2077
-        .4byte 0x6E656D4D
-        .4byte 0x65746172
-        .4byte 0x69646C65
-        .4byte 0x7950726F
-        .4byte 0x633A3A4E
-        .4byte 0x6F726D61
-        .4byte 0x6C42756C
-        .4byte 0x6C657446
-        .4byte 0x6C792020
-loc_1C7E8:
-        .4byte 0x0A006361
-        .4byte 0x6C6C2077
-        .4byte 0x6E656D4D
-        .4byte 0x65746172
-        .4byte 0x69646C65
-        .4byte 0x7950726F
-        .4byte 0x633A3A4E
-        .4byte 0x6F726D61
-        .4byte 0x6C42756C
-        .4byte 0x6C657444
-        .4byte 0x69736170
-        .4byte 0x70656172
-        .4byte 0x20200A00
-        .4byte 0x00000000
-
 .include "./Enemies/data/emFalconflyer.asm"
 .include "./Enemies/data/emTaboo.asm"
 .include "./Enemies/data/emMasterhand.asm"
