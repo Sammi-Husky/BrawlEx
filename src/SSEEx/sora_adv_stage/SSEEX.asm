@@ -124,13 +124,13 @@ loc_dontDisplaySpeedrunTimer:
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     li r4, 0x1                      # \
     bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryId")]
+    cmpwi r3, -1                    # |
+    beq- loc_dontGetP2Coins         # |
     mr r4, r3                       # |
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getOwner")]
     lwz r4, 0x0(r3)                 # | Get number of coins from P2
-    cmpwi r4, -1                    # |
-    beq- loc_dontGetP2Coins         # |
     lwz r9, 0x5c(r4)                # /
     li r10, 0x0                     # \ Set p2 coins to 0
     stw r10, 0x5c(r4)               # /
@@ -142,13 +142,13 @@ loc_dontGetP2Coins:
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     li r4, 0x0                      # \
     bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getEntryId")]
+    cmpwi r3, -1                    # |
+    beq- loc_dontDisplayNumCoins    # |
     mr r4, r3                       # |
     lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]
     bl __unresolved                          [R_PPC_REL24(27, 1, "ftManager__getOwner")]
     lwz r10, 0x0(r3)                # | Get number of coins from P1
-    cmpwi r10, -1                   # |
-    beq- loc_dontDisplayNumCoins    # |
     lwz r4, 0x5c(r10)               # /
     add r4, r4, r29                 # \ Add P2 coins to P1
     stw r4, 0x5c(r10)               # /
@@ -751,7 +751,7 @@ loc_stAdventure2__initForGameMode_initStamina:
 
 SSEEX__patchInstruction:
     stw r4, 0x0(r3)
-    addi r4, r3, 0x4
+    li r4, 0x8
     subi r3, r3, 0x4
     b __unresolved                           [R_PPC_REL24(0, 1, "flushcache__TRK_flush_cache")]
 
