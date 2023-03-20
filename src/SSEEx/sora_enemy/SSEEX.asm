@@ -23,6 +23,11 @@ loc_emDamageModuleImpl__getDamageAngle_passConnectedHitboxForSpecialAngles:
     lwz r8, 0x10(r1)
     b __unresolved                          [R_PPC_REL24(41, 1, "loc_passExtraParamForGetDamageAngleFinished")]
 
+loc_wnemSimple__notifyEventOnDamage_passConnectedHitboxForSpecialAngles:
+    li r7,0x0                # Original operation
+    mr r8, r28
+    b __unresolved                          [R_PPC_REL24(41, 1, "loc_passExtraParamForNotifyEventOnDamageFinished")]
+
 
 ## Apply multiplier if Time Attack
 loc_emBitan__getScore_applyTimeAttackMultiplier:
