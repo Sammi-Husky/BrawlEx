@@ -330,9 +330,9 @@ notVariant:
 }
 
 
-byte 0x2f @ $80B5251F // add '/' before "%s/%s/%s/%s%s%02dBrres.%s"
-byte 0x2f @ $80B5253B // add '/' before "%s/%s/%s/%s%sBrres.%s"
-byte 0x2f @ $80B5256B // add '/' before "%s/%s/%s/%s%sParam.%s"
+byte 0x2f @ $80B5251F # add '/' before "%s/%s/%s/%s%s%02dBrres.%s"
+byte 0x2f @ $80B5253B # add '/' before "%s/%s/%s/%s%sBrres.%s"
+byte 0x2f @ $80B5256B # add '/' before "%s/%s/%s/%s%sParam.%s"
 
 # Fetch alternate item brres path (i.e. for Pokemon and Assist Trophies)
 HOOK @ $809af180
@@ -504,9 +504,9 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 
 
 
-## TODO: Or alternatively load based on txt in stage file, probs would be better!! But even better is using stage param
-
+## TODO: Or alternatively load based on txt in stage file
 # TODO: Investigate laggy entrance
+## TODO: Keep track of current set loaded, only deload/load if it's different
 # TODO: Investigate item gen for Pokemon, stage item gen seems to ignore it
 # TODO: Shiny pokemon?
 # TODO: Random sets?
@@ -561,7 +561,7 @@ HOOK @ $8084e8d8    # ftDataProvider::reqItem
     slwi r10, r10, 16   # | variant += ftSlotNo*0x10000
     add r5, r5, r10     # /
     li r4, 0x4B     # itKind - SideStepper
-} // TODO: Pass costume id as last parameter
+} # TODO: Pass costume id as last parameter
 
 
 HOOK @ $809bca28    # itArchive::__ct
@@ -616,6 +616,7 @@ HOOK @ $80827a80    # ftSlot::exit
     %call (itManager__removeItemAllTempArchive)
     li r0, -1   # Original operation
 }
+# TODO: Unload when exiting CSS 
 HOOK @ $809b69f4 # itManager::removeItemAllTempArchive
 {
     mr r29, r3      # Original operation
@@ -630,7 +631,7 @@ HOOK @ $809b6a44 # itManager::removeItemAllTempArchive
     cmpwi r12, 18       # /
     blt+ end
     li r10, 0           # removeItem = false
-    lwz r11, 0x8DC(r3)  # \ 
+    lwz r11, 0x8DC(r4)  # \ 
     lwz r11, 0x0(r11)   # | Check if itArchiveType == item->itArchive->itArchiveType
     cmpw r12, r11       # |
     bne+ end            # /
@@ -639,10 +640,10 @@ HOOK @ $809b6a44 # itManager::removeItemAllTempArchive
 end:
     cmpwi r10, 1
 }
-op bne+ 0x4 @ $809b6a48
+op bne+ 0x8 @ $809b6a48
 op lwz r4, 0x8(r1) @ $809b6a8c  
 
-// TODO: Pass in extra parameter for removeItemAllTempArchive in stAdventure2::clearHeap
+# TODO: Pass in extra parameter for removeItemAllTempArchive in stAdventure2::clearHeap
 
 HOOK @ $807c3230    # soItemManageModuleImpl::haveItem
 {
@@ -679,6 +680,7 @@ CODE @ $809b15e4    # itManager::createBaseItem
     cmpwi r0, 8  # \ If stage item then don't set itKind to -3 so it can check if archive exists
     bge- 0x1C    # /
 }
+
 
 ## Adding new Pokemon/Assist Trophy notes
 # Do it based on variants
