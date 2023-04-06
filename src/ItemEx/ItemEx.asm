@@ -434,8 +434,7 @@ op b 0xB0 @ $809af154   # Skip to formulate ItmParam
 .macro buildFighterItemPath()
 {
     %lwi (r6, 0x80B08850)   # "Fighter"
-    subi r12, r17, 0x200    # \ variant -= 0x200
-    rlwinm r12,r12,28,20,31 # / (variant & 0xFFFF) / 0x10 to get ftKind
+    mr r12, r19             # Get ftKind from fourth parameter (TODO: Process out costume id)
     %lwi (r11, 0x817CD820)  # Internal BrawlEX internal fighter names
     mulli r12, r12, 0x10    # Offsets are 0x10 apart
     add r7, r11, r12        # r7 now contains a pointer to the character filename when using P+EX
@@ -445,13 +444,13 @@ op b 0xB0 @ $809af154   # Skip to formulate ItmParam
 }
 CODE @ $809af148
 {
-    cmpwi r17, 0x200    # \
-    bge+ 0xc            # / Check if variant id is in character specific range
+    cmplwi r17, 0xFFFF  # \
+    bgt+ 0xc            # / Check if variant id is in character specific range
 }
 HOOK @ $809af158
 {
-    rlwinm r12,r17,0,23,31  # \ (variant id & 0xFFFF) % 0x200 to get character item subvariant
-    stw r12, 0x8(r1)        # /
+    andi. r12,r17,0xFF00  # \ variant id & 0xFF00 to get character item subvariant
+    stw r12, 0x8(r1)      # /
     addi r12, r31, 6769     # \
     stw r12, 0xc(r1)        # / "Brres"
     stw r14, 0x14(r1)       # ".pac"
@@ -505,6 +504,7 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 
 
 ## TODO: Or alternatively load based on txt in stage file
+### Can have a field for regular items and Pokemon/Assist
 # TODO: Investigate laggy entrance
 ## TODO: Keep track of current set loaded, only deload/load if it's different
 # TODO: Investigate item gen for Pokemon, stage item gen seems to ignore it
@@ -512,14 +512,16 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 # TODO: Random sets?
 
 ## Character Specific Items notes:
-# Uses variant id ranges past 0x200, variant id 0x200-0x20F for Mario and so on (use Unknown24 in misc psa data to define which items to preload). 
-## itKind is set to 0x4B (Sidestepper) because stage items have more freedom
+# Uses variant id ranges past 0x1000, (use Unknown24 in misc psa data to define which items to preload). 
+## 0x1XYY (X - subvariant with first must be 0, Y - itKind to clone)
+## Internally itKind is set to 0x4B (Sidestepper) because stage items have more freedom
 ## ftSlot id * 0x10000 is added to variant id to differentiate archives between same fighters using different slots
 # Searches for /fighter/item/Itm<Fighter><subvariantid>Brres<costumeid>.pac, /fighter/item/Itm<Fighter><subvariantid>Param.pac, /fighter/item/Itm<Fighter>Param.pac
 ## Itm<Fighter>Param.pac attribute index is based on subvariant id (i.e 0-15)
 ## Loads on ftSlot::pushItem, deloads on ftSlot::exit
 ## TODO: Take over fighter->standyAdvFollow virtual function by passing parameters just like getItemPac
 ### Use itArchiveType to determine which fighter modules itCustomizer to use
+# TODO: Kirby support
 
 op b 0xb4 @ $8084ea44   # skip preloading in ftDataProvider::comp (later can probs deload items here)
 op b 0x84 @ $8084e67c   # skip preloading in ftDataProvider:isFinish      
@@ -539,74 +541,74 @@ HOOK @ $8084e854    # ftDataProvider::reqItem
 HOOK @ $8084e8b0    # ftDataProvider::reqItem
 {
     lwzx r4, r4, r29    # Original operation
-    cmpwi r4, 0x200     # Check if 0x200 or greater for character specific items
-    blt- %end%
-    lhz r5, 0xA(r1)    # \
-    mulli r5, r5, 0x10  # | variant += ftKind*0x10
-    add r5, r5, r4      # /
+    cmplwi r4, 0xFFFF   # Check if 0x10000 or greater for character specific items
+    ble- %end%
     lhz r10, 0x8(r1)    # \
-    slwi r10, r10, 16   # | variant += ftSlotNo*0x10000
-    add r5, r5, r10     # /
+    slwi r10, r10, 20   # | variant = itKind + ftSlotNo*0x100000
+    add r5, r4, r10     # /
     li r4, 0x4B     # itKind - SideStepper
 }
 HOOK @ $8084e8d8    # ftDataProvider::reqItem
 {
     lwzx r4, r4, r29    # Original operation
-    cmpwi r4, 0x200     # Check if 0x200 or greater for character specific items
-    blt- %end%
-    lhz r5, 0xA(r1)     # \
-    mulli r5, r5, 0x10  # | variant = ftKind*0x10
-    add r5, r5, r4      # variant += itKind
+    cmplwi r4, 0xFFFF   # Check if 0x10000 or greater for character specific items
+    ble- %end%
     lhz r10, 0x8(r1)    # \
-    slwi r10, r10, 16   # | variant += ftSlotNo*0x10000
-    add r5, r5, r10     # /
+    slwi r10, r10, 20   # | variant = itKind + ftSlotNo*0x100000
+    add r5, r4, r10     # /
+    lhz r7, 0xA(r1)     # Pass in ftKind as last parameter
     li r4, 0x4B     # itKind - SideStepper
-} # TODO: Pass costume id as last parameter
-
+} # TODO: Pass costume id + ftKind as last parameter
 
 HOOK @ $809bca28    # itArchive::__ct
 {
     lwz	r4, 0x1C(r25)   # Original operation
     lwz r12, 0xc(r25)   # \
-    cmpwi r12, 0x200    # / Check if variant id is in character specific item range
-    blt- %end%          # /
-    srawi r12, r12, 16    # \ itArchiveType = variant / 0x10000 + 18
+    cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
+    ble- %end%          # /
+    srawi r12, r12, 20    # \ itArchiveType = variant / 0x100000 + 18
     addi r29, r12, 18     # | Store HeapType as itArchiveType (to be able to clear character specific items)
     stw r29, 0x0(r25)    # /
     li r31, 0xA         # Set ItemGroup to an unused value
 }
 
-.macro forceArchiveCloneIfFighterSpecificArchive()
-{
-    li r6, 0    # Force clone = false
-    lwz r12, 0x0(r25)   # \
-    cmpwi r12, 18       # | Check if itArchiveType >= 18
-    blt+ %end%          # /
-    li r6, 1    # Force clone = true
-}
 HOOK @ $809bcbbc # itArchive::__ct
 {
-    %forceArchiveCloneIfFighterSpecificArchive()
+    li r6, 0    # Force clone = false
+    lwz r12, 0xc(r25)   # \
+    cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
+    ble+ %end%          # /
+    li r6, 1    # Force clone = true
 }
 HOOK @ $809bcc18    # itArchive::__ct
 {
-    %forceArchiveCloneIfFighterSpecificArchive()
+    li r6, 0    # Force clone = false
+    lwz r12, 0xc(r25)   # \
+    cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
+    ble+ %end%          # /
+    li r6, 1    # Force clone = true
 }
 HOOK @ $809bcc74    # itArchive::__ct
 {
     mr r5, r29  # Use heapType instead of only ItemResource
-    %forceArchiveCloneIfFighterSpecificArchive()
+    li r6, 0    # Force clone = false
+    lwz r12, 0xc(r25)   # \
+    cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
+    ble+ %end%          # /
+    # andi. r12,r12,0xFF00    # \ Check if itVariation & 0xFF00 == 0 (i.e. only clone character's first subvariant)
+    # bgt+ %end%              # /
+    li r6, 1    # Force clone = true
 }
 
 HOOK @ $809bcfec    # itArchive::getAllParam
 {
     mr r29, r4  # Original operation
     lwz r12, 0xc(r27)   # \
-    cmpwi r12, 0x200    # | Check if variant id is in character specific item range
-    blt+ %end%          # /
-    rlwinm r29,r12,0,23,31  # (variant id & 0xFFFF) % 0x200 to get character item subvariant and use that as ItmParam attribute index
-    addi r29, r29, 0x4B # Start at SideStepper param index (ItmParam attribute index and Param might need to match, have to investigate)
+    cmplwi r12, 0xFFFF    # | Check if variant id is in character specific item range
+    ble+ %end%          # /
+    andi. r29,r12,0xFF  # (variant id & 0xFF) to get itParam attribute index
 }
+## TODO: Also override itKind in itResourceModuleImpl::__ct
 
 HOOK @ $80827a80    # ftSlot::exit
 {
@@ -622,34 +624,54 @@ HOOK @ $809b69f4 # itManager::removeItemAllTempArchive
     mr r29, r3      # Original operation
     stw r4, 0x8(r1) # Store extra parameter (itArchiveType) on stack for later
 }
-HOOK @ $809b6a44 # itManager::removeItemAllTempArchive
+HOOK @ $809b6a24 # itManager::removeItemAllTempArchive
 {
-    li r5, 0            # \ Original operations
-    li r6, 1            # /
     li r10, 1           # removeItem = true
     lwz r12, 0x8(r1)    # \ Check if passed in itArchiveType >= 18
     cmpwi r12, 18       # /
-    blt+ end
+    blt+ end 
     li r10, 0           # removeItem = false
-    lwz r11, 0x8DC(r4)  # \ 
+    lwz r11, 0x0(r31)   # \
+    lwz r11, 0x8DC(r11) # |
     lwz r11, 0x0(r11)   # | Check if itArchiveType == item->itArchive->itArchiveType
     cmpw r12, r11       # |
     bne+ end            # /
     li r10, 1           # removeItem = true
-    li r5, 1            # remove item force
 end:
     cmpwi r10, 1
+    lwz	r12, 0x6D8(r29) # \ Original operation
+    addi r3, r29, 1752  # /
 }
-op bne+ 0x8 @ $809b6a48
-op lwz r4, 0x8(r1) @ $809b6a8c  
+op bne+ 0x2c @ $809b6a28
+HOOK @ $809b6a44 # itManager::removeItemAllTempArchive
+{
+    li r5, 0            # Original operation
+    lwz r12, 0x8(r1)    # \ Check if passed in itArchiveType >= 18
+    cmpwi r12, 18       # /
+    blt+ %end%
+    lwz r11, 0x8DC(r4)  # \ 
+    lwz r11, 0x0(r11)   # | Check if itArchiveType == item->itArchive->itArchiveType
+    cmpw r12, r11       # |
+    bne+ %end%          # /
+    li r5, 1            # remove item force
+}
+HOOK @ $809b6a84    # itManager::removeItemAllTempArchive
+{
+    lwz r12, 0x8(r1)    # \ 
+    cmpwi r12, 18       # | Check if passed in itArchiveType >= 18 (don't clear entire itemArrayList if it is)
+    bge- %end%          # /
+    bctrl           
+}
+op lwz r4, 0x8(r1) @ $809b6a8c  # clear out archives with type that was passed in
+
 
 # TODO: Pass in extra parameter for removeItemAllTempArchive in stAdventure2::clearHeap
 
 HOOK @ $807c3230    # soItemManageModuleImpl::haveItem
 {
     mr r5, r31          # Original operation
-    cmpwi r4, 0x200     # Check if 0x200 or greater for character specific items
-    blt+ %end%
+    cmplwi r4, 0xFFFF   # Check if 0x10000 or greater for character specific items
+    ble+ %end%
     lwz r12, 0x68(r27)  # \ 
     lwz r12, 0x8(r12)   # / soItemManageModuleImpl->soModuleAccesser->fighter
     lwz r11, 0x10c(r12) # fighter->entryId
@@ -658,12 +680,9 @@ HOOK @ $807c3230    # soItemManageModuleImpl::haveItem
     lwz r10, 0x0(r10)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
     mulli r11, r11, 580             # |
     add r10, r10, r11               # /
-    lwz r5, 0x30(r10)   # ftEntry->ftKind
-    mulli r5, r5, 0x10  # variant = ftKind*0x10
-    add r5, r5, r4      # variant += itKind
     lwz r11, 0x18(r10)   # ftEntry->slotNo
-    slwi r11, r11, 16   # \ variant += ftSlotNo*0x10000
-    add r5, r5, r11     # /
+    slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
+    add r5, r4, r11     # /
     li r4, 0x4B         # set itKind to Sidestepper
 }
 
