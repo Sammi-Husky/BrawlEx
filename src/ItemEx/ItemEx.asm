@@ -19,8 +19,11 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias g_itManager                          = 0x80B8B7F4
 .alias itManager__preloadItemKindArchive    = 0x809ae960
 .alias itManager__removeItemAllTempArchive  = 0x809b69d8
-.alias itManager__getItemGroup              = 0x809ab74c
+.alias itManager__getItemGroup              = 0x809ab74c  
+.alias g_ftManager                          = 0x80B87C28
+.alias ftManager__getFighter                = 0x80814f20
 .alias g_ftEntryManager                     = 0x80B87c48
+.alias ftEntryManager__getEntryIdFromPlayerNo   = 0x80823dd0
 .alias gfFileIO__checkFile                  = 0x8001F0D0
 .alias snprintf                             = 0x803f8924
 
@@ -97,7 +100,7 @@ notSubspace:
     li r5, 2
     li r6, 1
     %call (sndSystem__loadSoundGroup)
-    %swd (r3, r12, 076_SOUND_HEAP_LEVEL_ADDR)    # Store heap level for 076.sawnd%
+    %swd (r3, r12, 076_SOUND_HEAP_LEVEL_ADDR)    # Store heap level for 076.sawnd
     %lwd (r3, g_itManager)
     li r4, 0x0          # added parameter: itArchiveType
     %call (itManager__removeItemAllTempArchive)
@@ -175,14 +178,9 @@ HOOK @ $809abc28    # itManager::getCustomizer
     stw r29, 0x14(r1)
     mr r30, r4  
     mr r31, r5
-    %call (itManager__getItemGroup)         # \
-    cmpwi r3, 0x8                           # |
-    beq- grabItCustomizerFromModule         # |
-    cmpwi r3, 0x0                           # | if ItemGroup is Stage, Subspace or Enemy
-    beq- grabItCustomizerFromModule         # |
-    cmpwi r3, 0x5                           # |
-    bne+ skipGettingItCustomizerFromModule  # /
 grabItCustomizerFromModule:
+    cmplwi r31, 0xFFFF                  # \ Check if variant is in character specific range
+    bgt+ grabItCustomizerFromFighter    # /
     %lwd (r3, g_Stage)
     cmpwi r3, 0
     beq- skipGettingItCustomizerFromModule
@@ -196,6 +194,24 @@ grabItCustomizerFromModule:
     lwz r12, 0x80(r12)  # |
     mtctr r12           # |
     bctrl               # /
+    b fetchItCustomizer
+grabItCustomizerFromFighter:
+    srawi r4, r31, 20           # variant / 0x100000 to get ftSlotId
+    %lwd (r3, g_ftEntryManager) 
+    %call (ftEntryManager__getEntryIdFromPlayerNo)
+    mr r4, r3
+    %lwd (r3, g_ftManager)
+    li r5, -1
+    %call (ftManager__getFighter)
+    cmpwi r3, 0x0
+    beq- skipGettingItCustomizerFromModule
+    rlwinm r4,r31,0,12,31   # variant id & 0xFFFFF (i.e. remove the ftslotid)
+    addi r5, r1, 0x14   # \
+    lwz r12, 0x3c(r3)   # |
+    lwz r12, 0x278(r12) # | fighter->onStartFinal(int variantId, itCustomizerInterface** customizer)
+    mtctr r12           # |
+    bctrl               # /
+fetchItCustomizer:
     lwz r29, 0x14(r1)   # fetch obtained itCustomizer from stage
 skipGettingItCustomizerFromModule:
     mr r3, r29          
@@ -390,7 +406,7 @@ op bne -0x24 @ $809af200 # Loop if doesn't exist to make default path
 
 byte 0x00 @ $80B524FE   # add null terminator to get "Brres" as a string
 byte 0x00 @ $80B52594   # add null terminator to get "Param as a string"
-string "/%s/%s/%s/%s%s%02d%s.%s" @ $80B52503    # create string format for variant path
+string "/%s/%s/%s/%s%s%02d%s.%s" @ $80B52507    # create string format for variant path
 string "%s%02d.%s" @ $80B52531  # create "/%s/%s/%s/%s%s%02d%s%02d.%s" string format for fighter variant path
 
 HOOK @ $809af150
@@ -401,7 +417,7 @@ HOOK @ $809af150
     addi r12, r31, 6769 # \
     stw r12, 0xc(r1)    # / "Brres"
 formulatePath:
-    %setupAltItmPath(6779) # "/%s/%s/%s/%s%s%02d%s.%s"
+    %setupAltItmPath(6783) # "/%s/%s/%s/%s%s%02d%s.%s"
 formulateOriginalPath:
     add r3, r1, r22
     li r4, 0xff
@@ -417,7 +433,7 @@ formulateOriginalPath:
     %call (gfFileIO__checkFile) # /
     li r12, 0           # \ Store to keep track of whether loop happened once
     stw r12, 0x1c(r1)    # /
-    addi r5, r31, 6780      # "%s/%s/%s/%s%s%02d%s.%s"
+    addi r5, r31, 6784      # "%s/%s/%s/%s%s%02d%s.%s"
     lwz r6, 0x4(r31)
     addi r7, r31, 0x1A44    # "item"
     cmpwi r3, 0
@@ -473,7 +489,7 @@ formulateBrresPath:
 brresItemPathObtained:
     stw r14, 0x10(r1)       # ".pac"
     li r22, 276             # Formulate param path
-    addi r5, r31, 6779      # "/%s/%s/%s/%s%s%02d%s.%s"
+    addi r5, r31, 6783      # "/%s/%s/%s/%s%s%02d%s.%s"
     addi r12, r31, 6919     # \
     stw r12, 0xc(r1)        # / "Param"
 formulateParamPath:
@@ -506,6 +522,7 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 
 ## TODO: Or alternatively load based on txt in stage file
 ### Can have a field for regular items and Pokemon/Assist
+### Only deload common items if field is different
 # TODO: Investigate laggy entrance
 ## TODO: Keep track of current set loaded, only deload/load if it's different
 # TODO: Investigate item gen for Pokemon, stage item gen seems to ignore it
@@ -520,10 +537,9 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 # Searches for /fighter/item/Itm<Fighter><subvariantid>Brres<costumeid>.pac, /fighter/item/Itm<Fighter><subvariantid>Param.pac, /fighter/item/Itm<Fighter>Param.pac
 ## Itm<Fighter>Param.pac attribute index is based on subvariant id (i.e 0-15)
 ## Loads on ftSlot::pushItem, deloads on ftSlot::exit
-## TODO: Take over fighter->standyAdvFollow virtual function by passing parameters just like getItemPac
-### Use itArchiveType to determine which fighter modules itCustomizer to use
-## TODO: Kirby support
-### Might be able to get current fighter/ftslot copied and then should be able to spawn item
+# Takes over fighter->onStartFinal virtual function to get an optional itCustomizer from fighter module
+# TODO: Kirby support
+## Might be able to get current fighter/ftslot copied and then should be able to spawn item
 
 op b 0xb4 @ $8084ea44   # skip preloading in ftDataProvider::comp (later can probs deload items here)
 op b 0x84 @ $8084e67c   # skip preloading in ftDataProvider:isFinish      
@@ -573,9 +589,9 @@ HOOK @ $809bca28    # itArchive::__ct
     lwz r12, 0xc(r25)   # \
     cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
     ble- %end%          # /
-    srawi r12, r12, 20    # \ itArchiveType = variant / 0x100000 + 18
-    addi r29, r12, 18     # | Store HeapType as itArchiveType (to be able to clear character specific items)
-    stw r29, 0x0(r25)    # /
+    srawi r12, r12, 20  # \ ftSlotId = variant / 0x100000
+    addi r29, r12, 18   # | itArchiveType = ftSlotId + 18
+    stw r29, 0x0(r25)   #  / Store HeapType as itArchiveType (to be able to clear character specific items)
     li r31, 0xA         # Set ItemGroup to an unused value
 }
 
@@ -602,31 +618,31 @@ HOOK @ $809bcc74    # itArchive::__ct
     lwz r12, 0xc(r25)   # \
     cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
     ble+ %end%          # /
-    li r6, 1    # Force clone = true
+    li r6, 1    # Force clone = true    ## TODO: Force clone if Pokemon and variant
 } # Note: Could probably optimize memory by taking in ItmParam for the slot if already loaded instead of cloning again
 
 HOOK @ $809bcfec    # itArchive::getAllParam
 {
     mr r29, r4  # Original operation
     lwz r12, 0xc(r27)   # \
-    cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
-    ble+ %end%          # /
+    cmpwi r12, 0x200    # | Check if variant id is attribute index intercept range
+    blt+ %end%          # /
     andi. r29,r12,0xFF  # (variant id & 0xFF) to get itParam attribute index
 }
 HOOK @ $809c70dc    # itResourceModuleImpl::__ct
 {
     lwz	r4, 0x2C(r31)   # Original operation
     lwz r12, 0xc(r27)   # \
-    cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
-    ble+ %end%          # /
+    cmpwi r12, 0x200    # | Check if variant id is in attribute index intercept range
+    blt+ %end%          # /
     andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
 }
 HOOK @ $809c729c    # itResourceModuleImpl::reset
 {
     lwz	r4, 0x2C(r28)   # Original operation
     lwz r12, 0xc(r29)   # \
-    cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
-    ble+ %end%          # /
+    cmpwi r12, 0x200    # | Check if variant id is in attribute index intercept range
+    blt+ %end%          # /
     andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
 }
 
