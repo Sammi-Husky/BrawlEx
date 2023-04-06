@@ -434,7 +434,7 @@ op b 0xB0 @ $809af154   # Skip to formulate ItmParam
 .macro buildFighterItemPath()
 {
     %lwi (r6, 0x80B08850)   # "Fighter"
-    mr r12, r19             # Get ftKind from fourth parameter (TODO: Process out costume id)
+    andi. r12, r19, 0xFF    # Get ftKind from fourth parameter
     %lwi (r11, 0x817CD820)  # Internal BrawlEX internal fighter names
     mulli r12, r12, 0x10    # Offsets are 0x10 apart
     add r7, r11, r12        # r7 now contains a pointer to the character filename when using P+EX
@@ -449,8 +449,8 @@ CODE @ $809af148
 }
 HOOK @ $809af158
 {
-    andi. r12,r17,0xFF00  # \ variant id & 0xFF00 to get character item subvariant
-    stw r12, 0x8(r1)      # /
+    rlwinm r12,r17,24,24,31 # \ (variant id & 0xFF00) >> 8 to get character item subvariant
+    stw r12, 0x8(r1)        # /
     addi r12, r31, 6769     # \
     stw r12, 0xc(r1)        # / "Brres"
     stw r14, 0x14(r1)       # ".pac"
@@ -459,14 +459,15 @@ formulateBrresPath:
     li r4, 0xff
     addi r5, r31, 6807      # "/%s/%s/%s/%s%s%02d%s%02d.%s"
     %buildFighterItemPath()
-    stw r19, 0x10(r1)       # Costume id (preloadItemKindArchive fourth param is costume id when passed from reqItem)
+    rlwinm r12,r19,24,24,31 # \
+    stw r12, 0x10(r1)       # / Costume id from fourth parameter
     crclr 6,6
     %call (snprintf)
-    cmpwi r19, 0x0              # \ Check if looped once / costume id was already 00
-    beq+ brresItemPathObtained  # /
+    cmpwi r19, 0xFF             # \ Check if looped once / costume id was already 00
+    ble+ brresItemPathObtained  # /
     addi r3, r1, 532            # \ Check if Brres.pac exists on the SD card
     %call (gfFileIO__checkFile) # /
-    li r19, 0               # \ 
+    andi. r19, r19, 0xFF    # \ 
     cmpwi r3, 0             # | Turn costume id to 00 and try again if item doesn't exist
     bne- formulateBrresPath # /
 brresItemPathObtained:
@@ -521,20 +522,23 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 ## Loads on ftSlot::pushItem, deloads on ftSlot::exit
 ## TODO: Take over fighter->standyAdvFollow virtual function by passing parameters just like getItemPac
 ### Use itArchiveType to determine which fighter modules itCustomizer to use
-# TODO: Kirby support
+## TODO: Kirby support
+### Might be able to get current fighter/ftslot copied and then should be able to spawn item
 
 op b 0xb4 @ $8084ea44   # skip preloading in ftDataProvider::comp (later can probs deload items here)
 op b 0x84 @ $8084e67c   # skip preloading in ftDataProvider:isFinish      
 
-HOOK @ $80829988    # Pass in extra SlotId parameter to ftDataProvider::reqItem in ftSlot::pushItem
+HOOK @ $80829988    # Pass in extra SlotId and costumeId parameter to ftDataProvider::reqItem in ftSlot::pushItem
 {
     lwz	r4, 0x8(r4) # Original operation
     lwz r5, 0x174(r31) # pass ftslot id
+    lbz r6, 0x15B(r31) # pass costume id
 }
 
 HOOK @ $8084e854    # ftDataProvider::reqItem
 {
-    sth r5, 0x8(r1) # store ftslot id on stack
+    stb r5, 0x8(r1) # store ftslot id on stack
+    stb r6, 0x9(r1) # store costume id on stack
     sth r27, 0xA(r1) # store ftKind on stack
     mr r3, r27  # Original operation
 }
@@ -543,7 +547,7 @@ HOOK @ $8084e8b0    # ftDataProvider::reqItem
     lwzx r4, r4, r29    # Original operation
     cmplwi r4, 0xFFFF   # Check if 0x10000 or greater for character specific items
     ble- %end%
-    lhz r10, 0x8(r1)    # \
+    lbz r10, 0x8(r1)    # \
     slwi r10, r10, 20   # | variant = itKind + ftSlotNo*0x100000
     add r5, r4, r10     # /
     li r4, 0x4B     # itKind - SideStepper
@@ -553,12 +557,15 @@ HOOK @ $8084e8d8    # ftDataProvider::reqItem
     lwzx r4, r4, r29    # Original operation
     cmplwi r4, 0xFFFF   # Check if 0x10000 or greater for character specific items
     ble- %end%
-    lhz r10, 0x8(r1)    # \
+    lbz r10, 0x8(r1)    # \
     slwi r10, r10, 20   # | variant = itKind + ftSlotNo*0x100000
     add r5, r4, r10     # /
     lhz r7, 0xA(r1)     # Pass in ftKind as last parameter
+    lbz r8, 0x9(r1)     # \
+    slwi r8, r8, 8      # | Add costumeId * 0x100 to last parameter
+    add r7, r7, r8      # /
     li r4, 0x4B     # itKind - SideStepper
-} # TODO: Pass costume id + ftKind as last parameter
+}
 
 HOOK @ $809bca28    # itArchive::__ct
 {
@@ -595,20 +602,33 @@ HOOK @ $809bcc74    # itArchive::__ct
     lwz r12, 0xc(r25)   # \
     cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
     ble+ %end%          # /
-    # andi. r12,r12,0xFF00    # \ Check if itVariation & 0xFF00 == 0 (i.e. only clone character's first subvariant)
-    # bgt+ %end%              # /
     li r6, 1    # Force clone = true
-}
+} # Note: Could probably optimize memory by taking in ItmParam for the slot if already loaded instead of cloning again
 
 HOOK @ $809bcfec    # itArchive::getAllParam
 {
     mr r29, r4  # Original operation
     lwz r12, 0xc(r27)   # \
-    cmplwi r12, 0xFFFF    # | Check if variant id is in character specific item range
+    cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
     ble+ %end%          # /
     andi. r29,r12,0xFF  # (variant id & 0xFF) to get itParam attribute index
 }
-## TODO: Also override itKind in itResourceModuleImpl::__ct
+HOOK @ $809c70dc    # itResourceModuleImpl::__ct
+{
+    lwz	r4, 0x2C(r31)   # Original operation
+    lwz r12, 0xc(r27)   # \
+    cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
+    ble+ %end%          # /
+    andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
+}
+HOOK @ $809c729c    # itResourceModuleImpl::reset
+{
+    lwz	r4, 0x2C(r28)   # Original operation
+    lwz r12, 0xc(r29)   # \
+    cmplwi r12, 0xFFFF  # | Check if variant id is in character specific item range
+    ble+ %end%          # /
+    andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
+}
 
 HOOK @ $80827a80    # ftSlot::exit
 {
@@ -618,7 +638,15 @@ HOOK @ $80827a80    # ftSlot::exit
     %call (itManager__removeItemAllTempArchive)
     li r0, -1   # Original operation
 }
-# TODO: Unload when exiting CSS 
+HOOK @ $80827b28    # ftSlot::remove
+{
+    %lwd (r3, g_itManager)
+    lwz r4, 0x174(r30)          # get ftSlot->id
+    addi r4, r4, 18             # added parameter: itArchiveType = ftSlotId + 18
+    %call (itManager__removeItemAllTempArchive)
+    li r26, 0   # Original operation
+}
+
 HOOK @ $809b69f4 # itManager::removeItemAllTempArchive
 {
     mr r29, r3      # Original operation
