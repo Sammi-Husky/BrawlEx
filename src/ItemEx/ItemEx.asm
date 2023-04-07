@@ -405,7 +405,7 @@ HOOK @ $809af1fc
 op bne -0x24 @ $809af200 # Loop if doesn't exist to make default path
 
 byte 0x00 @ $80B524FE   # add null terminator to get "Brres" as a string
-byte 0x00 @ $80B52594   # add null terminator to get "Param as a string"
+byte 0x00 @ $80B52594   # add null terminator to get "Param" as a string
 string "/%s/%s/%s/%s%s%02d%s.%s" @ $80B52507    # create string format for variant path
 string "%s%02d.%s" @ $80B52531  # create "/%s/%s/%s/%s%s%02d%s%02d.%s" string format for fighter variant path
 
@@ -530,18 +530,18 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 # TODO: Random sets?
 
 ## Character Specific Items notes:
-# Uses variant id ranges past 0x1000, (use Unknown24 in misc psa data to define which items to preload). 
-## 0x1XYY (X - subvariant with first must be 0, Y - itKind to clone)
+# Uses variant id ranges past 0x10000, (use Unknown24 in misc psa data to define which items to preload). 
+## 0x1XXYY (X - subvariant with first must be 0, Y - itKind to clone)
 ## Internally itKind is set to 0x4B (Sidestepper) because stage items have more freedom
-## ftSlot id * 0x10000 is added to variant id to differentiate archives between same fighters using different slots
-# Searches for /fighter/item/Itm<Fighter><subvariantid>Brres<costumeid>.pac, /fighter/item/Itm<Fighter><subvariantid>Param.pac, /fighter/item/Itm<Fighter>Param.pac
+## ftSlot id * 0x100000 is added to variant id to differentiate archives between same fighters using different slots
+# Searches for /fighter/<fighter>/item/Itm<Fighter><subvariantid>Brres<costumeid>.pac, /fighter/<fighter>/item/Itm<Fighter><subvariantid>Param.pac, /fighter/<fighter>/item/Itm<Fighter>Param.pac
 ## Itm<Fighter>Param.pac attribute index is based on subvariant id (i.e 0-15)
 ## Loads on ftSlot::pushItem, deloads on ftSlot::exit
 # Takes over fighter->onStartFinal virtual function to get an optional itCustomizer from fighter module
 # TODO: Kirby support
 ## Might be able to get current fighter/ftslot copied and then should be able to spawn item
 
-op b 0xb4 @ $8084ea44   # skip preloading in ftDataProvider::comp (later can probs deload items here)
+op b 0xb4 @ $8084ea44   # skip preloading in ftDataProvider::comp
 op b 0x84 @ $8084e67c   # skip preloading in ftDataProvider:isFinish      
 
 HOOK @ $80829988    # Pass in extra SlotId and costumeId parameter to ftDataProvider::reqItem in ftSlot::pushItem
