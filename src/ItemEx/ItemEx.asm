@@ -6,7 +6,7 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 # Character specific items
 # Variants setup for Pokemon/Assist Trophies
 
-# Requires: BrawlEX, StageEX, SSEEX
+# Requires: BrawlEX, SSEEX
 
 .alias g_GameGlobal                         = 0x805a00E0
 .alias g_stLoaderManager                    = 0x80B8A6D0
@@ -24,11 +24,15 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias ftManager__getFighter                = 0x80814f20
 .alias g_ftEntryManager                     = 0x80B87c48
 .alias ftEntryManager__getEntryIdFromPlayerNo   = 0x80823dd0
+.alias gfFileArchive__getData               = 0x80015ddc
 .alias gfFileIO__checkFile                  = 0x8001F0D0
 .alias snprintf                             = 0x803f8924
+.alias strcpy                               = 0x803fa280
+.alias strcmp                               = 0x803fa3fc
 
-.alias STEX                       = 0x8053F000
-.alias 076_SOUND_HEAP_LEVEL_ADDR  = 0x80B524E8
+.alias ITM_OVERRIDE_STR_ADDR        = 0x80B524EC 
+.alias PKM_OVERRIDE_STR_ADDR        = 0x80B52582
+.alias 076_SOUND_HEAP_LEVEL_ADDR    = 0x80B524E8
 
 .macro swd(<storeReg>, <addrReg>, <addr>)
 {
@@ -66,7 +70,14 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 # Skip retrieving and assigning common item pacs from common3.pac #
 ###################################################################
 
-op b 0xF8 @ $806bfc2c   # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
+HOOK @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
+{   
+    li r11, 0
+    lis r12, 0x80B5
+    stw r11, 0x24EC(r12)    # Empty ITM_OVERRIDE_STR
+    stw r11, 0x2582(r12)    # Empty PKM_OVERRIDE_STR
+}
+op b 0xF4 @ $806bfc30   # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 
 op li r6, 0 @ $809acc7c  # Preload as a temp itarchive
 
@@ -81,25 +92,87 @@ op b 0x8 @ $809acccc    # /
 # Unload common item pacs and sawnds, and reload on stage creation #                                           
 ####################################################################
 
-HOOK @ $8092c524    # unload and then preload at Stage::__ct
+HOOK @ $8094a5c8    # stLoaderStage::entryEntity
 {
-    li r10, 5                       
-    %lwd (r12, g_stLoaderManager)   
+    stw	r0, 0x1A4(r3)   # Original operation
+    lwz r12, 0x44(r3)   # \
+    stw r12, 0xc(r1)    # | Check if stage kind is results
+    cmpwi r12, 0x28     # |
+    beq- %end%          # /
+
+    li r10, 0           # \
+    stw r10, 0x10(r1)   # | set temp string to empty
+    stw r10, 0x1c(r1)   # /
+    lwz r3, 0x1A0(r3)           # stage filedata
+    li r4, 1                    # Data_Type_Misc
+    li r5, 20000                # fileIndex
+    addi r6, r4, -3             # \ endian
+    rlwinm r6, r6, 0, 16, 31    # / 
+    %call (gfFileArchive__getData)  # \
+    stw r3, 0x8(r1)                 # | Check stage pac for itov in file index 2000
+    cmpwi r3, 0x0                   # |
+    beq+ noItov                     # /
+    addi r4, r3, 0x10   # \
+    addi r3, r1, 0x1c   # |
+    %call (strcpy)      # | Copy item and pokemon override strings from Itov to temp strings if Itov exists
+    lwz r4, 0x8(r1)     # |
+    addi r4, r4, 0x4    # |
+    addi r3, r1, 0x10   # |
+    %call (strcpy)      # /
+noItov:
+    lwz r12, 0xc(r1)            # \
+    cmpwi r12, 0x3d             # | Check if stage kind = subspace
+    beq+ isSubspace             # /
+    %lwd (r12, g_GameGlobal)    # \
+    lwz r12, 0x8(r12)           # |
+    lbz r11, 0x37(r12)          # | If not Subspace check if Pokeballs are turned on in the Item Switch 
+    rlwinm. r11,r11,30,31,31    # |
+    beq+ dontReloadPkmnSawnd    # /
+isSubspace:
+    addi r4, r1, 0x1c                   # \
+    %lwi (r3, PKM_OVERRIDE_STR_ADDR)    # |
+    %call (strcmp)                      # | Check if Pokemon folder has changed
+    cmpwi r3, 0x0                       # |
+    beq+ dontReloadPkmnSawnd            # /
+    addi r4, r1, 0x1c                   # \
+    %lwi (r3, PKM_OVERRIDE_STR_ADDR     # | Copy new Pokemon folder name
+    %call (strcpy)                      # /
+    %lwd (r12, g_stLoaderManager)       
+    li r10, 5   
     lwz r11, 0x28(r12)              # Get g_stLoaderManager->stLoaderPokemonSe
-    cmpwi r30, 0x3d                 # \ Check if stageKind is Subspace
-    bne+ notSubspace                # /
+    lwz r12, 0xc(r1)
+    cmpwi r12, 0x3d
+    bne+ notSubspace
     lwz r11, 0x24(r12)              # Get g_stLoaderManager->stLoaderCommonSeAdventure
 notSubspace:
     stb r10, 0x44(r11)              # stLoader->state to 5 to tell it to reload sawnd
-    %lwd (r3, g_sndSystem)
-    %lwd (r4, 076_SOUND_HEAP_LEVEL_ADDR)
-    li r5, 0
-    %call (sndSystem__freeGroup)
-    %lwd (r3, g_sndSystem)
-    li r4, 0x76 # sawnd id
-    li r5, 2
-    li r6, 1
-    %call (sndSystem__loadSoundGroup)
+dontReloadPkmnSawnd:
+    lwz r12, 0xc(r1)            # \
+    cmpwi r12, 0x3d             # | Check if stageKind = Subspace
+    beq+ isSubspace             # /
+    %lwd (r12, g_GameGlobal)    # \
+    lwz r12, 0x8(r12)           # |
+    lbz r11, 0x16(r12)          # | If not Subspace, check if Item frequency is 0
+    cmpwi r11, 0x0              # |
+    beq+ %end%                  # /
+isSubspace2:     
+    addi r4, r1, 0x10                   # \
+    %lwi (r3, ITM_OVERRIDE_STR_ADDR)    # |
+    %call (strcmp)                      # | Check if item folder has changed
+    cmpwi r3, 0x0                       # |
+    beq+ %end%                          # /
+    addi r4, r1, 0x10                       # \
+    %lwi (r3, ITM_OVERRIDE_STR_ADDR)        # |
+    %call (strcpy)                          # | Copy new item folder name
+    %lwd (r3, g_sndSystem)                  # |
+    %lwd (r4, 076_SOUND_HEAP_LEVEL_ADDR)    # /
+    li r5, 0                        # \ Unload item sawnd
+    %call (sndSystem__freeGroup)    # /
+    %lwd (r3, g_sndSystem)              # \
+    li r4, 0x76 # sawnd id              # |
+    li r5, 2                            # | Reload item sawnd
+    li r6, 1                            # |
+    %call (sndSystem__loadSoundGroup)   # /
     %swd (r3, r12, 076_SOUND_HEAP_LEVEL_ADDR)    # Store heap level for 076.sawnd
     %lwd (r3, g_itManager)
     li r4, 0x0          # added parameter: itArchiveType
@@ -110,7 +183,6 @@ notSubspace:
     li r6, 0x0  # itArchiveType - Temp
     li r7, 0x1
     %call (itManager__preloadItemKindArchive)
-    lis	r4, 0x80B9  # Original instruction
 }
 HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizationNandLoader::loadFiles2 to be able to unload later
 {
@@ -118,11 +190,14 @@ HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizati
     lwz	r3, 0x1D0(r27)  # original operation
 }
 
-######################################################################################################################
-# Pass in extra parameters to stage->getItemPac() of pointer to gfArchive* for itmParam and pointer to itCustomizer* #
-#                                                                                                                    # 
-# Allows stage to set custom ItmParam as well as custom itCustomizer                                                 #
-######################################################################################################################
+
+########################################################################################################################
+# Allow stage to set custom ItmParam as well as custom itCustomizer                                                    #
+# Passes in extra parameters to stage->getItemPac() of pointer to gfArchive* for itmParam and pointer to itCustomizer* #
+#                                                                                                                      #
+# Allow fighter to set custom itCustomizer                                                                             #
+# Passes in extar parameters to fighter->onStartFinal() of item variant pointer to itCustomizer*                       #           
+########################################################################################################################
 
 HOOK @ $809bcaec # itArchive::__ct
 {
@@ -231,6 +306,13 @@ CODE @ $809ac11c                    # |
 
 ## TODO: Early return in stAdventure2::getItemPac in sora_adv_stage rel so it doesn't run everytime a stage item spawns
 
+HOOK @ $808382f0    # Fighter::startFinal
+{
+    mtctr r12   # Original operation
+    li r4, -1   # \ Pass extra parameters to fighter->onStartFinal
+    li r5, 0    # /
+}
+
 #####################################
 # Setup paths for item archive pacs #
 #####################################
@@ -239,20 +321,16 @@ CODE @ $809ac11c                    # |
 {
     addi r6, r31, 0x1A44    # "item"
     addi r5, r31, <formatterOffset> 
-    %lwi (r12, STEX)		    # STEX pointer
-    stw r12, 0x1c(r1)            # Store to initialize to loop
-    lwz r7, 0x1C(r12)		# Pointer to offset in string block for filename
-    lwz r9, 0x4(r12)		# Pointer to string block
-    add r7, r7, r12		# \ Obtain address for string of stage filename
-    add r7, r7, r9		# /
-    %lwd (r11, g_GameGlobal)    #  g_GameGlobal
-    lwz r10, 0x8(r11)           # \ 
-    lhz r10, 0x1A(r10)          # |
-    cmpwi r10, 0x3d             # | Check if gmGlobalModeMelee->meleeInitData.stageKind is SSE
-    bne+ notSubspace            # /
-    lwz r9, 0x30(r11)          # \ &advSaveData->lastJumpBone[20] 
-    addi r7, r9, 1604          # /
-notSubspace:
+    %lwi (r7, ITM_OVERRIDE_STR_ADDR)	
+    stw r7, 0x1c(r1)   # Store to initialize to loop	    
+}
+
+.macro setupAltPkmPath(<formatterOffset>)
+{
+    addi r6, r31, 0x1A44    # "item"
+    addi r5, r31, <formatterOffset> 
+    %lwi (r7, PKM_OVERRIDE_STR_ADDR)	
+    stw r7, 0x1c(r1)   # Store to initialize to loop	    
 }
 
 # Fetch alternate ItmCommonBrres.pac path
@@ -290,7 +368,7 @@ HOOK @ $809af0b0
 HOOK @ $809af0b8
 {       
     addi r3, r1, 276
-    addi r8, r31, 0x1A4C    # "Item"
+    addi r8, r31, 0x1A4C    # "Itm"
     addi r9, r31, 0x1A3C    # "Common"
     mr r10, r14             # ".pac"
     crclr 6,6
@@ -353,7 +431,7 @@ byte 0x2f @ $80B5256B # add '/' before "%s/%s/%s/%s%sParam.%s"
 # Fetch alternate item brres path (i.e. for Pokemon and Assist Trophies)
 HOOK @ $809af180
 {
-    %setupAltItmPath(0x1AB3)   # "/%s/%s/%s/%s%sBrres.%s"
+    %setupAltPkmPath(0x1AB3)   # "/%s/%s/%s/%s%sBrres.%s"
 }
 op stw r14, 0x8(r1) @ $809af18c
 op nop @ $809af198
@@ -378,7 +456,7 @@ op bne -0x20 @ $809af1a4 # Loop if doesn't exist to make default path
 # Fetch alternate item param path (i.e. for Pokemon and Assist Trophies)
 HOOK @ $809af1d8
 {
-    %setupAltItmPath(6883)     # "/%s/%s/%s/%s%sParam.%s"
+    %setupAltPkmPath(6883)     # "/%s/%s/%s/%s%sParam.%s"
 }
 CODE @ $809af1e8
 {
@@ -417,7 +495,7 @@ HOOK @ $809af150
     addi r12, r31, 6769 # \
     stw r12, 0xc(r1)    # / "Brres"
 formulatePath:
-    %setupAltItmPath(6783) # "/%s/%s/%s/%s%s%02d%s.%s"
+    %setupAltPkmPath(6783) # "/%s/%s/%s/%s%s%02d%s.%s"
 formulateOriginalPath:
     add r3, r1, r22
     li r4, 0xff
@@ -519,12 +597,6 @@ op addi r4, r1, 0x20    @ $809af2d0 # |
 op addi r7, r1, 0x24    @ $809af2a0 # /
 
 
-
-## TODO: Or alternatively load based on txt in stage file
-### Can have a field for regular items and Pokemon/Assist
-### Only deload common items if field is different
-# TODO: Investigate laggy entrance
-## TODO: Keep track of current set loaded, only deload/load if it's different
 # TODO: Investigate item gen for Pokemon, stage item gen seems to ignore it
 # TODO: Shiny pokemon?
 # TODO: Random sets?
