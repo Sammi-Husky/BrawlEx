@@ -289,9 +289,13 @@ grabItCustomizerFromFighter:
 fetchItCustomizer:
     lwz r29, 0x14(r1)   # fetch obtained itCustomizer from stage
 skipGettingItCustomizerFromModule:
+    mr r4, r30
+    cmpwi r31, 0x200        # \ Check if clone
+    blt+ notClone           # /
+    andi. r4, r31, 0xff     # Change itKind to kind of base used to get its itCustomizer (if not set earlier)
+notClone:
     mr r3, r29          
     cmpwi r3, 0x0       # check if itCustomizer is null 
-    mr r4, r30
     lis	r7, 0x80B9      # \ Original operation
     lbz	r0, -0x4810(r7) # /
 }
