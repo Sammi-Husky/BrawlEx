@@ -149,7 +149,7 @@ notSubspace:
 dontReloadPkmnSawnd:
     lwz r12, 0xc(r1)            # \
     cmpwi r12, 0x3d             # | Check if stageKind = Subspace
-    beq+ isSubspace             # /
+    beq+ isSubspace2            # /
     %lwd (r12, g_GameGlobal)    # \
     lwz r12, 0x8(r12)           # |
     lbz r11, 0x16(r12)          # | If not Subspace, check if Item frequency is 0
