@@ -290,10 +290,6 @@ fetchItCustomizer:
     lwz r29, 0x14(r1)   # fetch obtained itCustomizer from stage
 skipGettingItCustomizerFromModule:
     mr r4, r30
-    cmpwi r31, 0x200        # \ Check if clone
-    blt+ notClone           # /
-    andi. r4, r31, 0xff     # Change itKind to kind of base used to get its itCustomizer (if not set earlier)
-notClone:
     mr r3, r29          
     cmpwi r3, 0x0       # check if itCustomizer is null 
     lis	r7, 0x80B9      # \ Original operation
@@ -608,7 +604,7 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 ## Character Specific Items notes:
 # Uses variant id ranges past 0x10000, (use Unknown24 in misc psa data to define which items to preload). 
 ## 0x1XXYY (X - subvariant with first must be 0, Y - itKind to clone)
-## Internally itKind is set to 0x4B (Sidestepper) because stage items have more freedom
+## Internally itKind in the itArchive is set to 0x4B (Sidestepper) because stage items have more freedom, though the item instance itKind is set to the base item id to pass all the required checks
 ## ftSlot id * 0x100000 is added to variant id to differentiate archives between same fighters using different slots
 # Searches for /fighter/<fighter>/item/Itm<Fighter><subvariantid>Brres<costumeid>.pac, /fighter/<fighter>/item/Itm<Fighter><subvariantid>Param.pac, /fighter/<fighter>/item/Itm<Fighter>Param.pac
 ## Itm<Fighter>Param.pac attribute index is based on subvariant id (i.e 0-15)
@@ -701,7 +697,7 @@ HOOK @ $809bcfec    # itArchive::getAllParam
 {
     mr r29, r4  # Original operation
     lwz r12, 0xc(r27)   # \
-    cmpwi r12, 0x200    # | Check if variant id is attribute index intercept range
+    cmpwi r12, 0x1400   # | Check if variant id is attribute index intercept range
     blt+ %end%          # /
     andi. r29,r12,0xFF  # (variant id & 0xFF) to get itParam attribute index
 }
@@ -709,7 +705,7 @@ HOOK @ $809c70dc    # itResourceModuleImpl::__ct
 {
     lwz	r4, 0x2C(r31)   # Original operation
     lwz r12, 0xc(r27)   # \
-    cmpwi r12, 0x200    # | Check if variant id is in attribute index intercept range
+    cmpwi r12, 0x1400   # | Check if variant id is in attribute index intercept range
     blt+ %end%          # /
     andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
 }
@@ -717,7 +713,7 @@ HOOK @ $809c729c    # itResourceModuleImpl::reset
 {
     lwz	r4, 0x2C(r28)   # Original operation
     lwz r12, 0xc(r29)   # \
-    cmpwi r12, 0x200    # | Check if variant id is in attribute index intercept range
+    cmpwi r12, 0x1400   # | Check if variant id is in attribute index intercept range
     blt+ %end%          # /
     andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
 }
@@ -804,6 +800,48 @@ HOOK @ $807c3230    # soItemManageModuleImpl::haveItem
     slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
     add r5, r4, r11     # /
     li r4, 0x4B         # set itKind to Sidestepper
+}
+
+HOOK @ $8098a514    # BaseItem::__ct
+{
+    lwz	r0, 0xC(r30)    # Original operation
+    lwz r12, 0x10(r30)  # \
+    cmpwi r12, 0x1400   # | If clone, set itKind to it's base itKind
+    blt+ %end%          # |
+    andi. r0,r12,0xFF   # /
+}
+
+HOOK @ $8098d524    # BaseItem::activate
+{
+    lwz r6, 0xc(r30)    # Original operation
+    lwz r12, 0x10(r30)  # \
+    cmpwi r12, 0x1400   # | If clone, set itKind to it's base itKind
+    blt+ %end%          # |
+    andi. r6,r12,0xFF   # /
+}
+
+HOOK @ $809b03d8    # itManager::getItemKindArchive
+{
+    mflr r0     # Original operation
+    cmpwi r5, 0x1400    # \
+    blt+ %end%          # | If clone, set itKind to SideStepper
+    li r4, 0x4B         # /
+}
+
+HOOK @ $809ab8f0    # itManager::getItemKindArchiveGroup
+{
+    mflr r0     # Original operation
+    cmpwi r5, 0x1400    # \
+    blt+ %end%          # | If clone, set itKind to SideStepper
+    li r4, 0x4B         # /
+}
+
+HOOK @ $809ab838    # itManager::getItemKindArchiveId
+{
+    lbz	r0, 0x14A0(r3)  # Original operation
+    cmpwi r5, 0x1400    # \
+    blt+ %end%          # | If clone, set itKind to SideStepper
+    li r4, 0x4B         # /
 }
 
 # Note: Number of variants dependent on array on in 80b50b60, (probs can either intercept if variant is above certain number or just set to non negative number)
