@@ -20,6 +20,7 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias itManager__preloadItemKindArchive    = 0x809ae960
 .alias itManager__removeItemAllTempArchive  = 0x809b69d8
 .alias itManager__getItemGroup              = 0x809ab74c  
+.alias g_itKindVariationNums                = 0x80ADB548
 .alias g_ftManager                          = 0x80B87C28
 .alias ftManager__getFighter                = 0x80814f20
 .alias g_ftEntryManager                     = 0x80B87c48
@@ -29,6 +30,7 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias snprintf                             = 0x803f8924
 .alias strcpy                               = 0x803fa280
 .alias strcmp                               = 0x803fa3fc
+.alias randi                                = 0x8003fc7c
 
 .alias ITM_OVERRIDE_STR_ADDR        = 0x80B524EC 
 .alias PKM_OVERRIDE_STR_ADDR        = 0x80B52582
@@ -401,10 +403,10 @@ formulatePath:
     blt+ notVariant     # /
     cmpwi r17, 0x0      # \ check if variant > 0, get alt ItmParam if it is
     ble+ notVariant     # /
-    stw r9, 0x8(r1)     # ""
+    addi r11, r31, 6919  # \ "Param"
+    stw r11, 0x8(r1)     # /
     stw r10, 0xc(r1)    # ".pac"
-    subi r5, r5, 0x68    # "/%s/%s/%s%s%02d%s.%s"
-    addi r9, r31, 6919  # "Param"
+    subi r5, r5, 0x64    # "/%s/%s/%s%s%02d%s.%s"
     mr r10, r17         # variant
 notVariant:
     crclr 6,6
@@ -482,6 +484,16 @@ HOOK @ $809af1fc
 }
 op bne -0x24 @ $809af200 # Loop if doesn't exist to make default path
 
+HOOK @ $809af13c
+{
+    xori r0, r0, 0x0001 # Original operation
+    cmpwi r16, 0x62 # \ check if itKind >= 0x62 (Pokemon and Assist Trophies)
+    blt+ %end%      # /
+    cmpwi r17, 0x0  # \ check if variant > 0, get alt if it is
+    bgt+ %end%      # /
+    li r0, 0x0
+}
+
 byte 0x00 @ $80B524FE   # add null terminator to get "Brres" as a string
 byte 0x00 @ $80B52594   # add null terminator to get "Param" as a string
 string "/%s/%s/%s/%s%s%02d%s.%s" @ $80B52507    # create string format for variant path
@@ -500,7 +512,7 @@ formulateOriginalPath:
     add r3, r1, r22
     li r4, 0xff
     mr r8, r25          # item name 
-    mr r9, r21          # "Itm"
+    mr r9, r21          # "Itm" or "Pkm" or "Asf" or "Wpn"
     mr r10, r24
     crclr 6,6
     %call (snprintf)
@@ -521,6 +533,7 @@ skipExistsCheck:
     stw r12, 0xc(r1)    # / "Param"
     cmpwi r22, 276
     li r22, 276
+    addi r21, r31, 0x1A4C   # "Itm"
     bne+ formulatePath
 }
 op b 0xB0 @ $809af154   # Skip to formulate ItmParam
@@ -533,7 +546,7 @@ op b 0xB0 @ $809af154   # Skip to formulate ItmParam
     mulli r12, r12, 0x10    # Offsets are 0x10 apart
     add r7, r11, r12        # r7 now contains a pointer to the character filename when using P+EX
     addi r8, r31, 0x1A44    # "item"
-    mr r9, r21              # "Itm"
+    mr r9, r21              # "Itm" or "Pkm" or "Asf" or "Wpn"
     mr r10, r7              # Fighter name again
 }
 CODE @ $809af148
@@ -687,10 +700,17 @@ HOOK @ $809bcc74    # itArchive::__ct
 {
     mr r5, r29  # Use heapType instead of only ItemResource
     li r6, 0    # Force clone = false
-    lwz r12, 0xc(r25)   # \
+    lwz r12, 0xc(r25)   # itArchive->itVariation
+    lwz r11, 0x8(r25)   # itArchive->itKind
+    cmpwi r11, 0x62                 # \ check if itKind >= 0x62 (Pokemon and Assist Trophies)
+    blt+ notPokemonAssistVariant    # /
+    cmpwi r12, 0x0      # \ check if Pokemon/Assist variant 
+    bgt- forceClone     # /
+notPokemonAssistVariant:
     cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
     ble+ %end%          # /
-    li r6, 1    # Force clone = true    ## TODO: Force clone if Pokemon and variant
+forceClone:
+    li r6, 1    # Force clone = true    
 } # Note: Could probably optimize memory by taking in ItmParam for the slot if already loaded instead of cloning again
 
 HOOK @ $809bcfec    # itArchive::getAllParam
@@ -844,9 +864,6 @@ HOOK @ $809ab838    # itManager::getItemKindArchiveId
     li r4, 0x4B         # /
 }
 
-# Note: Number of variants dependent on array on in 80b50b60, (probs can either intercept if variant is above certain number or just set to non negative number)
-int 4 @ $80adb674
-
 CODE @ $809b1420    # itManager::createBaseItem
 {
     cmpwi r0, 8  # \ If stage item then don't set itKind to -3 so it can check if archive exists
@@ -858,20 +875,217 @@ CODE @ $809b15e4    # itManager::createBaseItem
     bge- 0x1C    # /
 }
 
+# Note: Number of variants dependent on array on in 80b50b60, (probs can either intercept if variant is above certain number or just set to non negative number)
+int 4 @ $80adb674
 
 ## Adding new Pokemon/Assist Trophy notes
-# Do it based on variants
-# For Assist Trophy, load alt sawnd
-# Need to edit path to consider variant params
+# Add how many random variants you want into below array, if you want a non random variant then variant should be at least 1
+# Variants load as Itm<Name><variantId>Param.pac, variants also use their own ItmParam called Itm<variantId>Param.pac
+# TODO: For Assist Trophy, load alt sawnd
+# Note: PSA should make sure that emitted shot item use right variant
 
-## Item Clone Engine notes:
+int[80] |
+1, |    # 0x62 - Torchic
+0, |    # 0x63 - Celebi
+0, |    # 0x64 - Chikorita
+0, |    # 0x65 - Chikorita Shot
+0, |    # 0x66 - Entei
+0, |    # 0x67 - Moltres
+0, |    # 0x68 - Munchlax
+0, |    # 0x69 - Deoxys
+0, |    # 0x6A - Groudon
+0, |    # 0x6B - Gulpin
+0, |    # 0x6C - Staryu
+0, |    # 0x6D - Staryu Shot   
+0, |    # 0x6E - Ho-Oh
+0, |    # 0x6F - Ho-Oh Shot
+0, |    # 0x70 - Jirachi
+0, |    # 0x71 - Snorlax
+0, |    # 0x72 - Bellosom
+0, |    # 0x73 - Kyogre
+0, |    # 0x74 - Kyogre Shot
+0, |    # 0x75 - Latias/Latios
+0, |    # 0x76 - Lugia
+0, |    # 0x77 - Lugia Shot
+0, |    # 0x78 - Manaphy
+0, |    # 0x79 - Weavile
+0, |    # 0x7A - Electrode
+0, |    # 0x7B - Metagross
+0, |    # 0x7C - Mew
+0, |    # 0x7D - Meowth
+0, |    # 0x7E - Meowth Shot
+0, |    # 0x7F - Piplup
+0, |    # 0x80 - Togepi
+0, |    # 0x81 - Goldeen
+0, |    # 0x82 - Gardevoir
+0, |    # 0x83 - Wobbuffet
+0, |    # 0x84 - Suicune
+0, |    # 0x85 - Bonsly
+0, |    # 0x86 - Andross
+0, |    # 0x87 - Andross Shot
+0, |    # 0x88 - Barbara
+0, |    # 0x89 - GrayFox
+0, |    # 0x8A - RayMKII
+0, |    # 0x8B - RayMKII Bomb
+0, |    # 0x8C - RayMKII Gun
+0, |    # 0x8D - Samurai Goroh
+0, |    # 0x8E - Devil
+-3, |    # 0x8F - Excitebike
+0, |    # 0x90 - Jeff
+0, |    # 0x91 - Jeff Pencil Bullet
+0, |    # 0x92 - Jeff Pencil Rocket
+0, |    # 0x93 - Lakitu
+0, |    # 0x94 - Knuckle Joe
+0, |    # 0x95 - Knuckle Joe Shot
+0, |    # 0x96 - Hammer Bro
+0, |    # 0x97 - Hammer Bro Hammer
+0, |    # 0x98 - Helirin
+0, |    # 0x99 - Kat/Ana
+0, |    # 0x9A - Kat/Ana Ana
+0, |    # 0x9B - Jill Dozer
+0, |    # 0x9C - Lyn
+0, |    # 0x9D - Little Mac
+0, |    # 0x9E - Metroid
+0, |    # 0x9F - Nintendog
+0, |    # 0xA0 - Nintendog Full
+0, |    # 0xA1 - MrResetti
+0, |    # 0xA2 - Isaac
+0, |    # 0xA3 - Isaac Shot
+0, |    # 0xA4 - Saki
+0, |    # 0xA5 - Saki Shot 1
+0, |    # 0xA6 - Saki Shot 2
+0, |    # 0xA7 - Shadow
+0, |    # 0xA8 - War Infantry
+0, |    # 0xA9 - War Infantry Shot
+0, |    # 0xAA - Starfy
+0, |    # 0xAB - War Tank
+0, |    # 0xAC - War Tank Shot
+0, |    # 0xAD - Tingle
+0, |    # 0xAE - Lakitu Spiny
+0, |    # 0xAF - Waluigi
+0, |    # 0xB0 - Dr. Wright
+0 |     # 0xB1 - Dr. Wright Building
+@ $80ADB6D0
+
+HOOK @ $809b0850    # itManager::isExclusiveManaphy
+{
+    lwz	r0, 0x0(r3)     # Original operation
+    andi. r0, r0, 0xff  # Get itKind from last byte
+}
+HOOK @ $809b55ac    # itManager::safeLotCreateItem
+{
+    rlwinm r5, r4, 24,24,31 # Get itVariation from second last byte
+    andi. r4, r4, 0xff      # Get itKind from last byte
+}
+HOOK @ $809b5918    # itManager::safeLotCreateItem
+{
+    lwz r21, 0x0(r3)    # Original operation
+    rlwinm r23, r21, 24,24,31   # Get itVariation from second last byte
+    andi. r21, r21, 0xff        # Get itKind from last byte
+}
+HOOK @ $809b593c    # itManager::safeLotCreateItem
+{
+    rlwinm r5, r4, 24,24,31     # Get itVariation from second last byte
+    andi. r4, r4, 0xff          # Get itKind from last byte
+}
+HOOK @ $809b59b8    # itManager::safeLotCreateItem
+{
+    andi. r12, r20, 0xff        # Get itKind from last byte
+    cmpwi r12, 120              # Original operation
+}
+HOOK @ $809b5a00    # itManager::safeLotCreateItem  
+{
+    lwz r0, 0x0(r3)             # Original operation
+    andi. r0, r0, 0xff          # Get itKind from last byte
+}
+HOOK @ $809b5a30    # itManager::safeLotCreateItem
+{
+    rlwinm r5, r4, 24,24,31     # Get itVariation from second last byte
+    andi. r4, r4, 0xff          # Get itKind from last byte
+}
+CODE @ $809b5afc    # itManager::safeLotCreateItem
+{
+    andi. r4, r20, 0xff         # Get itKind from last byte
+    rlwinm r5, r20, 24,24,31    # Get itVariation from second last byte
+}
+op b 0x38 @ $809b5c5c # Skip checking if variant is less than max variant
+HOOK @ $809b2088    # itManager::removeItemAfter
+{
+    rlwinm r12, r0, 24,24,31    # Get itVariation from second last byte
+    andi. r0, r0, 0xff          # Get itKind from last byte
+    cmpw r29, r0                # \ Check if desired itKind
+    bne+ %end%                  # /
+    cmpw r26, r12               # Check if desired itVariation
+}
+HOOK @ $809b2158    # itManager::removeItemAfter
+{
+    lwz r12, 0xc(r3)    # Get itArchive->itVariation
+    cmpw r0, r29        # \ Check if desired variation
+    bne+ %end%          # /
+    cmpw r12, r26       # Check if desired itKind
+}
+HOOK @ $809b0ba0    # itManager::checkCreatableItem
+{
+    rlwinm r5, r4, 24,24,31 # Get itVariation from second last byte
+    andi. r4, r4, 0xff      # Get itKind from last byte
+}
+HOOK @ $809b0ff8    # itManager::checkCreatableItem
+{
+    lwz	r12, 0x0(r3)        # Original operation
+    andi. r4, r12, 0xff     # Get itKind from last byte
+}
+op rlwinm r5, r12, 24,24,31 @ $809b1008     # Get itVariation from second last byte
+HOOK @ $809ad7d4    # itManager::processBegin
+{
+    mr r5, r4   # Pass variation as extra parameter to itManager::preloadPokemon
+    mr r4, r3   # Original operation
+}
+HOOK @ $809afcec    # itManager::preloadPokemon
+{
+    stw	r4, 0x8(r1) # Original operation
+    stw r5, 0xc(r1) # Store variation on stack
+}
+HOOK @ $809afe68    # itManager::preloadPokemon
+{
+    lwz r10, 0x8C4(r4)          # Original operation
+    rlwinm r12, r28, 24,24,31   # Get itVariation from second last byte 
+    andi. r11, r28, 0xff        # Get itKind from last byte
+    cmpw r11, r0                # \ Check if desired itVariation
+    bne+ %end%                  # /
+    cmpw r10, r12               # Check if desired itKind
+}
+HOOK @ $809aff30    # itManager::preloadPokemon
+{
+    lwz r10, 0xc(r3)            # Original operation
+    rlwinm r12, r28, 24,24,31   # Get itVariation from second last byte 
+    andi. r11, r28, 0xff        # Get itKind from last byte
+    cmpw r11, r0                # \ Check if desired itVariation
+    bne+ %end%                  # /
+    cmpw r10, r12               # Check if desired itKind
+}
+HOOK @ $809aff84    # itManager::preloadPokemon
+{
+    lwz r3, 0xc(r1)         # \
+    cmpwi r3, 5000          # | Check if variant == 5000
+    bne+ notRandomVariant   # /
+    lwz	r3, 0x8(r1)         # Get itKind
+    %lwi (r11, g_itKindVariationNums)  # \ 
+    rlwinm r3, r3, 2, 0, 29            # | g_itKindVariationNums[itKind]
+    lwzx r3, r11, r3                   # /
+    %call (randi)           # Get random variation from 0 to itKindVariationNum
+notRandomVariant:
+    mr r5, r3               # Pass itVariation
+    lwz r4, 0x8(r1)         # Pass itKind
+    mulli r11, r5, 0x100    # \ 
+    add r11, r4, r11        # | itKind += variant*0x100
+    stw r11, 0x8(r1)        # /
+}
+op nop @ $809aff8c
+
+# TODO: Test out making every item have a grCollision
+
+## Common Item Expansion notes:
 # Expand itKind ids (handle out of bounds for the various arrays like itCustomizer)
 # Allow StageResource to be used on expanded set of items/and/or Pokemon
 # Expand/rework ItmParam attributes
 # Add to ItemGen tables
-
-
-# Pokemon Modifier (Torchic)
-# *4A000000 90180F08
-# *14000050 00000001
-# *E0000000 80008000
