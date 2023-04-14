@@ -803,25 +803,38 @@ op lwz r4, 0x8(r1) @ $809b6a8c  # clear out archives with type that was passed i
 
 # TODO: Pass in extra parameter for removeItemAllTempArchive in stAdventure2::clearHeap
 
-HOOK @ $807c3230    # soItemManageModuleImpl::haveItem
+HOOK @ $807c3240    # soItemManageModuleImpl::haveItem
 {
-    mr r5, r31          # Original operation
-    cmplwi r4, 0xFFFF   # Check if 0x10000 or greater for character specific items
-    ble+ %end%
-    lwz r12, 0x68(r27)  # \ 
-    lwz r12, 0x8(r12)   # / soItemManageModuleImpl->soModuleAccesser->fighter
-    lwz r11, 0x10c(r12) # fighter->entryId
-    %lwd (r10, g_ftEntryManager)    # \
+    lwz	r6, 0x8(r6)     # Original operation
+    cmplwi r4, 0xFFFF   # \ Check if itKind is in fighter specific range
+    ble+ %end%          # /
+    lwz r11, 0x10c(r6) # fighter->entryId
+    %lwd (r12, g_ftEntryManager)    # \
     rlwinm r11, r11, 0, 24, 31      # |
-    lwz r10, 0x0(r10)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
+    lwz r12, 0x0(r12)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
     mulli r11, r11, 580             # |
-    add r10, r10, r11               # /
-    lwz r11, 0x18(r10)   # ftEntry->slotNo
+    add r12, r12, r11               # /
+    lwz r11, 0x18(r12)   # ftEntry->slotNo
     slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
     add r5, r4, r11     # /
     li r4, 0x4B         # set itKind to Sidestepper
 }
-
+HOOK @ $807c3394    # soItemManageModuleImpl::createThrowItem
+{
+    lwz	r7, 0x8(r7)     # Original operation
+    cmpwi r6, 0xFFFF    # \ Check if variant is in fighter specific range
+    ble+ %end%          # /
+    lwz r11, 0x10c(r7) # fighter->entryId
+    %lwd (r12, g_ftEntryManager)    # \
+    rlwinm r11, r11, 0, 24, 31      # |
+    lwz r12, 0x0(r12)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
+    mulli r11, r11, 580             # |
+    add r12, r12, r11               # /
+    lwz r11, 0x18(r12)  # fitEntry->slotNo
+    slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
+    add r5, r4, r11     # /
+    li r4, 0x4b         # set itKind to Sidestepper
+}
 HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
 {
     lfs	f0, 0x0(r28)    # Original operation
