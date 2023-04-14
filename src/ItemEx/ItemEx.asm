@@ -822,6 +822,23 @@ HOOK @ $807c3230    # soItemManageModuleImpl::haveItem
     li r4, 0x4B         # set itKind to Sidestepper
 }
 
+HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
+{
+    lfs	f0, 0x0(r28)    # Original operation
+    cmpwi r31, 0xFFFF   # \
+    ble+ %end%          # /
+    lwz r11, 0x8c4(r21) # baseItem->itVariant
+    srawi r11, r11, 20  # ftSlotId = current item variant / 0x100000
+    add r31, r31, r11   # variant += ftSlotId
+}
+HOOK @ $80990328    # BaseItem::notifyEventAnimCmd
+{
+    mr r7, r31    # Original operation
+    cmpwi r31, 0x1400   # \ check if clone item
+    blt+ %end%          # /
+    li r6, 0x4b     # set itKind to Sidestepper
+}
+
 HOOK @ $8098a514    # BaseItem::__ct
 {
     lwz	r0, 0xC(r30)    # Original operation
@@ -881,11 +898,12 @@ int 4 @ $80adb674
 ## Adding new Pokemon/Assist Trophy notes
 # Add how many random variants you want into below array, if you want a non random variant then variant should be at least 1
 # Variants load as Itm<Name><variantId>Param.pac, variants also use their own ItmParam called Itm<variantId>Param.pac
+# TODO: For Pokemon, look into using an SSE sawnd? Might need to prevent Pokemon of the same base type from being used
 # TODO: For Assist Trophy, load alt sawnd
 # Note: PSA should make sure that emitted shot item use right variant
 
 int[80] |
-1, |    # 0x62 - Torchic
+0, |    # 0x62 - Torchic
 0, |    # 0x63 - Celebi
 0, |    # 0x64 - Chikorita
 0, |    # 0x65 - Chikorita Shot
@@ -967,52 +985,67 @@ int[80] |
 0 |     # 0xB1 - Dr. Wright Building
 @ $80ADB6D0
 
-HOOK @ $809b0850    # itManager::isExclusiveManaphy
+*08ADBD1A 000000DF  # Start at 0x00DF for Torchic
+*10240004 00000001  
+
+HOOK @ $809af278    # itManager::preloadItemKindArchive
 {
-    lwz	r0, 0x0(r3)     # Original operation
-    andi. r0, r0, 0xff  # Get itKind from last byte
+    lwzx r14, r3, r0    # Original operation
+    andi. r14, r14, 0xffff  # Get sawnd id from last two bytes
+    extsh r14, r14      # Convert to int
+    sthx r17, r3, r0    # Store variant in first two bytes
+    cmpwi r16, 0x86     # \
+    bge+ %end%          # / Check if assist
+    cmpwi r17, 0x0      # \ Check if variant > 0
+    bgt+ %end%          # / 
+    li r14, -1          # Set sfx group id to -1
 }
-HOOK @ $809b55ac    # itManager::safeLotCreateItem
+
+HOOK @ $809bca68    # itArchive::__ct
 {
-    rlwinm r5, r4, 24,24,31 # Get itVariation from second last byte
-    andi. r4, r4, 0xff      # Get itKind from last byte
+    li r5, 0x2      # Original operation
+    cmpwi r31, 0x3  # \ Check if Pokemon item group
+    bne+ %end%      # /
+    li r5, 0xc      # Change sound heap to enemy sound heap
+}
+
+op lhz r0, 0x2(r3) @ $809b0850    # itManager::isExclusiveManaphy
+CODE @ $809b55a8    # itManager::safeLotCreateItem
+{
+    lhz r5, 0x0(r4) # Get itVariation from first two bytes
+    lhz	r4, 0x2(r4) # Get itKind from last two bytes
 }
 HOOK @ $809b5918    # itManager::safeLotCreateItem
 {
-    lwz r21, 0x0(r3)    # Original operation
-    rlwinm r23, r21, 24,24,31   # Get itVariation from second last byte
-    andi. r21, r21, 0xff        # Get itKind from last byte
+    lhz r23, 0x0(r3)    # Get itVariation from first two bytes
+    lhz r21, 0x2(r3)    # Get itKind from last two bytes
 }
-HOOK @ $809b593c    # itManager::safeLotCreateItem
+CODE @ $809b5938    # itManager::safeLotCreateItem
 {
-    rlwinm r5, r4, 24,24,31     # Get itVariation from second last byte
-    andi. r4, r4, 0xff          # Get itKind from last byte
+    lhz r5, 0x0(r4) # Get itVariation from first two bytes
+    lhz	r4, 0x2(r4) # Get itKind from last two bytes
 }
 HOOK @ $809b59b8    # itManager::safeLotCreateItem
 {
-    andi. r12, r20, 0xff        # Get itKind from last byte
+    andi. r12, r20, 0xffff      # Get itKind from last two bytes
     cmpwi r12, 120              # Original operation
 }
-HOOK @ $809b5a00    # itManager::safeLotCreateItem  
+op lhz r0, 0x2(r3) @ $809b5a00    # itManager::safeLotCreateItem  
+CODE @ $809b5a2c    # itManager::safeLotCreateItem
 {
-    lwz r0, 0x0(r3)             # Original operation
-    andi. r0, r0, 0xff          # Get itKind from last byte
-}
-HOOK @ $809b5a30    # itManager::safeLotCreateItem
-{
-    rlwinm r5, r4, 24,24,31     # Get itVariation from second last byte
-    andi. r4, r4, 0xff          # Get itKind from last byte
+    lhz r5, 0x0(r4) # Get itVariation from first two bytes
+    lhz	r4, 0x2(r4) # Get itKind from last two bytes
 }
 CODE @ $809b5afc    # itManager::safeLotCreateItem
 {
-    andi. r4, r20, 0xff         # Get itKind from last byte
-    rlwinm r5, r20, 24,24,31    # Get itVariation from second last byte
+    andi. r4, r20, 0xffff       # Get itKind from last two byte
+    srwi r5, r20, 16            # Get itVariation from first two bytes
 }
 op b 0x38 @ $809b5c5c # Skip checking if variant is less than max variant
 HOOK @ $809b2088    # itManager::removeItemAfter
 {
-    rlwinm r12, r0, 24,24,31    # Get itVariation from second last byte
-    andi. r0, r0, 0xff          # Get itKind from last byte
+    srwi r12, r0, 16          # Get itVariation from first two bytes
+    andi. r0, r0, 0xffff      # Get itKind from last two bytes
     cmpw r29, r0                # \ Check if desired itKind
     bne+ %end%                  # /
     cmpw r26, r12               # Check if desired itVariation
@@ -1020,21 +1053,21 @@ HOOK @ $809b2088    # itManager::removeItemAfter
 HOOK @ $809b2158    # itManager::removeItemAfter
 {
     lwz r12, 0xc(r3)    # Get itArchive->itVariation
-    cmpw r0, r29        # \ Check if desired variation
+    cmpw r0, r29        # \ Check if desired itKind
     bne+ %end%          # /
-    cmpw r12, r26       # Check if desired itKind
+    cmpw r12, r26       # Check if desired itVariation
 }
-HOOK @ $809b0ba0    # itManager::checkCreatableItem
+CODE @ $809b0b9c    # itManager::checkCreatableItem
 {
-    rlwinm r5, r4, 24,24,31 # Get itVariation from second last byte
-    andi. r4, r4, 0xff      # Get itKind from last byte
+    lhz r5, 0x0(r4) # Get itVariation from first two bytes
+    lhz	r4, 0x2(r4) # Get itKind from last two bytes
 }
-HOOK @ $809b0ff8    # itManager::checkCreatableItem
+op lhz r4, 0x2(r3) @ $809b0ff8    # itManager::checkCreatableItem
+CODE @ $809b1004    # itManager::checkCreatableItem
 {
-    lwz	r12, 0x0(r3)        # Original operation
-    andi. r4, r12, 0xff     # Get itKind from last byte
-}
-op rlwinm r5, r12, 24,24,31 @ $809b1008     # Get itVariation from second last byte
+    lhz r5, 0x0(r3) # Get itVariation from first two bytes
+    mr r3, r26      # Original operation
+} 
 HOOK @ $809ad7d4    # itManager::processBegin
 {
     mr r5, r4   # Pass variation as extra parameter to itManager::preloadPokemon
@@ -1047,21 +1080,21 @@ HOOK @ $809afcec    # itManager::preloadPokemon
 }
 HOOK @ $809afe68    # itManager::preloadPokemon
 {
-    lwz r10, 0x8C4(r4)          # Original operation
-    rlwinm r12, r28, 24,24,31   # Get itVariation from second last byte 
-    andi. r11, r28, 0xff        # Get itKind from last byte
-    cmpw r11, r0                # \ Check if desired itVariation
+    lwz r10, 0x8C4(r4)          # Get baseItem->itVariation
+    srwi r12, r28, 16           # Get itVariation from first two bytes 
+    andi. r11, r28, 0xffff      # Get itKind from last two bytes
+    cmpw r11, r0                # \ Check if desired itKind
     bne+ %end%                  # /
-    cmpw r10, r12               # Check if desired itKind
+    cmpw r10, r12               # Check if desired itVariation
 }
 HOOK @ $809aff30    # itManager::preloadPokemon
 {
-    lwz r10, 0xc(r3)            # Original operation
-    rlwinm r12, r28, 24,24,31   # Get itVariation from second last byte 
-    andi. r11, r28, 0xff        # Get itKind from last byte
-    cmpw r11, r0                # \ Check if desired itVariation
+    lwz r10, 0xc(r3)            # Get itArchiveType->itVariatin
+    srwi r12, r28, 16           # Get itVariation from first two bytes 
+    andi. r11, r28, 0xffff      # Get itKind from last two bytes
+    cmpw r11, r0                # \ Check if desired itKind
     bne+ %end%                  # /
-    cmpw r10, r12               # Check if desired itKind
+    cmpw r10, r12               # Check if desired itVariation
 }
 HOOK @ $809aff84    # itManager::preloadPokemon
 {
@@ -1075,12 +1108,9 @@ HOOK @ $809aff84    # itManager::preloadPokemon
     %call (randi)           # Get random variation from 0 to itKindVariationNum
 notRandomVariant:
     mr r5, r3               # Pass itVariation
-    lwz r4, 0x8(r1)         # Pass itKind
-    mulli r11, r5, 0x100    # \ 
-    add r11, r4, r11        # | itKind += variant*0x100
-    stw r11, 0x8(r1)        # /
+    sth r5, 0x8(r1)         
 }
-op nop @ $809aff8c
+op lhz r4, 0xA(r1) @ $809aff8c  # itManager::preloadPokemon
 
 # TODO: Test out making every item have a grCollision
 
