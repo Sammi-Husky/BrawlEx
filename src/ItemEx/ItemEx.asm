@@ -67,6 +67,12 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
   mtctr r12
   bctrl    
 }
+.macro branch(<addr>)
+{
+    %lwi(r12, <addr>)
+    mtctr r12
+    bctr
+}
 
 ###################################################################
 # Skip retrieving and assigning common item pacs from common3.pac #
@@ -1091,22 +1097,46 @@ HOOK @ $809afcec    # itManager::preloadPokemon
     stw	r4, 0x8(r1) # Original operation
     stw r5, 0xc(r1) # Store variation on stack
 }
+HOOK @ $809afd74    # itManager::preloadPokemon
+{
+    mr r30, r3
+    mr r29, r30
+    b startLoop
+loop:
+    subi r29, r29, 1
+    addi r3, r31, 0x10C8    # \
+    mr r4, r29              # |
+    lwz r12, 0x10C8(r31)    # | itManager->itKindPokemonArrayList->at(index)
+    lwz r12, 0xc(r12)       # |
+    mtctr r12               # |
+    bctrl                   # /
+    lhz r10, 0x2(r3)    # \
+    lwz r12, 0x8(r1)    # | Check if itKind already in the list of Pokemon
+    cmpw r12, r10       # |
+    bne+ startLoop      # /
+    li r3, 0x0              # \ Don't preload if Pokemon with same itKind already exists (to avoid clashing sfx group ids)
+    %branch (0x809affc8)    # /
+startLoop:
+    cmpwi r29, 0
+    bgt+ loop
+    cmpwi r30, 5 # Original operation
+}
 HOOK @ $809afe68    # itManager::preloadPokemon
 {
-    lwz r10, 0x8C4(r4)          # Get baseItem->itVariation
-    srwi r12, r28, 16           # Get itVariation from first two bytes 
     andi. r11, r28, 0xffff      # Get itKind from last two bytes
     cmpw r11, r0                # \ Check if desired itKind
     bne+ %end%                  # /
+    lwz r10, 0x8C4(r4)          # Get baseItem->itVariation
+    srwi r12, r28, 16           # Get itVariation from first two bytes  
     cmpw r10, r12               # Check if desired itVariation
 }
 HOOK @ $809aff30    # itManager::preloadPokemon
 {
-    lwz r10, 0xc(r3)            # Get itArchiveType->itVariatin
-    srwi r12, r28, 16           # Get itVariation from first two bytes 
     andi. r11, r28, 0xffff      # Get itKind from last two bytes
     cmpw r11, r0                # \ Check if desired itKind
     bne+ %end%                  # /
+    lwz r10, 0xc(r3)            # Get itArchiveType->itVariation
+    srwi r12, r28, 16           # Get itVariation from first two bytes 
     cmpw r10, r12               # Check if desired itVariation
 }
 HOOK @ $809aff84    # itManager::preloadPokemon
