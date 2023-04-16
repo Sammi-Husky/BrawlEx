@@ -826,7 +826,7 @@ HOOK @ $807c3240    # soItemManageModuleImpl::haveItem
 HOOK @ $807c3394    # soItemManageModuleImpl::createThrowItem
 {
     lwz	r7, 0x8(r7)     # Original operation
-    cmpwi r6, 0xFFFF    # \ Check if variant is in fighter specific range
+    cmplwi r6, 0xFFFF   # \ Check if variant is in fighter specific range
     ble+ %end%          # /
     lwz r11, 0x10c(r7) # fighter->entryId
     %lwd (r12, g_ftEntryManager)    # \
@@ -836,8 +836,8 @@ HOOK @ $807c3394    # soItemManageModuleImpl::createThrowItem
     add r12, r12, r11               # /
     lwz r11, 0x18(r12)  # fitEntry->slotNo
     slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
-    add r5, r4, r11     # /
-    li r4, 0x4b         # set itKind to Sidestepper
+    add r6, r6, r11     # /
+    li r5, 0x4b         # set itKind to Sidestepper
 }
 HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
 {
