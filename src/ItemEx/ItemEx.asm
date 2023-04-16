@@ -245,13 +245,16 @@ HOOK @ $8098d574    # BaseItem::activate
     lwz r4, 0x8C0(r29)  # Original operation
     lwz r5, 0x8C4(r29)  # Pass itVariation to itManager::getCustomizer as extra parameter
 }
-CODE @ $809abc14        # \
-{                       # |
-    stwu r1, -0x60(r1)  # |
-    mflr r0             # | Increase stack size
-    stw	r0, 0x64(r1)    # |
-    addi r11, r1, 0x60  # /
-}
+CODE @ $809abc14        # itManager::getCustomizer
+{                                   # \
+    stwu r1, -0x60(r1)              # |
+    mflr r0                         # | 
+    stw	r0, 0x64(r1)                # |
+    addi r11, r1, 0x60              # | Increase stack size
+}                                   # |
+op addi r11, r1, 0x60 @ $809ac114   # |
+op lwz r0, 0x64(r1) @ $809ac11c     # |
+op addi r1, r1, 0x60 @ $809ac124    # /
 HOOK @ $809abc28    # itManager::getCustomizer
 {
     li r29, 0
@@ -304,13 +307,6 @@ skipGettingItCustomizerFromModule:
     lbz	r0, -0x4810(r7) # /
 }
 op bne- 0x4E8 @ $809abc2c   # Skip fetching default itCustomizer if already obtained
-op addi r11, r1, 0x60 @ $809ac114   # \
-CODE @ $809ac11c                    # |
-{                                   # | Increase stack size
-    lwz	r0, 0x64(r1)                # |
-    mtlr r0                         # |
-    addi r1, r1, 0x60               # /
-}
 
 ## TODO: Early return in stAdventure2::getItemPac in sora_adv_stage rel so it doesn't run everytime a stage item spawns
 
@@ -619,6 +615,8 @@ op addi r7, r1, 0x24    @ $809af2a0 # /
 # TODO: Investigate item gen for Pokemon, stage item gen seems to ignore it
 # TODO: Shiny pokemon?
 # TODO: Random sets?
+# TODO: Subspace custom items per stage file
+## itCustomizer code in stage file?
 
 ## Character Specific Items notes:
 # Uses variant id ranges past 0x10000, (use Unknown24 in misc psa data to define which items to preload). 
@@ -917,91 +915,89 @@ int 4 @ $80adb674
 ## Adding new Pokemon/Assist Trophy notes
 # Add how many random variants you want into below array, if you want a non random variant then variant should be at least 1
 # Variants load as Itm<Name><variantId>Param.pac, variants also use their own ItmParam called Itm<variantId>Param.pac
-# TODO: For Pokemon, look into using an SSE sawnd? Might need to prevent Pokemon of the same base type from being used
-# TODO: For Assist Trophy, load alt sawnd
 # Note: PSA should make sure that emitted shot item use right variant
 
 int[80] |
-0, |    # 0x62 - Torchic
-0, |    # 0x63 - Celebi
-0, |    # 0x64 - Chikorita
-0, |    # 0x65 - Chikorita Shot
-0, |    # 0x66 - Entei
-0, |    # 0x67 - Moltres
-0, |    # 0x68 - Munchlax
-0, |    # 0x69 - Deoxys
-0, |    # 0x6A - Groudon
-0, |    # 0x6B - Gulpin
-0, |    # 0x6C - Staryu
-0, |    # 0x6D - Staryu Shot   
-0, |    # 0x6E - Ho-Oh
-0, |    # 0x6F - Ho-Oh Shot
-0, |    # 0x70 - Jirachi
-0, |    # 0x71 - Snorlax
-0, |    # 0x72 - Bellosom
-0, |    # 0x73 - Kyogre
-0, |    # 0x74 - Kyogre Shot
-0, |    # 0x75 - Latias/Latios
-0, |    # 0x76 - Lugia
-0, |    # 0x77 - Lugia Shot
-0, |    # 0x78 - Manaphy
-0, |    # 0x79 - Weavile
-0, |    # 0x7A - Electrode
-0, |    # 0x7B - Metagross
-0, |    # 0x7C - Mew
-0, |    # 0x7D - Meowth
-0, |    # 0x7E - Meowth Shot
-0, |    # 0x7F - Piplup
-0, |    # 0x80 - Togepi
-0, |    # 0x81 - Goldeen
-0, |    # 0x82 - Gardevoir
-0, |    # 0x83 - Wobbuffet
-0, |    # 0x84 - Suicune
-0, |    # 0x85 - Bonsly
-0, |    # 0x86 - Andross
-0, |    # 0x87 - Andross Shot
-0, |    # 0x88 - Barbara
-0, |    # 0x89 - GrayFox
-0, |    # 0x8A - RayMKII
-0, |    # 0x8B - RayMKII Bomb
-0, |    # 0x8C - RayMKII Gun
-0, |    # 0x8D - Samurai Goroh
-0, |    # 0x8E - Devil
+1, |    # 0x62 - Torchic
+1, |    # 0x63 - Celebi
+1, |    # 0x64 - Chikorita
+1, |    # 0x65 - Chikorita Shot
+1, |    # 0x66 - Entei
+1, |    # 0x67 - Moltres
+1, |    # 0x68 - Munchlax
+1, |    # 0x69 - Deoxys
+1, |    # 0x6A - Groudon
+1, |    # 0x6B - Gulpin
+1, |    # 0x6C - Staryu
+1, |    # 0x6D - Staryu Shot   
+1, |    # 0x6E - Ho-Oh
+1, |    # 0x6F - Ho-Oh Shot
+1, |    # 0x70 - Jirachi
+1, |    # 0x71 - Snorlax
+1, |    # 0x72 - Bellosom
+1, |    # 0x73 - Kyogre
+1, |    # 0x74 - Kyogre Shot
+1, |    # 0x75 - Latias/Latios
+1, |    # 0x76 - Lugia
+1, |    # 0x77 - Lugia Shot
+1, |    # 0x78 - Manaphy
+1, |    # 0x79 - Weavile
+1, |    # 0x7A - Electrode
+1, |    # 0x7B - Metagross
+1, |    # 0x7C - Mew
+1, |    # 0x7D - Meowth
+1, |    # 0x7E - Meowth Shot
+1, |    # 0x7F - Piplup
+1, |    # 0x80 - Togepi
+1, |    # 0x81 - Goldeen
+1, |    # 0x82 - Gardevoir
+1, |    # 0x83 - Wobbuffet
+1, |    # 0x84 - Suicune
+1, |    # 0x85 - Bonsly
+1, |    # 0x86 - Andross
+1, |    # 0x87 - Andross Shot
+1, |    # 0x88 - Barbara
+1, |    # 0x89 - GrayFox
+1, |    # 0x8A - RayMKII
+1, |    # 0x8B - RayMKII Bomb
+1, |    # 0x8C - RayMKII Gun
+1, |    # 0x8D - Samurai Goroh
+1, |    # 0x8E - Devil
 -3, |    # 0x8F - Excitebike
-0, |    # 0x90 - Jeff
-0, |    # 0x91 - Jeff Pencil Bullet
-0, |    # 0x92 - Jeff Pencil Rocket
-0, |    # 0x93 - Lakitu
-0, |    # 0x94 - Knuckle Joe
-0, |    # 0x95 - Knuckle Joe Shot
-0, |    # 0x96 - Hammer Bro
-0, |    # 0x97 - Hammer Bro Hammer
-0, |    # 0x98 - Helirin
-0, |    # 0x99 - Kat/Ana
-0, |    # 0x9A - Kat/Ana Ana
-0, |    # 0x9B - Jill Dozer
-0, |    # 0x9C - Lyn
-0, |    # 0x9D - Little Mac
-0, |    # 0x9E - Metroid
-0, |    # 0x9F - Nintendog
-0, |    # 0xA0 - Nintendog Full
-0, |    # 0xA1 - MrResetti
-0, |    # 0xA2 - Isaac
-0, |    # 0xA3 - Isaac Shot
-0, |    # 0xA4 - Saki
-0, |    # 0xA5 - Saki Shot 1
-0, |    # 0xA6 - Saki Shot 2
-0, |    # 0xA7 - Shadow
-0, |    # 0xA8 - War Infantry
-0, |    # 0xA9 - War Infantry Shot
-0, |    # 0xAA - Starfy
-0, |    # 0xAB - War Tank
-0, |    # 0xAC - War Tank Shot
-0, |    # 0xAD - Tingle
-0, |    # 0xAE - Lakitu Spiny
-0, |    # 0xAF - Waluigi
-0, |    # 0xB0 - Dr. Wright
-0 |     # 0xB1 - Dr. Wright Building
+1, |    # 0x90 - Jeff
+1, |    # 0x91 - Jeff Pencil Bullet
+1, |    # 0x92 - Jeff Pencil Rocket
+1, |    # 0x93 - Lakitu
+1, |    # 0x94 - Knuckle Joe
+1, |    # 0x95 - Knuckle Joe Shot
+1, |    # 0x96 - Hammer Bro
+1, |    # 0x97 - Hammer Bro Hammer
+1, |    # 0x98 - Helirin
+1, |    # 0x99 - Kat/Ana
+1, |    # 0x9A - Kat/Ana Ana
+1, |    # 0x9B - Jill Dozer
+1, |    # 0x9C - Lyn
+1, |    # 0x9D - Little Mac
+1, |    # 0x9E - Metroid
+1, |    # 0x9F - Nintendog
+1, |    # 0xA0 - Nintendog Full
+1, |    # 0xA1 - MrResetti
+1, |    # 0xA2 - Isaac
+1, |    # 0xA3 - Isaac Shot
+1, |    # 0xA4 - Saki
+1, |    # 0xA5 - Saki Shot 1
+1, |    # 0xA6 - Saki Shot 2
+1, |    # 0xA7 - Shadow
+1, |    # 0xA8 - War Infantry
+1, |    # 0xA9 - War Infantry Shot
+1, |    # 0xAA - Starfy
+1, |    # 0xAB - War Tank
+1, |    # 0xAC - War Tank Shot
+1, |    # 0xAD - Tingle
+1, |    # 0xAE - Lakitu Spiny
+1, |    # 0xAF - Waluigi
+1, |    # 0xB0 - Dr. Wright
+1 |     # 0xB1 - Dr. Wright Building
 @ $80ADB6D0
 
 *08ADBD1A 000000DF  # Start at 0x00DF for Torchic
@@ -1154,6 +1150,102 @@ notRandomVariant:
     sth r5, 0x8(r1)         
 }
 op lhz r4, 0xA(r1) @ $809aff8c  # itManager::preloadPokemon
+
+op lhz r0, 0x10BE(r3) @ $809b0600   # itManager::isExclusiveSpecialItem
+op lhz r0, 0x10BE(r3) @ $809af544   # itManager::removeRequestTrainingItem
+op lhz r0, 0x10BE(r28) @ $809af698  # itManager::removeRequestTrainingItem
+CODE @ $809b5514        # itManager::safeLotCreateItem
+{
+    lhz r4, 0x10BE(r15)     # Get itKind from last two bytes
+    cmplwi r4, 0xFFFF       # Check if -1
+}
+op lhz r5, 0x10BC(r15) @ $809b5524  # itManager::safeLotCreateItem
+CODE @ $809b5844        # itManager::safeLotCreateItem
+{
+    lhz r4, 0x10BE(r15)     # Get itKind from last two bytes
+    cmplwi r4, 0xFFFF       # Check if -1
+}
+op lhz r5, 0x10BC(r15) @ $809b5854  # itManager::safeLotCreateItem
+HOOK @ $809b5870    # itManager::safeLotCreateItem
+{
+    lhz r23, 0x10BC(r15)    # Get itVariation from first two bytes
+    lhz r21, 0x10BE(r15)    # Get itKind from last two bytes
+}
+CODE @ $809b587c    # itManager::safeLotCreateItem
+{
+    lhz r4, 0x10BE(r15)     # Get itKind from last two bytes
+    cmplwi r4, 0xFFFF       # Check if -1
+}
+op lhz r5, 0x10BC(r15) @ $809b588c  # itManager::safeLotCreateItem
+CODE @ $809b0b44    # itManager::checkCreatableItem
+{
+    lhz r4, 0x10BE(r26)     # Get itKind from last two bytes
+    cmplwi r4, 0xFFFF       # Check if -1
+}
+op lhz r5, 0x10BC(r26) @ $809b0b54  # itManager::checkCreatableItem
+op lhz r0, 0x10BE(r26) @ $809b0f10  # itManager::checkCreatableItem
+op lhz r0, 0x10BE(r28) @ $809ad444  # itManager::processBegin
+op lhz r3, 0x10BE(r28) @ $809ad470  # itManager::processBegin
+HOOK @ $809ad4ec    # itManager::processBegin
+{
+    mr r5, r4   # Pass variation as extra parameter to itManager::preloadPokemon 
+    mr r4, r3   # Original operation
+}
+HOOK @ $809ad6f0    # itManager::processBegin
+{
+    mr r5, r4   # Pass variation as extra parameter to itManager::preloadPokemon 
+    mr r4, r3   # Original operation
+}
+HOOK @ $80952750    # stOperatorDropItemEvent::startOperator
+{
+    li r4, 134  # Original operation
+    li r5, 0    # Pass variation as extra parameters to itManager::preloadPokemon
+}
+CODE @ $809afa0c    # itManager::preloadAssist
+{
+    stwu r1,-0x30(r1)               # \
+    mflr r0                         # | 
+    stw r0,0x34(r1)                 # |
+    addi r11,r1,0x30                # | Increase stack frame
+}                                   # |
+op addi	r11, r1, 0x30 @ $809afcc0   # |
+op lwz r0, 0x34(r1) @ $809afcc8     # |
+op addi r1, r1, 0x30 @ $809afcd0    # /
+HOOK @ $809afa20    # itManager::preloadAssist
+{
+    stw r5, 0x8(r1)     # Store variation for later
+    lwz	r5, 0x4C(r3)    # Original operation
+}
+CODE @ $809afa98    # itManager::preloadAssist
+{
+    lhz r4, 0x10BE(r3)
+    cmplwi r4, 0xFFFF
+}
+CODE @ $809afaa4    # itManager::preloadAssist
+{
+    lhz r5, 0x10BC(r3)
+    mr r3, r30
+}
+HOOK @ $809afc90    # itManager:preloadAssist
+{
+    lwz r3, 0x8(r1)         # \
+    cmpwi r3, 5000          # | Check if variant == 5000
+    bne+ notRandomVariant   # /
+    %lwi (r11, g_itKindVariationNums)  # \ 
+    rlwinm r5, r31, 2, 0, 29            # | g_itKindVariationNums[itKind]
+    lwzx r5, r11, r5                   # /
+    cmpwi r5, 0             # \ Check if itKindVariationNums < 0
+    ble+ notRandomVariant   # /
+    mr r3, r5
+    %call (randi)           # Get random variation from 0 to itKindVariationNum
+notRandomVariant:
+    mr r5, r3               # Pass itVariation
+    slwi r12, r5, 16    # \
+    add r31, r12, r31   # / Add variation to itKind
+    mr r3, r30      # Original operation
+}
+op andi. r4, r31, 0xFFFF @ $809afc98 # itManager:preloadAssist
+
 
 # TODO: Test out making every item have a grCollision
 
