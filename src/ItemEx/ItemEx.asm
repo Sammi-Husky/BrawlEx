@@ -142,9 +142,6 @@ isSubspace:
     %call (strcmp)                      # | Check if Pokemon folder has changed
     cmpwi r3, 0x0                       # |
     beq+ dontReloadPkmnSawnd            # /
-    addi r4, r1, 0x1c                   # \
-    %lwi (r3, PKM_OVERRIDE_STR_ADDR     # | Copy new Pokemon folder name
-    %call (strcpy)                      # /
     %lwd (r12, g_stLoaderManager)       
     li r10, 5   
     lwz r11, 0x28(r12)              # Get g_stLoaderManager->stLoaderPokemonSe
@@ -155,6 +152,9 @@ isSubspace:
 notSubspace:
     stb r10, 0x44(r11)              # stLoader->state to 5 to tell it to reload sawnd
 dontReloadPkmnSawnd:
+    addi r4, r1, 0x1c                   # \
+    %lwi (r3, PKM_OVERRIDE_STR_ADDR     # | Copy new Pokemon folder name
+    %call (strcpy)                      # /
     lwz r12, 0xc(r1)            # \
     cmpwi r12, 0x3d             # | Check if stageKind = Subspace
     beq+ isSubspace2            # /
