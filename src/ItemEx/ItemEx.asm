@@ -799,57 +799,7 @@ HOOK @ $809b6a84    # itManager::removeItemAllTempArchive
 }
 op lwz r4, 0x8(r1) @ $809b6a8c  # clear out archives with type that was passed in
 
-
 # TODO: Pass in extra parameter for removeItemAllTempArchive in stAdventure2::clearHeap
-
-HOOK @ $807c3240    # soItemManageModuleImpl::haveItem
-{
-    lwz	r6, 0x8(r6)     # Original operation
-    cmplwi r4, 0xFFFF   # \ Check if itKind is in fighter specific range
-    ble+ %end%          # /
-    lwz r11, 0x10c(r6) # fighter->entryId
-    %lwd (r12, g_ftEntryManager)    # \
-    rlwinm r11, r11, 0, 24, 31      # |
-    lwz r12, 0x0(r12)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
-    mulli r11, r11, 580             # |
-    add r12, r12, r11               # /
-    lwz r11, 0x18(r12)   # ftEntry->slotNo
-    slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
-    add r5, r4, r11     # /
-    li r4, 0x4B         # set itKind to Sidestepper
-}
-HOOK @ $807c3394    # soItemManageModuleImpl::createThrowItem
-{
-    lwz	r7, 0x8(r7)     # Original operation
-    cmplwi r6, 0xFFFF   # \ Check if variant is in fighter specific range
-    ble+ %end%          # /
-    lwz r11, 0x10c(r7) # fighter->entryId
-    %lwd (r12, g_ftEntryManager)    # \
-    rlwinm r11, r11, 0, 24, 31      # |
-    lwz r12, 0x0(r12)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
-    mulli r11, r11, 580             # |
-    add r12, r12, r11               # /
-    lwz r11, 0x18(r12)  # fitEntry->slotNo
-    slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
-    add r6, r6, r11     # /
-    li r5, 0x4b         # set itKind to Sidestepper
-}
-HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
-{
-    lfs	f0, 0x0(r28)    # Original operation
-    cmpwi r31, 0xFFFF   # \
-    ble+ %end%          # /
-    lwz r11, 0x8c4(r21) # baseItem->itVariant
-    srawi r11, r11, 20  # ftSlotId = current item variant / 0x100000
-    add r31, r31, r11   # variant += ftSlotId
-}
-HOOK @ $80990328    # BaseItem::notifyEventAnimCmd
-{
-    mr r7, r31    # Original operation
-    cmpwi r31, 0x1400   # \ check if clone item
-    blt+ %end%          # /
-    li r6, 0x4b     # set itKind to Sidestepper
-}
 
 HOOK @ $8098a514    # BaseItem::__ct
 {
@@ -904,7 +854,58 @@ CODE @ $809b15e4    # itManager::createBaseItem
     bge- 0x1C    # /
 }
 
-# Note: Number of variants dependent on array on in 80b50b60, (probs can either intercept if variant is above certain number or just set to non negative number)
+## Patch item creation functions to handle item clones 
+
+HOOK @ $807c3240    # soItemManageModuleImpl::haveItem
+{
+    lwz	r6, 0x8(r6)     # Original operation
+    cmplwi r4, 0xFFFF   # \ Check if itKind is in fighter specific range
+    ble+ %end%          # /
+    lwz r11, 0x10c(r6) # fighter->entryId
+    %lwd (r12, g_ftEntryManager)    # \
+    rlwinm r11, r11, 0, 24, 31      # |
+    lwz r12, 0x0(r12)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
+    mulli r11, r11, 580             # |
+    add r12, r12, r11               # /
+    lwz r11, 0x18(r12)   # ftEntry->slotNo
+    slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
+    add r5, r4, r11     # /
+    li r4, 0x4B         # set itKind to Sidestepper
+}
+HOOK @ $807c3394    # soItemManageModuleImpl::createThrowItem
+{
+    lwz	r7, 0x8(r7)     # Original operation
+    cmplwi r6, 0xFFFF   # \ Check if variant is in fighter specific range
+    ble+ %end%          # /
+    lwz r11, 0x10c(r7) # fighter->entryId
+    %lwd (r12, g_ftEntryManager)    # \
+    rlwinm r11, r11, 0, 24, 31      # |
+    lwz r12, 0x0(r12)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
+    mulli r11, r11, 580             # |
+    add r12, r12, r11               # /
+    lwz r11, 0x18(r12)  # fitEntry->slotNo
+    slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
+    add r6, r6, r11     # /
+    li r5, 0x4b         # set itKind to Sidestepper
+}
+HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
+{
+    lfs	f0, 0x0(r28)    # Original operation
+    cmpwi r31, 0xFFFF   # \
+    ble+ %end%          # /
+    lwz r11, 0x8c4(r21) # baseItem->itVariant
+    srawi r11, r11, 20  # ftSlotId = current item variant / 0x100000
+    add r31, r31, r11   # variant += ftSlotId
+}
+HOOK @ $80990328    # BaseItem::notifyEventAnimCmd
+{
+    mr r7, r31    # Original operation
+    cmpwi r31, 0x1400   # \ check if clone item
+    blt+ %end%          # /
+    li r6, 0x4b     # set itKind to Sidestepper
+}
+
+# Note: Number of variants dependent on array on in 80b50b60
 int 4 @ $80adb674
 
 ## Adding new Pokemon/Assist Trophy notes
@@ -1316,13 +1317,13 @@ HOOK @ $809b3a74    # itManager::getRandBasicItemSheet
 }
 op lwz r4, 0x20(r1) @ $809b3b7c # Use desired genParamId (instead of always using 10000)
 
-# TODO: Test out making every item have a grCollision
+########################################
+Every Item Can Have Collision [Kapedani]
+########################################
+op nop @ $8098f6b8
+op li r24, 0x1 @ $8098f6d0 
+
 # TODO: Random sets?
 # TODO: Subspace custom items per stage file
 ## itCustomizer code in stage file?
 
-## Common Item Expansion notes:
-# Expand itKind ids (handle out of bounds for the various arrays like itCustomizer)
-# Allow StageResource to be used on expanded set of items/and/or Pokemon
-# Expand/rework ItmParam attributes
-# Add to ItemGen tables
