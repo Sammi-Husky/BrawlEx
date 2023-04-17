@@ -5,6 +5,7 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 # Stages can override items
 # Character specific items
 # Variants setup for Pokemon/Assist Trophies
+# Allows Pokemon/Assist probabilities to be adjusted in ItmGen in stage file
 
 # Requires: BrawlEX, SSEEX
 
@@ -20,6 +21,7 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias itManager__preloadItemKindArchive    = 0x809ae960
 .alias itManager__removeItemAllTempArchive  = 0x809b69d8
 .alias itManager__getItemGroup              = 0x809ab74c  
+.alias itManager__getRandBasicItemSheet     = 0x809b3a60
 .alias g_itKindVariationNums                = 0x80ADB548
 .alias g_ftManager                          = 0x80B87C28
 .alias ftManager__getFighter                = 0x80814f20
@@ -611,13 +613,6 @@ op addi r4, r1, 0x20    @ $809af2d0 # |
 #op addi r3, r1, 0x24    @ $809af228 # |
 op addi r7, r1, 0x24    @ $809af2a0 # /
 
-
-# TODO: Investigate item gen for Pokemon, stage item gen seems to ignore it
-# TODO: Shiny pokemon?
-# TODO: Random sets?
-# TODO: Subspace custom items per stage file
-## itCustomizer code in stage file?
-
 ## Character Specific Items notes:
 # Uses variant id ranges past 0x10000, (use Unknown24 in misc psa data to define which items to preload). 
 ## 0x1XXYY (X - subvariant with first must be 0, Y - itKind to clone)
@@ -1024,6 +1019,8 @@ HOOK @ $809bca68    # itArchive::__ct
     li r5, 0xc      # Change sound heap to enemy sound heap
 }
 
+## Variant support for Pokemon
+
 op lhz r0, 0x2(r3) @ $809b0850    # itManager::isExclusiveManaphy
 CODE @ $809b55a8    # itManager::safeLotCreateItem
 {
@@ -1151,6 +1148,8 @@ notRandomVariant:
 }
 op lhz r4, 0xA(r1) @ $809aff8c  # itManager::preloadPokemon
 
+## Variant support for Assists
+
 op lhz r0, 0x10BE(r3) @ $809b0600   # itManager::isExclusiveSpecialItem
 op lhz r0, 0x10BE(r3) @ $809af544   # itManager::removeRequestTrainingItem
 op lhz r0, 0x10BE(r28) @ $809af698  # itManager::removeRequestTrainingItem
@@ -1188,18 +1187,18 @@ op lhz r0, 0x10BE(r28) @ $809ad444  # itManager::processBegin
 op lhz r3, 0x10BE(r28) @ $809ad470  # itManager::processBegin
 HOOK @ $809ad4ec    # itManager::processBegin
 {
-    mr r5, r4   # Pass variation as extra parameter to itManager::preloadPokemon 
+    mr r5, r4   # Pass variation as extra parameter to itManager::preloadAssist
     mr r4, r3   # Original operation
 }
 HOOK @ $809ad6f0    # itManager::processBegin
 {
-    mr r5, r4   # Pass variation as extra parameter to itManager::preloadPokemon 
+    mr r5, r4   # Pass variation as extra parameter to itManager::preloadAssist 
     mr r4, r3   # Original operation
 }
 HOOK @ $80952750    # stOperatorDropItemEvent::startOperator
 {
     li r4, 134  # Original operation
-    li r5, 0    # Pass variation as extra parameters to itManager::preloadPokemon
+    li r5, 0    # Pass variation as extra parameters to itManager::preloadAssist
 }
 CODE @ $809afa0c    # itManager::preloadAssist
 {
@@ -1246,8 +1245,81 @@ notRandomVariant:
 }
 op andi. r4, r31, 0xFFFF @ $809afc98 # itManager:preloadAssist
 
+## Allow stages to override probabilities of other Item sets in ItmGenParam 
+
+HOOK @ $809b3bfc    # itManager::getRandBasicItemValue
+{
+    mr r25, r5      # Original operation
+    li r4, 10000    # Pass genParamId as extra parameter to itManager::getRandBasicItemSheet
+}
+HOOK @ $809b3e30    # itManager::getRandBasicItemVariation
+{
+    mr r28, r4      # Original operation
+    li r4, 10000    # Pass genParamId as extra parameter to itManager::getRandBasicItemSheet
+}
+HOOK @ $809b4fe8    # itManager::getLotKirbyNormalItemKind
+{
+    stw	r0, 0x28(r1)    # Original operation
+    li r4, 10000        # Pass genParamId as extra parameter to itManager::getRandBasicItemSheet
+}
+HOOK @ $809b50cc    # itManager::getLotKirbyTabemonoItemKind
+{
+    mr r3, r31      # Original operation
+    li r4, 10000    # Pass genParamId as extra parameter to itManager::getRandBasicItemSheet
+}
+HOOK @ $809b57ac    # itManager::safeLotCreateItem
+{
+    mr r3, r15      # Original operation
+    li r4, 10000    # Pass genParamId as extra parameter to itManager::getRandBasicItemSheet
+}
+HOOK @ $809ad7a4    # itManager::processBegin
+{
+    mr r3, r28                                  # \
+    li r4, 0x2A                                 # |
+    %call (itManager__getRandBasicItemSheet)    # |
+    mr r7, r3                                   # | Pass itSheet so ItmGen in stage can override Pokemon probabilities
+    mr r0, r4                                   # |
+}                                               # |
+op nop @ $809ad7b0                              # /
+HOOK @ $809ad4bc    # itManager::processBegin   
+{                                               
+    mr r3, r28                                  # \
+    li r4, 0                                    # |
+    %call (itManager__getRandBasicItemSheet)    # | 
+    mr r7, r3                                   # | Pass itSheet so ItmGen in stage can override Assist probabilities
+    mr r0, r4                                   # |
+}                                               # |
+op nop @ $809ad4c8                              # /
+HOOK @ $809ad6c0    # itManager::processBegin 
+{
+    mr r3, r28                                  # \
+    li r4, 0                                    # |
+    %call (itManager__getRandBasicItemSheet)    # | 
+    mr r7, r3                                   # | Pass itSheet so ItmGen in stage can override Assist probabilities
+    mr r0, r4                                   # |
+}                                               # |
+op nop @ $809ad6cc                              # /
+CODE @ $809b3a60    # itManager::getRandBasicItemSheet
+{
+    stwu r1,-0x50(r1)               # \
+    mflr r0                         # |
+    stw r0,0x54(r1)                 # |
+    addi r11,r1,0x50                # | Make more room on stack
+}                                   # |
+op addi r11, r1, 0x50 @ $809b3bc0   # |
+op lwz r0, 0x54(r1) @ $809b3bd0     # |
+op addi r1, r1, 0x50 @ $809b3bd8    # /
+HOOK @ $809b3a74    # itManager::getRandBasicItemSheet
+{
+    stw r4, 0x20(r1)    # Store genParamId extra parameter on stack
+    lis	r5, 0x80B9      # Original operation
+}
+op lwz r4, 0x20(r1) @ $809b3b7c # Use desired genParamId (instead of always using 10000)
 
 # TODO: Test out making every item have a grCollision
+# TODO: Random sets?
+# TODO: Subspace custom items per stage file
+## itCustomizer code in stage file?
 
 ## Common Item Expansion notes:
 # Expand itKind ids (handle out of bounds for the various arrays like itCustomizer)
