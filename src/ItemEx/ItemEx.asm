@@ -1086,10 +1086,21 @@ HOOK @ $809ad7d4    # itManager::processBegin
     mr r5, r4   # Pass variation as extra parameter to itManager::preloadPokemon
     mr r4, r3   # Original operation
 }
-HOOK @ $809afcec    # itManager::preloadPokemon
+HOOK @ $809afcf0    # itManager::preloadPokemon
 {
-    stw	r4, 0x8(r1) # Original operation
-    stw r5, 0xc(r1) # Store variation on stack
+    mr r31, r3      # Original operation
+    sth r5, 0x8(r1) # Store variation on stack
+    cmpwi r5, 5000          # \ Check if variant == 5000
+    bne+ notRandomVariant   # /
+    lhz	r3, 0xA(r1)         # Get itKind
+    %lwi (r11, g_itKindVariationNums)  # \ 
+    rlwinm r3, r3, 2, 0, 29            # | g_itKindVariationNums[itKind]
+    lwzx r3, r11, r3                   # /
+    %call (randi)           # Get random variation from 0 to itKindVariationNum
+    sth r3, 0x8(r1) # Store new variantion on stack
+notRandomVariant:
+    mr r3, r31      # Put back itManager in r3
+    lhz r4, 0xA(r1) # Put back itKind in r4
 }
 HOOK @ $809afd74    # itManager::preloadPokemon
 {
@@ -1105,14 +1116,24 @@ loop:
     mtctr r12               # |
     bctrl                   # /
     lhz r10, 0x2(r3)    # \
-    lwz r12, 0x8(r1)    # | Check if itKind already in the list of Pokemon
+    lhz r12, 0xA(r1)    # | Check if desired itKind already in the list of Pokemon
     cmpw r12, r10       # |
     bne+ startLoop      # /
+    lhz r10, 0x0(r3)    # Get variant
+    lhz r12, 0x8(r1)    # Get desired variant
+    cmpw r10, r12       # \ Check if equal
+    beq+ startLoop      # /                        
+    cmpwi r10, 0x0      # \ 
+    beq+ startLoop      # | Check if one of the variants is 0 (which does not use extra soundbank)
+    cmpwi r12, 0x0      # | 
+    beq+ startLoop      # /
+dontPreload:
     li r3, 0x0              # \ Don't preload if Pokemon with same itKind already exists (to avoid clashing sfx group ids)
     %branch (0x809affc8)    # /
 startLoop:
     cmpwi r29, 0
     bgt+ loop
+endLoop:
     cmpwi r30, 5 # Original operation
 }
 HOOK @ $809afe68    # itManager::preloadPokemon
@@ -1133,20 +1154,7 @@ HOOK @ $809aff30    # itManager::preloadPokemon
     srwi r12, r28, 16           # Get itVariation from first two bytes 
     cmpw r10, r12               # Check if desired itVariation
 }
-HOOK @ $809aff84    # itManager::preloadPokemon
-{
-    lwz r3, 0xc(r1)         # \
-    cmpwi r3, 5000          # | Check if variant == 5000
-    bne+ notRandomVariant   # /
-    lwz	r3, 0x8(r1)         # Get itKind
-    %lwi (r11, g_itKindVariationNums)  # \ 
-    rlwinm r3, r3, 2, 0, 29            # | g_itKindVariationNums[itKind]
-    lwzx r3, r11, r3                   # /
-    %call (randi)           # Get random variation from 0 to itKindVariationNum
-notRandomVariant:
-    mr r5, r3               # Pass itVariation
-    sth r5, 0x8(r1)         
-}
+op lhz r5, 0x8(r1) @ $809aff84  # itManager::preloadPokemon
 op lhz r4, 0xA(r1) @ $809aff8c  # itManager::preloadPokemon
 
 ## Variant support for Assists
@@ -1320,7 +1328,7 @@ op lwz r4, 0x20(r1) @ $809b3b7c # Use desired genParamId (instead of always usin
 ########################################
 Every Item Can Have Collision [Kapedani]
 ########################################
-op nop @ $8098f6b8
+op nop @ $8098f6b8      
 op li r24, 0x1 @ $8098f6d0 
 
 # TODO: Random sets?
