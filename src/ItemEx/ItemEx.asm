@@ -613,7 +613,9 @@ op addi r4, r1, 0x20    @ $809af2d0 # |
 #op addi r3, r1, 0x24    @ $809af228 # |
 op addi r7, r1, 0x24    @ $809af2a0 # /
 
-## Character Specific Items notes:
+##########################
+# Fighter Specific Items #
+##########################
 # Uses variant id ranges past 0x10000, (use Unknown24 in misc psa data to define which items to preload). 
 ## 0x1XXYY (X - subvariant with first must be 0, Y - itKind to clone)
 ## Internally itKind in the itArchive is set to 0x4B (Sidestepper) because stage items have more freedom, though the item instance itKind is set to the base item id to pass all the required checks
@@ -854,7 +856,9 @@ CODE @ $809b15e4    # itManager::createBaseItem
     bge- 0x1C    # /
 }
 
-## Patch item creation functions to handle item clones 
+#######################################################
+# Patch item creation functions to handle item clones #
+#######################################################
 
 HOOK @ $807c3240    # soItemManageModuleImpl::haveItem
 {
@@ -906,9 +910,11 @@ HOOK @ $80990328    # BaseItem::notifyEventAnimCmd
 }
 
 # Note: Number of variants dependent on array on in 80b50b60
-int 4 @ $80adb674
+int 4 @ $80adb674   # Set Sidestepper to have > 0 variants
 
-## Adding new Pokemon/Assist Trophy notes
+##################################
+# Adding Pokemon/Assist Variants #
+##################################
 # Add how many random variants you want into below array, if you want a non random variant then variant should be at least 1
 # Variants load as Itm<Name><variantId>Param.pac, variants also use their own ItmParam called Itm<variantId>Param.pac
 # Note: PSA should make sure that emitted shot item use right variant
@@ -1001,15 +1007,17 @@ int[80] |
 
 HOOK @ $809af278    # itManager::preloadItemKindArchive
 {
+    cmpwi r16, 0x86     # \ Check if assist
+    bge+ useSoundbank   # / 
+    cmpwi r17, 0x0      # \ Check if variant > 0
+    bgt+ useSoundbank   # / 
+    li r14, -1          # Set sfx group id to -1
+    b %end%
+useSoundbank:
     lwzx r14, r3, r0    # Original operation
     andi. r14, r14, 0xffff  # Get sawnd id from last two bytes
     extsh r14, r14      # Convert to int
     sthx r17, r3, r0    # Store variant in first two bytes
-    cmpwi r16, 0x86     # \
-    bge+ %end%          # / Check if assist
-    cmpwi r17, 0x0      # \ Check if variant > 0
-    bgt+ %end%          # / 
-    li r14, -1          # Set sfx group id to -1
 }
 
 HOOK @ $809bca68    # itArchive::__ct
@@ -1020,7 +1028,9 @@ HOOK @ $809bca68    # itArchive::__ct
     li r5, 0xc      # Change sound heap to enemy sound heap
 }
 
-## Variant support for Pokemon
+###############################
+# Variant support for Pokemon #
+###############################
 
 op lhz r0, 0x2(r3) @ $809b0850    # itManager::isExclusiveManaphy
 CODE @ $809b55a8    # itManager::safeLotCreateItem
@@ -1157,7 +1167,9 @@ HOOK @ $809aff30    # itManager::preloadPokemon
 op lhz r5, 0x8(r1) @ $809aff84  # itManager::preloadPokemon
 op lhz r4, 0xA(r1) @ $809aff8c  # itManager::preloadPokemon
 
-## Variant support for Assists
+###############################
+# Variant support for Assists #
+###############################
 
 op lhz r0, 0x10BE(r3) @ $809b0600   # itManager::isExclusiveSpecialItem
 op lhz r0, 0x10BE(r3) @ $809af544   # itManager::removeRequestTrainingItem
@@ -1254,7 +1266,9 @@ notRandomVariant:
 }
 op andi. r4, r31, 0xFFFF @ $809afc98 # itManager:preloadAssist
 
-## Allow stages to override probabilities of other Item sets in ItmGenParam 
+############################################################################
+# Allow stages to override probabilities of other Item sets in ItmGenParam #
+############################################################################
 
 HOOK @ $809b3bfc    # itManager::getRandBasicItemValue
 {
