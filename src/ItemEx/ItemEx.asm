@@ -200,6 +200,7 @@ HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizati
     lwz	r3, 0x1D0(r27)  # original operation
 }
 
+# TODO: Random sets?
 
 ########################################################################################################################
 # Allow stage to set custom ItmParam as well as custom itCustomizer                                                    #
@@ -309,8 +310,6 @@ skipGettingItCustomizerFromModule:
     lbz	r0, -0x4810(r7) # /
 }
 op bne- 0x4E8 @ $809abc2c   # Skip fetching default itCustomizer if already obtained
-
-## TODO: Early return in stAdventure2::getItemPac in sora_adv_stage rel so it doesn't run everytime a stage item spawns
 
 HOOK @ $808382f0    # Fighter::startFinal
 {
@@ -578,7 +577,7 @@ formulateBrresPath:
     ble+ brresItemPathObtained  # /
     addi r3, r1, 532            # \ Check if Brres.pac exists on the SD card
     %call (gfFileIO__checkFile) # /
-    andi. r19, r19, 0xFF    # \ 
+    subi r19, r19, 0x100    # \ 
     cmpwi r3, 0             # | Turn costume id to 00 and try again if item doesn't exist
     bne- formulateBrresPath # /
 brresItemPathObtained:
@@ -800,8 +799,6 @@ HOOK @ $809b6a84    # itManager::removeItemAllTempArchive
     bctrl           
 }
 op lwz r4, 0x8(r1) @ $809b6a8c  # clear out archives with type that was passed in
-
-# TODO: Pass in extra parameter for removeItemAllTempArchive in stAdventure2::clearHeap
 
 HOOK @ $8098a514    # BaseItem::__ct
 {
@@ -1345,7 +1342,4 @@ Every Item Can Have Collision [Kapedani]
 op nop @ $8098f6b8      
 op li r24, 0x1 @ $8098f6d0 
 
-# TODO: Random sets?
-# TODO: Subspace custom items per stage file
-## itCustomizer code in stage file?
 
