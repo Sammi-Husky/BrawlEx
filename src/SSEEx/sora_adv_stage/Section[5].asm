@@ -495,14 +495,14 @@ loc_6D8:
         .4byte 0x65746572
         .4byte 0x732E0A00
 loc_704:
-        .4byte 0x8C9F8DF5
-        .4byte 0x91CE8FDB
-        .4byte 0x83418343
-        .4byte 0x83658380
-        .4byte 0x8EED95CA
-        .4byte 0x203D205B
-        .4byte 0x25645D20
-        .4byte 0x0A000000
+        .4byte 0x8C9F8DF5       # \
+        .4byte 0x91CE8FDB       # |
+        .4byte 0x83418343       # |
+        .4byte 0x83658380       # | Can be replaced
+        .4byte 0x8EED95CA       # |
+        .4byte 0x203D205B       # |
+        .4byte 0x25645D20       # |
+        .4byte 0x0A000000       # /
 loc_724:
         .4byte 0x00000000         [R_PPC_ADDR32(40, 5, "loc_7C8")]
         .4byte 0x00000000

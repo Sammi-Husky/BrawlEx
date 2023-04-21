@@ -16,9 +16,9 @@
 # TODO: Investigate putting entirely new level markers on the map
 ## Unlock levels similar to characters detecting jumpLevelId
 ## Seems to be setup in initDisp
-# TODO: Unload and load alt soundbanks based on level id so different enemy sfx can be used?
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
+# TODO: Stickers don't get deleted upon use
 # TODO: Stamina battles? (maybe can use jump string bone to set it up) as well as other stuff like Giant and such
 ## Gets set in stLoaderPlayer::descEntry
 ## Maybe manage custom rules in initForGameMode (apply to ftOwner)
@@ -29,9 +29,12 @@
 # TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
 # TODO: For coin, modify code @ 8081BC74 in All Star VS to check if user has coins and wipe if they don't (and then implement dropping coins upon death)
 # TODO: Make sublevel id above 0x1A (z) just use hex instead for the file name, make ids above 0x99 use hex in the file name
-# TODO: Investigate Wii crashing issues
-# TODO: Make door not be able to entered by putting requirements in potentially unused door, investigate three pin door
-
+# TODO: Make door not be able to entered by putting requirements in potentially unused door, investigate three pin door (i.e. investigate triggers more, make new triggers based on current character being used)
+# TODO: investigae movie menu (hold L for alternate menu of SSE)
+# TODO: Load optional tlst at beginning of stage
+# TODO: Control enemies
+# TODO: Split gimmicks into rels so each stage could have a completely different gimmicks as well as can put new itCustomizers there
+## Default rel with gimmicks would go in adventure_common, otherwise stages could have their own rel in it
 
 .set advExSaveSize, 0xC9
 .set tempAdvExSaveSize, 0xC9
@@ -412,7 +415,7 @@ loc_dontCreateTempExSave:
 loc_applyPenalty:           # /
     stw r10, 0x4910(r28)    # Set scoreInCurrentStage with applied penalty
     
-    ## Check for Time Attack info in jump bone Format: $$<reset><decrementer><set(=) or add(+)><target score> e.g. $$*9+000010000
+    ## Check for Time Attack info in jump bone Format: $$<reset><decrementer><set(=) or add(+)><target score> e.g. $$*9+000010000 # TODO: memcpy/string copy to stack so that can use rest of jump bone string
     lhz r0, 0xC(r27)        # \
     cmpwi r0, 0x2424        # | Check first two char of jump bone is "$$"
     bne+ loc_noTimeAttack   # /

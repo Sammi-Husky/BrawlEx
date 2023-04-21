@@ -1745,11 +1745,13 @@ stAdventure2__clearHeap:
     /* 000019B0: */    stwu r1,-0x20(r1)
     /* 000019B4: */    mflr r0
     /* 000019B8: */    stw r0,0x24(r1)
-    /* 000019BC: */    stw r31,0x1C(r1)
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_28")]
+    /* 000019BC: */    #stw r31,0x1C(r1)
     /* 000019C0: */    mr r31,r3
-    /* 000019C4: */    stw r30,0x18(r1)
-    /* 000019C8: */    stw r29,0x14(r1)
-    /* 000019CC: */    stw r28,0x10(r1)
+    /* 000019C4: */    #stw r30,0x18(r1)
+    /* 000019C8: */    #stw r29,0x14(r1)
+    /* 000019CC: */    #stw r28,0x10(r1)
     /* 000019D0: */    mr r28,r4
     /* 000019D4: */    lwz r0,0x554(r3)
     /* 000019D8: */    cmpwi r0,0x0
@@ -1862,6 +1864,7 @@ loc_1B48:
     /* 00001B48: */    lwz r3,0xA0(r31)
     /* 00001B4C: */    bl __unresolved                          [R_PPC_REL24(27, 1, "stTriggerMng__crearTrigger")]
     /* 00001B50: */    bl __unresolved                          [R_PPC_REL24(27, 1, "itManager__getInstance")]
+    li r4, 0x0          # Add extra parameter required by ItemEx
     /* 00001B54: */    bl __unresolved                          [R_PPC_REL24(27, 1, "itManager__removeItemAllTempArchive")]
     /* 00001B58: */    cmpwi r28,0x0
     /* 00001B5C: */    bne- loc_1C04
@@ -1999,14 +2002,19 @@ loc_1D18:
 loc_1D34:
     /* 00001D34: */    li r0,0x0
     /* 00001D38: */    stw r0,0x578(r31)
-    /* 00001D3C: */    lwz r31,0x1C(r1)
-    /* 00001D40: */    lwz r30,0x18(r1)
-    /* 00001D44: */    lwz r29,0x14(r1)
-    /* 00001D48: */    lwz r28,0x10(r1)
+    /* 00001D3C: */    #lwz r31,0x1C(r1)
+    /* 00001D40: */    #lwz r30,0x18(r1)
+    /* 00001D44: */    #lwz r29,0x14(r1)
+    /* 00001D48: */    #lwz r28,0x10(r1)
+    addi r11,r1,0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_28")]
     /* 00001D4C: */    lwz r0,0x24(r1)
     /* 00001D50: */    mtlr r0
     /* 00001D54: */    addi r1,r1,0x20
     /* 00001D58: */    blr
+    nop 
+    nop 
+    nop 
 grHitCircleObserver__remove:
     /* 00001D5C: */    stwu r1,-0x10(r1)
     /* 00001D60: */    mflr r0
@@ -8742,6 +8750,7 @@ loc_7D80:
     /* 00007D8C: */    addi r1,r1,0x10
     /* 00007D90: */    blr
 stAdventure2__getItemPac:
+    ## SSEEX: Check for item in stage file first, then check in adventure_common
     /* 00007D94: */    stwu r1,-0xE0(r1)
     /* 00007D98: */    mflr r0
     /* 00007D9C: */    stw r0,0xE4(r1)
@@ -8835,15 +8844,15 @@ loc_7EF0:
     /* 00007EF4: */    addi r4,r4,0x1
     /* 00007EF8: */    bdnz+ loc_7ED4
 loc_7EFC:
-    /* 00007EFC: */    cmpwi r31,-0x1
-    /* 00007F00: */    bne- loc_7F20
-    /* 00007F04: */    cmpwi r6,0x46
-    /* 00007F08: */    beq- loc_7F20
-    /* 00007F0C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 5, "loc_704")]
-    /* 00007F10: */    mr r4,r30
-    /* 00007F14: */    addi r3,r3,0x0                           [R_PPC_ADDR16_LO(40, 5, "loc_704")]
-    /* 00007F18: */    crclr 6
-    /* 00007F1C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    # /* 00007EFC: */    cmpwi r31,-0x1
+    # /* 00007F00: */    bne- loc_7F20
+    # /* 00007F04: */    cmpwi r6,0x46
+    # /* 00007F08: */    beq- loc_7F20
+    # /* 00007F0C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 5, "loc_704")]
+    # /* 00007F10: */    mr r4,r30
+    # /* 00007F14: */    addi r3,r3,0x0                           [R_PPC_ADDR16_LO(40, 5, "loc_704")]
+    # /* 00007F18: */    crclr 6
+    # /* 00007F1C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
 loc_7F20:
     /* 00007F20: */    li r0,0x7
     /* 00007F24: */    addi r3,r1,0x20
@@ -8863,13 +8872,13 @@ loc_7F50:
     /* 00007F54: */    addi r4,r4,0x1
     /* 00007F58: */    bdnz+ loc_7F34
 loc_7F5C:
-    /* 00007F5C: */    cmpwi r14,-0x1
-    /* 00007F60: */    bne- loc_7F78
-    /* 00007F64: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 5, "loc_704")]
-    /* 00007F68: */    mr r4,r30
-    /* 00007F6C: */    addi r3,r3,0x0                           [R_PPC_ADDR16_LO(40, 5, "loc_704")]
-    /* 00007F70: */    crclr 6
-    /* 00007F74: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
+    # /* 00007F5C: */    cmpwi r14,-0x1
+    # /* 00007F60: */    bne- loc_7F78
+    # /* 00007F64: */    lis r3,0x0                               [R_PPC_ADDR16_HA(40, 5, "loc_704")]
+    # /* 00007F68: */    mr r4,r30
+    # /* 00007F6C: */    addi r3,r3,0x0                           [R_PPC_ADDR16_LO(40, 5, "loc_704")]
+    # /* 00007F70: */    crclr 6
+    # /* 00007F74: */    bl __unresolved                          [R_PPC_REL24(0, 4, "OSError__OSReport")]
 loc_7F78:
     /* 00007F78: */    cmpwi r30,0x46
     /* 00007F7C: */    bne- loc_7F94
@@ -8884,18 +8893,25 @@ loc_7F94:
     /* 00007F9C: */    add r15,r29,r0
     /* 00007FA0: */    lwz r16,0x1F0(r15)
     /* 00007FA4: */    cmpwi r16,0x0
-    /* 00007FA8: */    beq- loc_7FB0
-    /* 00007FAC: */    b loc_800C
+    /* 00007FA8: */    bne+ loc_800C #beq- loc_7FB0
+    /* 00007FAC: */    #b loc_800C
 loc_7FB0:
-    /* 00007FB0: */    lis r4,0x1
-    /* 00007FB4: */    lwz r3,0x1B0(r29)
-    /* 00007FB8: */    subi r0,r4,0x2
-    /* 00007FBC: */    mr r5,r31
-    /* 00007FC0: */    addi r6,r1,0x18
-    /* 00007FC4: */    li r4,0x1
-    /* 00007FC8: */    rlwinm r7,r0,0,16,31
-    /* 00007FCC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
+    lwz r3, 0x1A4(r29)  # \
+    li r4, 0x1          # | Check for arc with fileIndex = itKind, group = 1 in secondary filedata
+    mr r6, r30          # /
+loc_isNotCustomBrres:
+    /* 00007FB0: */    lis r10,0x1 #lis r4,0x1
+    /* 00007FB8: */    subi r0,r10,0x2 #subi r0,r4,0x2
+    /* 00007FC0: */    addi r7,r1,0x18 #addi r6,r1,0x18
+    /* 00007FC4: */    li r5,0x1 #li r4,0x1
+    /* 00007FC8: */    rlwinm r8,r0,0,16,31 #rlwinm r7,r0,0,16,31
+    /* 00007FCC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData3")]
     /* 00007FD0: */    mr r17,r3
+    /* 00007FB4: */    lwz r3,0x1B0(r29)
+    /* 00007FBC: */    mr r6,r31 #mr r5,r31
+    li r4, 0
+    cmpwi r17, 0x0
+    beq+ loc_isNotCustomBrres
     /* 00007FD4: */    li r3,0x80
     /* 00007FD8: */    li r4,0xF
     /* 00007FDC: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -8917,18 +8933,25 @@ loc_800C:
     /* 00008014: */    add r15,r29,r0
     /* 00008018: */    lwz r17,0x1F0(r15)
     /* 0000801C: */    cmpwi r17,0x0
-    /* 00008020: */    beq- loc_8028
-    /* 00008024: */    b loc_8084
+    /* 00008020: */    bne+ loc_8084 #beq- loc_8028
+    /* 00008024: */    #b loc_8084
 loc_8028:
-    /* 00008028: */    lis r4,0x1
+    lwz r3, 0x1A4(r29)  # \
+    li r4, 0x2          # | Check for arc with fileIndex = itKind, group = 2 in secondary filedata
+    mr r6, r30          # /
+loc_isNotCustomParam:
+    /* 00008028: */    lis r10,0x1 #lis r4,0x1
+    /* 00008030: */    subi r0,r10,0x2 #subi r0,r4,0x2
+    /* 00008038: */    addi r7,r1,0x14 #addi r6,r1,0x14
+    /* 0000803C: */    li r5, 0x1 #li r4,0x1
+    /* 00008040: */    rlwinm r8,r0,0,16,31 #rlwinm r7,r0,0,16,31
+    /* 00008044: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData3")]
+    /* 00008048: */    mr r20,r3 #mr r14,r3
     /* 0000802C: */    lwz r3,0x1B0(r29)
-    /* 00008030: */    subi r0,r4,0x2
-    /* 00008034: */    mr r5,r14
-    /* 00008038: */    addi r6,r1,0x14
-    /* 0000803C: */    li r4,0x1
-    /* 00008040: */    rlwinm r7,r0,0,16,31
-    /* 00008044: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
-    /* 00008048: */    mr r14,r3
+    /* 00008034: */    mr r6, r14 #mr r5,r14
+    li r4, 0
+    cmpwi r20, 0x0
+    beq+ loc_isNotCustomParam
     /* 0000804C: */    li r3,0x80
     /* 00008050: */    li r4,0xF
     /* 00008054: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -8940,7 +8963,7 @@ loc_8028:
 loc_806C:
     /* 0000806C: */    lwz r5,0x14(r1)
     /* 00008070: */    mr r3,r17
-    /* 00008074: */    mr r4,r14
+    /* 00008074: */    mr r4,r20 #mr r4,r14
     /* 00008078: */    li r6,0x11
     /* 0000807C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__setFileImage")]
     /* 00008080: */    stw r17,0x1F0(r15)
@@ -8955,27 +8978,85 @@ loc_8084:
     /* 000080A0: */    mtlr r0
     /* 000080A4: */    addi r1,r1,0xE0
     /* 000080A8: */    blr
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+    nop 
+
+    nop 
+    nop 
+    nop 
+    # +43 
 stAdventure2__getItemPacEnemyFigure:
     /* 000080AC: */    stwu r1,-0x20(r1)
     /* 000080B0: */    mflr r0
     /* 000080B4: */    stw r0,0x24(r1)
-    /* 000080B8: */    stw r31,0x1C(r1)
-    /* 000080BC: */    stw r30,0x18(r1)
+    addi r11, r1, 0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_29")]
+    /* 000080B8: */    #stw r31,0x1C(r1)
+    /* 000080BC: */    #stw r30,0x18(r1)
     /* 000080C0: */    mr r30,r4
-    /* 000080C4: */    stw r29,0x14(r1)
+    /* 000080C4: */    #stw r29,0x14(r1)
     /* 000080C8: */    mr r29,r3
     /* 000080CC: */    lwz r0,0x220(r3)
     /* 000080D0: */    cmpwi r0,0x0
     /* 000080D4: */    bne- loc_8134
-    /* 000080D8: */    lis r4,0x1
-    /* 000080DC: */    lwz r3,0x1B0(r3)
-    /* 000080E0: */    subi r0,r4,0x2
-    /* 000080E4: */    addi r6,r1,0x8
-    /* 000080E8: */    rlwinm r7,r0,0,16,31
-    /* 000080EC: */    li r4,0x1
-    /* 000080F0: */    li r5,0x17
-    /* 000080F4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
+    lwz r3, 0x1A4(r29)  # \
+    li r4, 1            # | Check for arc with fileIndex = 0x46, group = 1 in secondary filedata
+    li r6, 0x46         # /
+loc_isNotCustomEnemyFigures:
+    /* 000080D8: */    lis r10,0x1 #lis r4,0x1
+    /* 000080E0: */    subi r0,r10,0x2 #subi r0,r4,0x2
+    /* 000080E4: */    addi r7,r1,0x8 #addi r6,r1,0x8
+    /* 000080E8: */    rlwinm r8,r0,0,16,31 #rlwinm r7,r0,0,16,31
+    /* 000080EC: */    li r5,0x1 #li r4,0x1
+    /* 000080F4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData3")]
     /* 000080F8: */    mr r31,r3
+    /* 000080DC: */    lwz r3,0x1B0(r29) #lwz r3,0x1B0(r3)
+    li r4, 0x0
+    /* 000080F0: */    li r6, 0x17 #li r5,0x17
+    cmpwi r31, 0x0
+    beq+ loc_isNotCustomEnemyFigures
+
     /* 000080FC: */    li r3,0x80
     /* 00008100: */    li r4,0xF
     /* 00008104: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -8994,10 +9075,12 @@ loc_8114:
 loc_8134:
     /* 00008134: */    stw r0,0x0(r4)
 loc_8138:
+    addi r11, r1, 0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_29")]
     /* 00008138: */    lwz r0,0x24(r1)
-    /* 0000813C: */    lwz r31,0x1C(r1)
-    /* 00008140: */    lwz r30,0x18(r1)
-    /* 00008144: */    lwz r29,0x14(r1)
+    /* 0000813C: */    #lwz r31,0x1C(r1)
+    /* 00008140: */    #lwz r30,0x18(r1)
+    /* 00008144: */    #lwz r29,0x14(r1)
     /* 00008148: */    mtlr r0
     /* 0000814C: */    addi r1,r1,0x20
     /* 00008150: */    blr
@@ -9010,12 +9093,12 @@ stAdventure2__getEnemyPac:
     /* 00008164: */    mflr r0
     /* 00008168: */    stw r0,0x44(r1)
     /* 0000816C: */    addi r11,r1,0x40
-    /* 00008170: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_22")]
+    /* 00008170: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_20")]
     /* 00008174: */    li r9,0x0
     /* 00008178: */    rlwinm r31,r8,1,0,30
     /* 0000817C: */    stw r9,0x0(r4)
-    /* 00008180: */    addi r10,r31,0x1
-    /* 00008184: */    rlwinm r0,r10,2,0,29
+    /* 00008180: */    addi r20,r31,0x1 #addi r10,r31,0x1
+    /* 00008184: */    rlwinm r0,r20,2,0,29 #rlwinm r0,r10,2,0,29
     /* 00008188: */    mr r23,r3
     /* 0000818C: */    stw r9,0x0(r5)
     /* 00008190: */    add r22,r3,r0
@@ -9026,9 +9109,7 @@ stAdventure2__getEnemyPac:
     /* 000081A4: */    mr r27,r7
     /* 000081A8: */    mr r28,r8
     /* 000081AC: */    stw r9,0x0(r7)
-    /* 000081B0: */    lwz r30,0x288(r22)
-    /* 000081B4: */    cmpwi r30,0x0
-    /* 000081B8: */    bne- loc_8270
+    /* 000081E4: */    li r21, 0x0 #li r0,0x0
     /* 000081BC: */    cmpwi r8,0x17
     /* 000081C0: */    beq- loc_81DC
     /* 000081C4: */    cmpwi r8,0x1C
@@ -9038,33 +9119,38 @@ stAdventure2__getEnemyPac:
     /* 000081D4: */    cmpwi r8,0x23
     /* 000081D8: */    bgt- loc_81E4
 loc_81DC:
-    /* 000081DC: */    li r0,0x1
-    /* 000081E0: */    b loc_81E8
+    /* 000081DC: */    li r21, 0x1 #li r0,0x1
+    /* 000081E0: */    #b loc_81E8
 loc_81E4:
-    /* 000081E4: */    li r0,0x0
+    /* 000081B0: */    lwz r30,0x288(r22)
+    /* 000081B4: */    cmpwi r30,0x0
+    /* 000081B8: */    bne- loc_8270
 loc_81E8:
-    /* 000081E8: */    cmpwi r0,0x0
-    /* 000081EC: */    beq- loc_8214
-    /* 000081F0: */    lis r4,0x1
-    /* 000081F4: */    lwz r3,0x1B0(r3)
-    /* 000081F8: */    subi r0,r4,0x2
-    /* 000081FC: */    mr r5,r10
-    /* 00008200: */    addi r6,r1,0x14
-    /* 00008204: */    li r4,0x1
-    /* 00008208: */    rlwinm r7,r0,0,16,31
-    /* 0000820C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
-    /* 00008210: */    b loc_8234
+    /* 000081E8: */    #cmpwi r21,0x0 #cmpwi r0,0x0
+    /* 000081EC: */    #beq- loc_8214
+    /* 000081F0: */    #lis r4,0x1
+    /* 000081F8: */    #subi r0,r4,0x2
+    /* 000081FC: */    #mr r5,r10
+    /* 00008200: */    #addi r6,r1,0x8 #addi r6,r1,0x14
+    /* 00008204: */    #li r4,0x1
+    /* 00008208: */    #rlwinm r7,r0,0,16,31
+    /* 0000820C: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
+    /* 00008210: */    #b loc_8234
 loc_8214:
+    /* 00008218: */    lwz r3,0x1A4(r23) #lwz r3,0x1A4(r3)
+loc_enemyBrresNotFound:    
     /* 00008214: */    lis r4,0x1
-    /* 00008218: */    lwz r3,0x1A4(r3)
     /* 0000821C: */    subi r0,r4,0x2
-    /* 00008220: */    mr r5,r10
-    /* 00008224: */    addi r6,r1,0x14
+    /* 00008220: */    mr r5,r20 #mr r5,r10
+    /* 00008224: */    addi r6,r1,0x8 #addi r6,r1,0x14
     /* 00008228: */    li r4,0x1
     /* 0000822C: */    rlwinm r7,r0,0,16,31
     /* 00008230: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
-loc_8234:
     /* 00008234: */    mr r29,r3
+    /* 000081F4: */    lwz r3,0x1B0(r23) #lwz r3,0x1B0(r3)
+    cmpwi r29, 0x0
+    beq- loc_enemyBrresNotFound
+loc_8234:
     /* 00008238: */    li r3,0x80
     /* 0000823C: */    li r4,0xF
     /* 00008240: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -9074,7 +9160,7 @@ loc_8234:
     /* 00008250: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive____ct")]
     /* 00008254: */    mr r30,r3
 loc_8258:
-    /* 00008258: */    lwz r5,0x14(r1)
+    /* 00008258: */    lwz r5,0x8(r1) #lwz r5,0x14(r1)
     /* 0000825C: */    mr r3,r30
     /* 00008260: */    mr r4,r29
     /* 00008264: */    li r6,0x11
@@ -9086,42 +9172,45 @@ loc_8270:
     /* 00008278: */    lwz r29,0x288(r22)
     /* 0000827C: */    cmpwi r29,0x0
     /* 00008280: */    bne- loc_8338
-    /* 00008284: */    cmpwi r28,0x17
-    /* 00008288: */    beq- loc_82A4
-    /* 0000828C: */    cmpwi r28,0x1C
-    /* 00008290: */    beq- loc_82A4
-    /* 00008294: */    cmpwi r28,0x1F
-    /* 00008298: */    blt- loc_82AC
-    /* 0000829C: */    cmpwi r28,0x23
-    /* 000082A0: */    bgt- loc_82AC
+    /* 00008284: */    #cmpwi r28,0x17
+    /* 00008288: */    #beq- loc_82A4
+    /* 0000828C: */    #cmpwi r28,0x1C
+    /* 00008290: */    #beq- loc_82A4
+    /* 00008294: */    #cmpwi r28,0x1F
+    /* 00008298: */    #blt- loc_82AC
+    /* 0000829C: */    #cmpwi r28,0x23
+    /* 000082A0: */    #bgt- loc_82AC
 loc_82A4:
-    /* 000082A4: */    li r0,0x1
-    /* 000082A8: */    b loc_82B0
+    /* 000082A4: */    #li r0,0x1
+    /* 000082A8: */    #b loc_82B0
 loc_82AC:
-    /* 000082AC: */    li r0,0x0
+    /* 000082AC: */    #li r0,0x0
 loc_82B0:
-    /* 000082B0: */    cmpwi r0,0x0
-    /* 000082B4: */    beq- loc_82DC
-    /* 000082B8: */    lis r4,0x1
-    /* 000082BC: */    lwz r3,0x1B0(r23)
-    /* 000082C0: */    subi r0,r4,0x2
-    /* 000082C4: */    mr r5,r31
-    /* 000082C8: */    addi r6,r1,0x10
-    /* 000082CC: */    li r4,0x1
-    /* 000082D0: */    rlwinm r7,r0,0,16,31
-    /* 000082D4: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
-    /* 000082D8: */    b loc_82FC
+    /* 000082B0: */    #cmpwi r21,0x0 #cmpwi r0,0x0
+    /* 000082B4: */    #beq- loc_82DC
+    /* 000082B8: */    #lis r4,0x1
+    /* 000082C0: */    #subi r0,r4,0x2
+    /* 000082C4: */    #mr r5,r31
+    /* 000082C8: */    #addi r6,r1,0x8 #addi r6,r1,0x10
+    /* 000082CC: */    #li r4,0x1
+    /* 000082D0: */    #rlwinm r7,r0,0,16,31
+    /* 000082D4: */    #bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
+    /* 000082D8: */    #b loc_82FC
 loc_82DC:
-    /* 000082DC: */    lis r4,0x1
     /* 000082E0: */    lwz r3,0x1A4(r23)
+loc_enemyParamNotFound:    
+    /* 000082DC: */    lis r4,0x1
     /* 000082E4: */    subi r0,r4,0x2
     /* 000082E8: */    mr r5,r31
-    /* 000082EC: */    addi r6,r1,0x10
+    /* 000082EC: */    addi r6,r1,0x8 #addi r6,r1,0x10
     /* 000082F0: */    li r4,0x1
     /* 000082F4: */    rlwinm r7,r0,0,16,31
     /* 000082F8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
+    /* 000082FC: */    mr r20,r3 #mr r31,r3
+    /* 000082BC: */    lwz r3,0x1B0(r23)
+    cmpwi r20, 0x0
+    beq- loc_enemyParamNotFound
 loc_82FC:
-    /* 000082FC: */    mr r31,r3
     /* 00008300: */    li r3,0x80
     /* 00008304: */    li r4,0xF
     /* 00008308: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -9131,9 +9220,9 @@ loc_82FC:
     /* 00008318: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive____ct")]
     /* 0000831C: */    mr r29,r3
 loc_8320:
-    /* 00008320: */    lwz r5,0x10(r1)
+    /* 00008320: */    lwz r5,0x8(r1) #lwz r5,0x10(r1)
     /* 00008324: */    mr r3,r29
-    /* 00008328: */    mr r4,r31
+    /* 00008328: */    mr r4,r20 #mr r4,r31
     /* 0000832C: */    li r6,0x11
     /* 00008330: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__setFileImage")]
     /* 00008334: */    stw r29,0x288(r22)
@@ -9141,15 +9230,19 @@ loc_8338:
     /* 00008338: */    lwz r0,0x510(r23)
     /* 0000833C: */    cmpwi r0,0x0
     /* 00008340: */    bne- loc_8394
+    lwz r3,0x1A4(r23)
+loc_enemyCommonNotFound:
     /* 00008344: */    lis r4,0x1
-    /* 00008348: */    lwz r3,0x1B0(r23)
     /* 0000834C: */    subi r0,r4,0x2
-    /* 00008350: */    addi r6,r1,0xC
+    /* 00008350: */    addi r6,r1,0x8 #addi r6,r1,0xC
     /* 00008354: */    rlwinm r7,r0,0,16,31
     /* 00008358: */    li r4,0x1
     /* 0000835C: */    li r5,0x12C
     /* 00008360: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
     /* 00008364: */    mr r22,r3
+    /* 00008348: */    lwz r3,0x1B0(r23)
+    cmpwi r22, 0x0
+    beq- loc_enemyCommonNotFound
     /* 00008368: */    li r3,0x80
     /* 0000836C: */    li r4,0xF
     /* 00008370: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -9160,48 +9253,52 @@ loc_8380:
     /* 00008380: */    stw r3,0x510(r23)
     /* 00008384: */    mr r4,r22
     /* 00008388: */    li r6,0x11
-    /* 0000838C: */    lwz r5,0xC(r1)
+    /* 0000838C: */    lwz r5,0x8(r1) #lwz r5,0xC(r1)
     /* 00008390: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__setFileImage")]
 loc_8394:
     /* 00008394: */    lwz r0,0x510(r23)
-    /* 00008398: */    cmpwi r28,0x17
+    /* 00008398: */    #cmpwi r28,0x17
     /* 0000839C: */    stw r0,0x0(r26)
-    /* 000083A0: */    beq- loc_83BC
-    /* 000083A4: */    cmpwi r28,0x1C
-    /* 000083A8: */    beq- loc_83BC
-    /* 000083AC: */    cmpwi r28,0x1F
-    /* 000083B0: */    blt- loc_83C4
-    /* 000083B4: */    cmpwi r28,0x23
-    /* 000083B8: */    bgt- loc_83C4
+    /* 000083A0: */    #beq- loc_83BC
+    /* 000083A4: */    #cmpwi r28,0x1C
+    /* 000083A8: */    #beq- loc_83BC
+    /* 000083AC: */    #cmpwi r28,0x1F
+    /* 000083B0: */    #blt- loc_83C4
+    /* 000083B4: */    #cmpwi r28,0x23
+    /* 000083B8: */    #bgt- loc_83C4
 loc_83BC:
-    /* 000083BC: */    li r0,0x1
-    /* 000083C0: */    b loc_83C8
+    /* 000083BC: */    #li r0,0x1
+    /* 000083C0: */    #b loc_83C8
 loc_83C4:
-    /* 000083C4: */    li r0,0x0
+    /* 000083C4: */    #li r0,0x0
 loc_83C8:
-    /* 000083C8: */    cmpwi r0,0x0
+    /* 000083C8: */    cmpwi r21,0x0 #cmpwi r0,0x0
     /* 000083CC: */    beq- loc_8458
+    lwz r3,0x1A4(r23)
+loc_primFaceNotFound:
     /* 000083D0: */    lwz r4,0x524(r23)
-    /* 000083D4: */    lis r3,-0x3333
+    /* 000083D4: */    lis r10,-0x3333 #lis r3,-0x3333
     /* 000083D8: */    lwz r0,0x514(r23)
-    /* 000083DC: */    subi r3,r3,0x3333
+    /* 000083DC: */    subi r10,r10,0x3333 #subi r3,r3,0x3333
     /* 000083E0: */    lwz r4,0x618(r4)
     /* 000083E4: */    cmpwi r0,0x0
     /* 000083E8: */    addi r4,r4,0x13
-    /* 000083EC: */    mulhwu r0,r3,r4
+    /* 000083EC: */    mulhwu r0,r10,r4 #mulhwu r0,r3,r4
     /* 000083F0: */    rlwinm r0,r0,28,4,31
     /* 000083F4: */    mulli r0,r0,0x14
-    /* 000083F8: */    sub r3,r4,r0
-    /* 000083FC: */    addi r5,r3,0xC8
+    /* 000083F8: */    sub r10,r4,r0 #sub r3,r4,r0
+    /* 000083FC: */    addi r5,r10,0xC8 #addi r5,r3,0xC8
     /* 00008400: */    bne- loc_8450
     /* 00008404: */    lis r4,0x1
-    /* 00008408: */    lwz r3,0x1B0(r23)
     /* 0000840C: */    subi r0,r4,0x2
     /* 00008410: */    addi r6,r1,0x8
     /* 00008414: */    li r4,0x1
     /* 00008418: */    rlwinm r7,r0,0,16,31
     /* 0000841C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
     /* 00008420: */    mr r22,r3
+    /* 00008408: */    lwz r3,0x1B0(r23)
+    cmpwi r22, 0x0
+    beq- loc_primFaceNotFound
     /* 00008424: */    li r3,0x80
     /* 00008428: */    li r4,0xF
     /* 0000842C: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -9221,7 +9318,7 @@ loc_8458:
     /* 00008458: */    stw r30,0x0(r24)
     /* 0000845C: */    addi r11,r1,0x40
     /* 00008460: */    stw r29,0x0(r25)
-    /* 00008464: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_22")]
+    /* 00008464: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_20")]
     /* 00008468: */    lwz r0,0x44(r1)
     /* 0000846C: */    mtlr r0
     /* 00008470: */    addi r1,r1,0x40
@@ -9229,17 +9326,19 @@ loc_8458:
 stAdventure2__getAdvRadarData:
     /* 00008478: */    stwu r1,-0x20(r1)
     /* 0000847C: */    mflr r0
-    /* 00008480: */    li r6,0x0
     /* 00008484: */    stw r0,0x24(r1)
-    /* 00008488: */    stw r31,0x1C(r1)
+    addi r11, r1, 0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_28")]
+    /* 00008480: */    li r6,0x0
+    /* 00008488: */    #stw r31,0x1C(r1)
     /* 0000848C: */    lis r31,0x1
     /* 00008490: */    subi r0,r31,0x2
-    /* 00008494: */    stw r30,0x18(r1)
+    /* 00008494: */    #stw r30,0x18(r1)
     /* 00008498: */    mr r30,r5
     /* 0000849C: */    rlwinm r7,r0,0,16,31
-    /* 000084A0: */    stw r29,0x14(r1)
+    /* 000084A0: */    #stw r29,0x14(r1)
     /* 000084A4: */    mr r29,r4
-    /* 000084A8: */    stw r28,0x10(r1)
+    /* 000084A8: */    #stw r28,0x10(r1)
     /* 000084AC: */    mr r28,r3
     /* 000084B0: */    stw r6,0x0(r4)
     /* 000084B4: */    li r4,0x1
@@ -9257,10 +9356,12 @@ stAdventure2__getAdvRadarData:
     /* 000084E4: */    li r5,0x0
     /* 000084E8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "gfArchive__getData2")]
     /* 000084EC: */    stw r3,0x0(r30)
-    /* 000084F0: */    lwz r31,0x1C(r1)
-    /* 000084F4: */    lwz r30,0x18(r1)
-    /* 000084F8: */    lwz r29,0x14(r1)
-    /* 000084FC: */    lwz r28,0x10(r1)
+    addi r11, r1, 0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_28")]
+    /* 000084F0: */    #lwz r31,0x1C(r1)
+    /* 000084F4: */    #lwz r30,0x18(r1)
+    /* 000084F8: */    #lwz r29,0x14(r1)
+    /* 000084FC: */    #lwz r28,0x10(r1)
     /* 00008500: */    lwz r0,0x24(r1)
     /* 00008504: */    mtlr r0
     /* 00008508: */    addi r1,r1,0x20
@@ -9268,14 +9369,16 @@ stAdventure2__getAdvRadarData:
 stAdventure2__setStageOutEffectInit:
     /* 00008510: */    stwu r1,-0x20(r1)
     /* 00008514: */    mflr r0
+    /* 00008520: */    stw r0,0x24(r1)
+    addi r11, r1, 0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_28")]
     /* 00008518: */    lis r5,0x0                               [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     /* 0000851C: */    cmplwi r4,0x1
-    /* 00008520: */    stw r0,0x24(r1)
-    /* 00008524: */    stw r31,0x1C(r1)
+    /* 00008524: */    #stw r31,0x1C(r1)
     /* 00008528: */    mr r31,r3
-    /* 0000852C: */    stw r30,0x18(r1)
-    /* 00008530: */    stw r29,0x14(r1)
-    /* 00008534: */    stw r28,0x10(r1)
+    /* 0000852C: */    #stw r30,0x18(r1)
+    /* 00008530: */    #stw r29,0x14(r1)
+    /* 00008534: */    #stw r28,0x10(r1)
     /* 00008538: */    lwz r4,0x0(r5)                           [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     /* 0000853C: */    lwz r3,0x30(r4)
     /* 00008540: */    lbz r0,0x4924(r3)
@@ -9341,11 +9444,13 @@ loc_8614:
     /* 00008614: */    mr r3,r31
     /* 00008618: */    li r4,0x1
     /* 0000861C: */    bl __unresolved                          [R_PPC_REL24(27, 1, "Stage__setStageOutEffectInit")]
+    addi r11, r1, 0x20
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_28")]
     /* 00008620: */    lwz r0,0x24(r1)
-    /* 00008624: */    lwz r31,0x1C(r1)
-    /* 00008628: */    lwz r30,0x18(r1)
-    /* 0000862C: */    lwz r29,0x14(r1)
-    /* 00008630: */    lwz r28,0x10(r1)
+    /* 00008624: */    #lwz r31,0x1C(r1)
+    /* 00008628: */    #lwz r30,0x18(r1)
+    /* 0000862C: */    #lwz r29,0x14(r1)
+    /* 00008630: */    #lwz r28,0x10(r1)
     /* 00008634: */    mtlr r0
     /* 00008638: */    addi r1,r1,0x20
     /* 0000863C: */    blr
