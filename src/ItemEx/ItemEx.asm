@@ -163,15 +163,6 @@ HOOK @ $8094a5c8    # stLoaderStage::entryEntity
     addi r3, r1, 0x10   # |
     %call (strcpy)      # /
 noItov:
-    lwz r12, 0xc(r1)            # \
-    cmpwi r12, 0x3d             # | Check if stage kind = subspace
-    beq+ isSubspace             # /
-    %lwd (r12, g_GameGlobal)    # \
-    lwz r12, 0x8(r12)           # |
-    lbz r11, 0x37(r12)          # | If not Subspace check if Pokeballs are turned on in the Item Switch 
-    rlwinm. r11,r11,30,31,31    # |
-    beq+ dontReloadPkmnSawnd    # /
-isSubspace:
     addi r4, r1, 0x1c                   # \
     %lwi (r3, PKM_OVERRIDE_STR_ADDR)    # |
     %call (strcmp)                      # | Check if Pokemon folder has changed
@@ -190,15 +181,6 @@ dontReloadPkmnSawnd:
     addi r4, r1, 0x1c                   # \
     %lwi (r3, PKM_OVERRIDE_STR_ADDR     # | Copy new Pokemon folder name
     %call (strcpy)                      # /
-    lwz r12, 0xc(r1)            # \
-    cmpwi r12, 0x3d             # | Check if stageKind = Subspace
-    beq+ isSubspace2            # /
-    %lwd (r12, g_GameGlobal)    # \
-    lwz r12, 0x8(r12)           # |
-    lbz r11, 0x16(r12)          # | If not Subspace, check if Item frequency is 0
-    cmpwi r11, 0x0              # |
-    beq+ %end%                  # /
-isSubspace2:     
     addi r4, r1, 0x10                   # \
     %lwi (r3, ITM_OVERRIDE_STR_ADDR)    # |
     %call (strcmp)                      # | Check if item folder has changed
