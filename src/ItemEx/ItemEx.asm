@@ -115,7 +115,7 @@ HOOK @ $809bca84    # itArchive::__ct
     cmpwi r31, 3        # \ Check if Pokemon
     bne- end            # /
 dontUseGlobalItmParam:
-    li r12, 0x0         # \ Set item group to be 0
+    li r12, 0x0         # \ Set itmParam to NULL
     stw r12, 0x20(r1)   # /
 end:
     cmpwi r31, 8    # Original opeartion
