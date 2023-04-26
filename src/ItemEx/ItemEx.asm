@@ -1,7 +1,7 @@
 
-######################################################
-ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
-######################################################
+################################################
+ItemEx Clone Engine v1.0 [Sammi Husky, Kapedani]
+################################################
 # Stages can override items
 # Character specific items
 # Variants setup for Pokemon/Assist Trophies
@@ -39,6 +39,9 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias ITM_OVERRIDE_STR_ADDR        = 0x80B524EC 
 .alias PKM_OVERRIDE_STR_ADDR        = 0x80B52582
 .alias 076_SOUND_HEAP_LEVEL_ADDR    = 0x80B524E8
+.alias ITM_FT_PARAM_ARCHIVES        = 0x80B5253B
+.alias FIGHTER_STR                  = 0x80B08850
+.alias BRAWLEX_FIGHTER_NAMES        = 0x817CD820
 
 .macro swd(<storeReg>, <addrReg>, <addr>)
 {
@@ -88,7 +91,15 @@ CODE @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
     lis r12, 0x80B5
     stw r11, 0x24EC(r12)    # Empty ITM_OVERRIDE_STR
     stw r11, 0x2582(r12)    # Empty PKM_OVERRIDE_STR
-    b 0xE8 # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
+    stw r11, 0x253B(r12)    # \
+    stw r11, 0x253F(r12)    # |
+    stw r11, 0x2543(r12)    # |
+    stw r11, 0x2547(r12)    # | Set ITM_FT_ARCHIVES to NULL
+    stw r11, 0x254B(r12)    # |
+    stw r11, 0x254F(r12)    # |
+    stw r11, 0x2553(r12)    # /
+
+    b 0xCC # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 }
 
 op li r6, 0 @ $809acc7c  # Preload as a temp itarchive
@@ -105,10 +116,19 @@ CODE @ $806bfd48            # |
 
 HOOK @ $809bca84    # itArchive::__ct
 {   
+    lwz r12, 0xc(r25)   # itArchive->variant
+    cmplwi r12, 0xFFFF  # \ Check if fighter item
+    ble+ notFighterItem # /
+    srawi r10, r12, 20  # ftSlotId = variant / 0x100000
+    %lwi (r11, ITM_FT_PARAM_ARCHIVES)   # \
+    mulli r10, r10, 0x4                 # |
+    lwzx r10, r11, r10                  # | Get itmParam for ftSlot so that it doesn't have to be copied for subsequent items
+    stw r10, 0x20(r1)                   # /
+    b end
+notFighterItem:
     cmpwi r31, 8                # \ Check if stage item group
     beq+ dontUseGlobalItmParam  # /
-    lwz r12, 0xc(r25)   # \
-    cmpwi r12, 0x0      # | Check if itVariation == 0
+    cmpwi r12, 0x0      # \ Check if itVariation == 0
     beq+ end            # /
     cmpwi r31, 2                # \ Check if Assist
     beq- dontUseGlobalItmParam  # /
@@ -361,27 +381,36 @@ HOOK @ $808382f0    # Fighter::startFinal
     stw r7, 0x1c(r1)   # Store to initialize to loop	    
 }
 
+op lwzx	r27, r3, r0 @ $809aeeb4 # \
+op lwzx	r25, r3, r5 @ $809aeebc # |
+CODE @ $809af1d0                # |
+{                               # | Remove the need for redundant lower case item name strings
+    addi r27, r31, 4016         # |
+    addi r26, r31, 4016         # |
+}                               # /
+
 # Fetch alternate ItmCommonBrres.pac path
 HOOK @ $809af08c
 {
-    %setupAltItmPath(0x1AB6)   # "/%s/%s/%s%sBrres.%s"    
+    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%s%s.%s"    
 }
 HOOK @ $809af094
 {
     addi r8, r31, 0x1A4C    # "Itm"
     addi r9, r31, 0x1A3C    # "Common"
-    mr r10, r14             # ".pac"
+    addi r10, r31, 6769     # "Brres"
+    stw r14, 0x8(r1)        # ".pac"
 }
 HOOK @ $809af0a4
 {   
     lwz r3, 0x1c(r1)    # \
-    cmpwi r3, 0        # | Check if has already looped once
-    beq- %end%         # /
+    cmpwi r3, 0         # | Check if has already looped once
+    beq- %end%          # /
     addi r3, r1, 532                # \ Check if alt ItmCommonBrres.pac exists on the SD card
 	%call (gfFileIO__checkFile)	    # /
     li r12, 0           # \ Store to keep track of whether loop happened once
     stw r12, 0x1c(r1)    # /
-    addi r5, r31, 0x1AB7    # "%s/%s/%s%sBrres.%s"
+    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
     lwz r6, 0x4(r31)
     addi r7, r31, 0x1A44    # "item"
     cmpwi r3, 0             
@@ -391,14 +420,15 @@ op bne- -0x18 @ $809af0a8   # Loop if doesn't exist to make default path
 # Fetch alternate ItmCommonParam.pac path
 HOOK @ $809af0b0
 {
-    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%sParam.%s"
+    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%s%s.%s"
 }
 HOOK @ $809af0b8
 {       
     addi r3, r1, 276
     addi r8, r31, 0x1A4C    # "Itm"
     addi r9, r31, 0x1A3C    # "Common"
-    mr r10, r14             # ".pac"
+    addi r10, r31, 6919     # "Param"
+    stw r14, 0x8(r1)        # ".pac"
     crclr 6,6
     %call (snprintf)
     lwz r3, 0x1c(r1)    # \
@@ -408,7 +438,7 @@ HOOK @ $809af0b8
     %call (gfFileIO__checkFile)     # /
     li r12, 0           # \ Store to keep track of whether loop happened once
     stw r12, 0x1c(r1)    # /
-    addi r5, r31, 0x1AE7    # "%s/%s/%s%sParam.%s"
+    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
     lwz r6, 0x4(r31)
     addi r7, r31, 0x1A44    # "item"
     cmpwi r3, 0
@@ -418,20 +448,20 @@ op bne -0x8 @ $809af0bc # Loop if doesn't exist to make default path
 # Fetch alternate ItmParam.pac path
 HOOK @ $809af244
 {
-    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%sParam.%s"
+    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%s%s.%s"
 formulatePath:
     addi r3, r1, 0x24
     li r4, 0xef
     addi r8, r31, 0x1A4C    # "Itm"
     lwz	r9, 0x04(r31)       # ""
-    mr r10, r14             # ".pac"
+    addi r10, r31, 6919     # "Param"
+    stw r14, 0x8(r1)        # ".pac"
     cmpwi r16, 0x62     # \ check if itKind >= 0x62 (Pokemon and Assist Trophies)
     blt+ notVariant     # /
     cmpwi r17, 0x0      # \ check if variant > 0, get alt ItmParam if it is
     ble+ notVariant     # /
-    addi r11, r31, 6919  # \ "Param"
-    stw r11, 0x8(r1)     # /
-    stw r10, 0xc(r1)    # ".pac"
+    stw r10, 0x8(r1)    # "Param"
+    stw r14, 0xc(r1)    # ".pac"
     subi r5, r5, 0x64    # "/%s/%s/%s%s%02d%s.%s"
     mr r10, r17         # variant
 notVariant:
@@ -444,27 +474,31 @@ notVariant:
     %call (gfFileIO__checkFile)     # /
     li r12, 0           # \ Store to keep track of whether loop happened once
     stw r12, 0x1c(r1)    # /
-    addi r5, r31, 0x1AE7    # "%s/%s/%s%sParam.%s"
+    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
     lwz r6, 0x4(r31)
     addi r7, r31, 0x1A44    # "item"
     cmpwi r3, 0
     bne- formulatePath
 }
 
-
-byte 0x2f @ $80B5251F # add '/' before "%s/%s/%s/%s%s%02dBrres.%s"
-byte 0x2f @ $80B5253B # add '/' before "%s/%s/%s/%s%sBrres.%s"
-byte 0x2f @ $80B5256B # add '/' before "%s/%s/%s/%s%sParam.%s"
+string "/%s/%s/%s/%s%s%02d%s.%s" @ $80B52507    # create string format for variant path
+string "%s%02d.%s" @ $80B52531  # create "/%s/%s/%s/%s%s%02d%s%02d.%s" string format for fighter variant path
+string "%s.%s" @ $80B52579 # create "/%s/%s/%s/%s%s%s.%s"
+byte 0x2f @ $80B5251F # add '/' before "%s/%s/%s/%s%s%02d%s%02d.%s"
+byte 0x2f @ $80B5256B # add '/' before "%s/%s/%s/%s%s%s.%s"
+byte 0x00 @ $80B524FE   # add null terminator to get "Brres" as a string
+byte 0x00 @ $80B52594   # add null terminator to get "Param" as a string
 
 # Fetch alternate item brres path (i.e. for Pokemon and Assist Trophies)
 HOOK @ $809af180
 {
-    %setupAltPkmPath(0x1AB3)   # "/%s/%s/%s/%s%sBrres.%s"
+    %setupAltPkmPath(6883)   # "/%s/%s/%s/%s%s%s.%s"
 }
-op stw r14, 0x8(r1) @ $809af18c
-op nop @ $809af198
+op stw r14, 0xc(r1) @ $809af18c # ".pac"
+op addi r12, r31, 6769  @ $809af198
 HOOK @ $809af1a0
 {
+    stw r12, 0x8(r1)    # "Brres"
     crclr 6,6
     %call (snprintf)
     lwz r3, 0x1c(r1)    # \
@@ -474,7 +508,7 @@ HOOK @ $809af1a0
     %call (gfFileIO__checkFile) # /
     li r12, 0           # \ Store to keep track of whether loop happened once
     stw r12, 0x1c(r1)    # /
-    addi r5, r31, 0x1AB4    # "%s/%s/%s/%s%sBrres.%s"
+    addi r5, r31, 6884    # "%s/%s/%s/%s%s%s.%s"
     lwz r6, 0x4(r31)
     addi r7, r31, 0x1A44    # "item"
     cmpwi r3, 0
@@ -484,13 +518,13 @@ op bne -0x20 @ $809af1a4 # Loop if doesn't exist to make default path
 # Fetch alternate item param path (i.e. for Pokemon and Assist Trophies)
 HOOK @ $809af1d8
 {
-    %setupAltPkmPath(6883)     # "/%s/%s/%s/%s%sParam.%s"
+    %setupAltPkmPath(6883)     # "/%s/%s/%s/%s%s%s.%s"
 }
 CODE @ $809af1e8
 {
-    stw	r14, 0x8(r1)
-    nop 
-    nop
+    stw	r14, 0xc(r1)        # ".pac"
+    addi r12, r31, 6919     # \ "Param" 
+    stw r12, 0x8(r1)        # /
 }
 HOOK @ $809af1fc
 {
@@ -503,7 +537,7 @@ HOOK @ $809af1fc
     %call (gfFileIO__checkFile) # /
     li r12, 0           # \ Store to keep track of whether loop happened once
     stw r12, 0x1c(r1)    # /
-    addi r5, r31, 6884      # "%s/%s/%s/%s%sParam.%s"
+    addi r5, r31, 6884      # "%s/%s/%s/%s%s%s.%s"
     lwz r6, 0x4(r31)
     addi r7, r31, 0x1A44    # "item"
     cmpwi r3, 0
@@ -519,11 +553,6 @@ HOOK @ $809af13c
     bgt+ %end%      # /
     li r0, 0x0
 }
-
-byte 0x00 @ $80B524FE   # add null terminator to get "Brres" as a string
-byte 0x00 @ $80B52594   # add null terminator to get "Param" as a string
-string "/%s/%s/%s/%s%s%02d%s.%s" @ $80B52507    # create string format for variant path
-string "%s%02d.%s" @ $80B52531  # create "/%s/%s/%s/%s%s%02d%s%02d.%s" string format for fighter variant path
 
 HOOK @ $809af150
 {
@@ -566,9 +595,9 @@ op b 0xB0 @ $809af154   # Skip to formulate ItmParam
 
 .macro buildFighterItemPath()
 {
-    %lwi (r6, 0x80B08850)   # "Fighter"
+    %lwi (r6, FIGHTER_STR)   # "Fighter"
     andi. r12, r19, 0xFF    # Get ftKind from fourth parameter
-    %lwi (r11, 0x817CD820)  # Internal BrawlEX internal fighter names
+    %lwi (r11, BRAWLEX_FIGHTER_NAMES)  # Internal BrawlEX internal fighter names
     mulli r12, r12, 0x10    # Offsets are 0x10 apart
     add r7, r11, r12        # r7 now contains a pointer to the character filename when using P+EX
     addi r8, r31, 0x1A44    # "item"
@@ -617,8 +646,10 @@ formulateParamPath:
     %call (snprintf)
     cmpwi r22, 0x24
     li r22, 0x24            # Formulate common param path
-    stw r14, 0x8(r1)        # ".pac"
-    addi r5, r31, 6883      # "/%s/%s/%s/%s%sParam.%s"
+    stw r14, 0xc(r1)        # ".pac"
+    addi r12, r31, 6919     # \ "Param" 
+    stw r12, 0x8(r1)        # /
+    addi r5, r31, 6883      # "/%s/%s/%s/%s%s%s.%s"
     bne+ formulateParamPath
 }
 op b 0xEC @ $809af15c   # Skip to after normal formulation of ItmParam
@@ -676,9 +707,8 @@ HOOK @ $8084e8b0    # ftDataProvider::reqItem
     add r5, r4, r10     # /
     li r4, 0x4B     # itKind - SideStepper
 }
-HOOK @ $8084e8d8    # ftDataProvider::reqItem
+HOOK @ $8084e8dc    # ftDataProvider::reqItem
 {
-    lwzx r4, r4, r29    # Original operation
     cmplwi r4, 0xFFFF   # Check if 0x10000 or greater for character specific items
     ble- %end%
     lbz r10, 0x8(r1)    # \
@@ -689,6 +719,15 @@ HOOK @ $8084e8d8    # ftDataProvider::reqItem
     slwi r8, r8, 8      # | Add costumeId * 0x100 to last parameter
     add r7, r7, r8      # /
     li r4, 0x4B     # itKind - SideStepper
+    %call (itManager__preloadItemKindArchive)
+    lwz r4, 0x10(r3)                # \
+    %lwd (r12, g_utArchiveManager3) # |
+    lwz r3, 0x4(r12)                # | Get gfArchive from itmParam archive id
+    %call (gfArchiveDatabase__get)  # /
+    lbz r11, 0x8(r1)                    # \
+    %lwi (r12, ITM_FT_PARAM_ARCHIVES)   # | Set ftSlot's global itmParam (so it can be reused for subsequent items)
+    mulli r11, r11, 0x4                 # |
+    stwx r3, r12, r11                   # /
 }
 
 HOOK @ $809bca28    # itArchive::__ct
@@ -734,7 +773,7 @@ notPokemonAssistVariant:
     ble+ %end%          # /
 forceClone:
     li r6, 1    # Force clone = true    
-} # Note: Could probably optimize memory by taking in ItmParam for the slot if already loaded instead of cloning again
+} 
 
 HOOK @ $809bcfec    # itArchive::getAllParam
 {
@@ -765,6 +804,10 @@ HOOK @ $80827a80    # ftSlot::exit
 {
     %lwd (r3, g_itManager)
     lwz r4, 0x174(r30)          # get ftSlot->id
+    li r10, 0x0                         # \
+    %lwi (r12, ITM_FT_PARAM_ARCHIVES)   # | Set ftSlot's global itmParam reference to NULL
+    mulli r11, r4, 0x4                  # |
+    stwx r10, r12, r11                  # /
     addi r4, r4, 18             # added parameter: itArchiveType = ftSlotId + 18
     %call (itManager__removeItemAllTempArchive)
     li r0, -1   # Original operation
@@ -773,6 +816,10 @@ HOOK @ $80827b28    # ftSlot::remove
 {
     %lwd (r3, g_itManager)
     lwz r4, 0x174(r30)          # get ftSlot->id
+    li r10, 0x0                         # \
+    %lwi (r12, ITM_FT_PARAM_ARCHIVES)   # | Set ftSlot's global itmParam reference to NULL
+    mulli r11, r4, 0x4                  # |
+    stwx r10, r12, r11                  # /
     addi r4, r4, 18             # added parameter: itArchiveType = ftSlotId + 18
     %call (itManager__removeItemAllTempArchive)
     li r26, 0   # Original operation
