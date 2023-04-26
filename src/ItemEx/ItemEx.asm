@@ -17,6 +17,7 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias g_Stage                              = 0x80B8A428
 .alias g_utArchiveManager3                  = 0x80B84ee8
 .alias utArchiveManager__addNoManageArchive = 0x800455e0
+.alias g_itmParam                           = 0x80B8B800
 .alias g_itManager                          = 0x80B8B7F4
 .alias itManager__preloadItemKindArchive    = 0x809ae960
 .alias itManager__removeItemAllTempArchive  = 0x809b69d8
@@ -27,6 +28,7 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 .alias ftManager__getFighter                = 0x80814f20
 .alias g_ftEntryManager                     = 0x80B87c48
 .alias ftEntryManager__getEntryIdFromPlayerNo   = 0x80823dd0
+.alias gfArchiveDatabase__get               = 0x80016664
 .alias gfFileArchive__getData               = 0x80015ddc
 .alias gfFileIO__checkFile                  = 0x8001F0D0
 .alias snprintf                             = 0x803f8924
@@ -80,23 +82,54 @@ ItemEx Clone Engine v1.0 BETA [Sammi Husky, Kapedani]
 # Skip retrieving and assigning common item pacs from common3.pac #
 ###################################################################
 
-HOOK @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
+CODE @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
 {   
     li r11, 0
     lis r12, 0x80B5
     stw r11, 0x24EC(r12)    # Empty ITM_OVERRIDE_STR
     stw r11, 0x2582(r12)    # Empty PKM_OVERRIDE_STR
+    b 0xE8 # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 }
-op b 0xF4 @ $806bfc30   # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 
 op li r6, 0 @ $809acc7c  # Preload as a temp itarchive
 
 op li r5, 0 @ $809adc04  # \ Preload as a temp itarchive
 op li r5, 0 @ $809add24  # /
 
-op nop @ $809accb4      # \ Skip assigning global itmParam, itmCommonParam and itmCommonBrres
-op b 0x8 @ $809acccc    # /
+op li r5, 0x0 @ $806bfd3c   # \ 
+CODE @ $806bfd48            # |
+{                           # | Skip assigning global itmParam, itmCommonParam and itmCommonBrres
+    stw	r5, 0xC(r1)         # |
+    stw r5, 0x10(r1)        # |
+}                           # /
 
+HOOK @ $809bca84    # itArchive::__ct
+{   
+    cmpwi r31, 8                # \ Check if stage item group
+    beq+ dontUseGlobalItmParam  # /
+    lwz r12, 0xc(r25)   # \
+    cmpwi r12, 0x0      # | Check if itVariation == 0
+    beq+ end            # /
+    cmpwi r31, 2                # \ Check if Assist
+    beq- dontUseGlobalItmParam  # /
+    cmpwi r31, 3        # \ Check if Pokemon
+    bne- end            # /
+dontUseGlobalItmParam:
+    li r12, 0x0         # \ Set item group to be 0
+    stw r12, 0x20(r1)   # /
+end:
+    cmpwi r31, 8    # Original opeartion
+}
+
+HOOK @ $809acc84    # itManager::create
+{
+    %call (itManager__preloadItemKindArchive)
+    lwz r4, 0x10(r3)                # \
+    %lwd (r12, g_utArchiveManager3) # |
+    lwz r3, 0x4(r12)                # | Get gfArchive from itmParam archive id and set to g_itmParam (this is so that it can fetch the archive quicker, was causing lag before)
+    %call (gfArchiveDatabase__get)  # |
+    %swd (r3, r12, g_itmParam)      # /
+}
 
 ####################################################################
 # Unload common item pacs and sawnds, and reload on stage creation #                                           
@@ -187,12 +220,19 @@ isSubspace2:
     %lwd (r3, g_itManager)
     li r4, 0x0          # added parameter: itArchiveType
     %call (itManager__removeItemAllTempArchive)
+    li r11, 0x0                     # \ Set g_itmParam to null
+    %swd (r11, r12, g_itmParam)     # /
     %lwd (r3, g_itManager)
     li r4, 0x3e # itKind
     li r5, 0x0  # variation
     li r6, 0x0  # itArchiveType - Temp
     li r7, 0x1
     %call (itManager__preloadItemKindArchive)
+    lwz r4, 0x10(r3)                # \
+    %lwd (r12, g_utArchiveManager3) # |
+    lwz r3, 0x4(r12)                # | Get gfArchive from itmParam archive id and set to g_itmParam (this is so that it can fetch the archive quicker, was causing lag before)
+    %call (gfArchiveDatabase__get)  # |
+    %swd (r3, r12, g_itmParam)      # /
 }
 HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizationNandLoader::loadFiles2 to be able to unload later
 {
@@ -201,6 +241,7 @@ HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizati
 }
 
 # TODO: Random sets?
+## Code menu option to disable overrides and use default
 
 ########################################################################################################################
 # Allow stage to set custom ItmParam as well as custom itCustomizer                                                    #
