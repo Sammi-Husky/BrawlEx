@@ -23,6 +23,7 @@ ItemEx Clone Engine v1.0 [Sammi Husky, Kapedani]
 .alias itManager__removeItemAllTempArchive  = 0x809b69d8
 .alias itManager__getItemGroup              = 0x809ab74c  
 .alias itManager__getRandBasicItemSheet     = 0x809b3a60
+.alias itManager__getLotOneItemKind         = 0x809b4864
 .alias g_itKindVariationNums                = 0x80ADB548
 .alias g_ftManager                          = 0x80B87C28
 .alias ftManager__getFighter                = 0x80814f20
@@ -912,6 +913,14 @@ HOOK @ $809ab838    # itManager::getItemKindArchiveId
     li r4, 0x4B         # /
 }
 
+HOOK @ $809b1b2c    # itManager::removeItemAfter
+{
+    mflr r0     # Original operation
+    cmpwi r5, 0x1400    # \
+    blt+ %end%          # | If clone, set itKind to SideStepper
+    li r4, 0x4B         # /
+}
+
 CODE @ $809b1420    # itManager::createBaseItem
 {
     cmpwi r0, 8  # \ If stage item then don't set itKind to -3 so it can check if archive exists
@@ -1406,10 +1415,36 @@ HOOK @ $809b3a74    # itManager::getRandBasicItemSheet
 }
 op lwz r4, 0x20(r1) @ $809b3b7c # Use desired genParamId (instead of always using 10000)
 
+HOOK @ $8095219c        # stOperatorDropItemMelee::processBegin
+{
+    mr r29, r3                                  # \
+    li r4, 10001                                # |
+    %call (itManager__getRandBasicItemSheet)    # |
+    stw r3, 0x8(r1)                             # |
+    stw r4, 0xc(r1)                             # |
+    mr r3, r29                                  # |
+    addi r4, r1, 0x8                            # | Get item from 10001 in ItmGen rather than always picking only Bombs
+    li r5, 10001                                # |
+    li r6, 0x0                                  # |
+    li r7, 0x0                                  # |
+    %call (itManager__getLotOneItemKind)        # |
+    mr r5, r3                                   # |
+    mr r6, r4                                   # /
+    mr r3, r29              # Put itManager back in r3
+    li r0, 0                # Original operation
+}
+op b 0x8 @ $809521b8
+
+HOOK @ $809521d0    # stOperatorDropItemMelee::processBegin
+{
+    cmpwi r3, 0x0   # Check if item was created
+    lis	r3, 0x805A  # \ Original operations
+    addi r5, r1, 32 # /
+}
+op beq+ 0x10 @ $809521d4 # Skip effect if item wasn't created 
+
 ########################################
 Every Item Can Have Collision [Kapedani]
 ########################################
 op nop @ $8098f6b8      
 op li r24, 0x1 @ $8098f6d0 
-
-
