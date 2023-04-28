@@ -103,10 +103,10 @@ CODE @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
     b 0xCC # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 }
 
-op li r6, 0 @ $809acc7c  # Preload as a temp itarchive
+op li r6, 17 @ $809acc7c  # Preload as a temp itarchive
 
-op li r5, 0 @ $809adc04  # \ Preload as a temp itarchive
-op li r5, 0 @ $809add24  # /
+op li r5, 17 @ $809adc04  # \ Preload as a temp itarchive
+op li r5, 17 @ $809add24  # /
 
 op li r5, 0x0 @ $806bfd3c   # \ 
 CODE @ $806bfd48            # |
@@ -221,7 +221,7 @@ dontReloadPkmnSawnd:
     %call (sndSystem__loadSoundGroup)   # /
     %swd (r3, r12, 076_SOUND_HEAP_LEVEL_ADDR)    # Store heap level for 076.sawnd
     %lwd (r3, g_itManager)
-    li r4, 0x0          # added parameter: itArchiveType
+    li r4, 17          # added parameter: itArchiveType
     %call (itManager__removeItemAllTempArchive)
     li r11, 0x0                     # \ Set g_itmParam to null
     %swd (r11, r12, g_itmParam)     # /
