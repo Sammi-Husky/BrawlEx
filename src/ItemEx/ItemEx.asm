@@ -1443,8 +1443,14 @@ HOOK @ $809521d0    # stOperatorDropItemMelee::processBegin
 }
 op beq+ 0x10 @ $809521d4 # Skip effect if item wasn't created 
 
-########################################
-Every Item Can Have Collision [Kapedani]
-########################################
-op nop @ $8098f6b8      
-op li r24, 0x1 @ $8098f6d0 
+###########################################
+Every Item Can Have Collision v2 [Kapedani]
+###########################################
+op nop @ $8098f6b8  # Always construct collision if it exists regardless of itKind
+HOOK @ $8098f6d0    # BaseItem::reset
+{
+    li r24, 0x1
+    cmpwi r5, 152   # \ Check if Helirin
+    bne+ %end%      # / 
+    li r24, 0x0
+}     
