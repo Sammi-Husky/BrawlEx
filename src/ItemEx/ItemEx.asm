@@ -1078,8 +1078,8 @@ int[80] |
 1 |     # 0xB1 - Dr. Wright Building
 @ $80ADB6D0
 
-*08ADBD1A 000000DF  # Start at 0x00DF for Torchic
-*10240004 00000001  
+*08ADBD1A 000000DF  # Give Pokemon soundbanks, start at 0x00DF for Torchic
+*10230004 00000001  # Uses SSE stage soundbanks since Pokemon don't appear in stages
 
 HOOK @ $809af278    # itManager::preloadItemKindArchive
 {
