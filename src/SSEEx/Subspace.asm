@@ -1,3 +1,42 @@
+############################################################
+BrawlEx Clone Engine v2.0.0.0 Subspace Fix (RSBE.Ver) [JOJI]
+############################################################
+* C2026074 00000003
+* 3CA08000 7C042840
+* 41810008 48000008
+* 80A40008 00000000
+* C2026078 00000006
+* 3C808001 7C042840
+* 41800020 3C808041
+* 60846B70 90840000
+* 38800000 6084F060
+* 3CA08000 48000008
+* 80850004 00000000
+* 20416B70 80416B70
+* 04416B70 00000000
+* 077BA5A0 000000A0
+* 80B84500 817BA5A0
+* 817DA5A0 00020000
+* 004C00CC 00010001
+* 00010F20 00010F20
+* 817BA600 00CCCCCC
+* 00000000 00000000
+* 00000000 00000000
+* CCCCCCCC CCCCCCCC
+* CCCCCCCC CCCCCCCC
+* CCCCCCCC CCCCCCCC
+* CCCCCCCC CCCCCCCC
+* CCCCCCCC CCCCCCCC
+* 817BA5A0 00000000
+* 817BA620 00000000
+* 00000000 CCCCCCCC
+* CCCCCCCC CCCCCCCC
+* 817BA5A0 0000F060
+* 817BA600 00000000
+* 00000000 CCCCCCCC
+* CCCCCCCC CCCCCCCC
+* E0000000 80008000
+
 #############################################################################
 SSEEx Levels [Kapedani]
 #############################################################################
@@ -376,6 +415,87 @@ HOOK @ $806ec4d4
 }
 
 op lbz r6,0x5FA(r4) @ $806ec610   # Use advSaveData->numReserveStocks instead of advSelchrResult->numSelectedFighters 
+
+################################################
+Default Subspace Sound Group is 0x0F2 [Kapedani]
+################################################
+op li r3, 0xF2 @ $8094c1e0
+op li r3, 0xF2 @ $8094c25c
+
+##############################################
+!All Players Can Interact With Warps [Kapedani]
+##############################################
+op b 0x48 @ $8085f47c
+
+##########################################################################
+!Stamina Behaviour is Defined Individually Per Fighter v1.1 [Kapedani, Eon]
+##########################################################################
+CODE @ $80861c38    # ftOutsideEventPresenter::notifyOutsideEventSetDamage
+{
+    lwz r10, 0x0(r3)    # \
+    lwz r10,0x8(r10)    # |  Check if ftOwner->ftOwnerData->hitPointMax was set  
+    cmpwi r10, 0x0      # |
+    beq- 0x18           # /
+}
+
+CODE @ $808619a0    # ftOutsideEventPresenter::addDamage
+{
+    lwz r10, 0x0(r3)    # \
+    lwz r10,0x8(r10)    # |  Check if ftOwner->ftOwnerData->hitPointMax was set  
+    cmpwi r10, 0x0      # |
+    beq- 0x18           # /
+}
+
+CODE @ $808616ac    # ftOutsideEventPresenter::onDamage
+{
+    lwz r10, 0x0(r3)    # \
+    lwz r10,0x8(r10)    # |  Check if ftOwner->ftOwnerData->hitPointMax was set  
+    cmpwi r10, 0x0      # |
+    beq- 0x18           # /
+}
+
+CODE @ $80843354    # Fighter::setCurry
+{
+    lwz	r12, 0x003C(r3)     # \
+    lwz	r12, 0x02EC(r12)    # | Fighter->getOwner()
+    mtctr r12               # |
+    bctrl                   # /
+    lwz r10, 0x0(r3)    # \
+    lwz r10,0x8(r10)    # | Check if ftOwner->ftOwnerData->hitPointMax was set  
+    cmpwi r10, 0x0      # |
+    beq- 0x58           # /
+}
+
+CODE @ $80840dcc    # Fighter::notifyEventAddDamage
+{
+    mr r3, r31              # \
+    lwz	r12, 0x003C(r3)     # |
+    lwz	r12, 0x02EC(r12)    # | Fighter->getOwner()
+    mtctr r12               # |
+    bctrl                   # /
+    lwz r10, 0x0(r3)    # \
+    lwz r10,0x8(r10)    # | Check if ftOwner->ftOwnerData->hitPointMax was set  
+    cmpwi r10, 0x0      # |
+    beq- 0x58           # / 
+}
+
+CODE @ $80840c40 # Fighter::notifyEventOnDamage
+{
+    mr r3, r29              # \
+    lwz	r12, 0x003C(r3)     # |
+    lwz	r12, 0x02EC(r12)    # | Fighter->getOwner()
+    mtctr r12               # |
+    bctrl                   # /
+    lwz r10, 0x0(r3)    # \
+    lwz r10,0x8(r10)    # | Check if ftOwner->ftOwnerData->hitPointMax was set  
+    cmpwi r10, 0x0      # |
+    beq- 0x58           # /  
+}
+
+# Fighter::onDeadEnd (check is skipped by PM Stamina)
+
+# TODO: ftDamageTransactorImpl::getDamageForReaction
+
 
 #############################################################################
 !Change filename of figdisp.pac to figdisx.pac Except During SSE [Kapedani]
