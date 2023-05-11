@@ -37,10 +37,11 @@ ItemEx Clone Engine v1.0 [Sammi Husky, Kapedani]
 .alias strcmp                               = 0x803fa3fc
 .alias randi                                = 0x8003fc7c
 
-.alias ITM_OVERRIDE_STR_ADDR        = 0x80B524EC 
-.alias PKM_OVERRIDE_STR_ADDR        = 0x80B52582
-.alias 076_SOUND_HEAP_LEVEL_ADDR    = 0x80B524E8
-.alias ITM_FT_PARAM_ARCHIVES        = 0x80B5253B
+.alias ITM_OVERRIDE_STR_ADDR        = 0x80B518F8 
+.alias PKM_OVERRIDE_STR_ADDR        = 0x80B51908
+.alias SND_OVERRIDE_STR_ADDR        = 0x80B524E8
+.alias 076_SOUND_HEAP_LEVEL_ADDR    = 0x80B51918
+.alias ITM_FT_PARAM_ARCHIVES        = 0x80B5191C
 .alias FIGHTER_STR                  = 0x80B08850
 .alias BRAWLEX_FIGHTER_NAMES        = 0x817CD820
 
@@ -90,17 +91,18 @@ CODE @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
 {   
     li r11, 0
     lis r12, 0x80B5
-    stw r11, 0x24EC(r12)    # Empty ITM_OVERRIDE_STR
-    stw r11, 0x2582(r12)    # Empty PKM_OVERRIDE_STR
-    stw r11, 0x253B(r12)    # \
-    stw r11, 0x253F(r12)    # |
-    stw r11, 0x2543(r12)    # |
-    stw r11, 0x2547(r12)    # | Set ITM_FT_ARCHIVES to NULL
-    stw r11, 0x254B(r12)    # |
-    stw r11, 0x254F(r12)    # |
-    stw r11, 0x2553(r12)    # /
+    stw r11, 0x18F8(r12)    # Empty ITM_OVERRIDE_STR
+    stw r11, 0x1908(r12)    # Empty PKM_OVERRIDE_STR
+    stw r11, 0x191C(r12)    # \
+    stw r11, 0x1920(r12)    # |
+    stw r11, 0x1924(r12)    # |
+    stw r11, 0x1928(r12)    # | Set ITM_FT_ARCHIVES to NULL
+    stw r11, 0x192C(r12)    # |
+    stw r11, 0x1930(r12)    # |
+    stw r11, 0x1934(r12)    # /
+    stw r11, 0x24E8(r12)    # Empty SND_OVERRIDE_STR_ADDR
 
-    b 0xCC # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
+    b 0xC8 # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 }
 
 op li r6, 17 @ $809acc7c  # Preload as a temp itarchive
@@ -245,6 +247,7 @@ HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizati
 
 # TODO: Random sets?
 ## Code menu option to disable overrides and use default
+# TODO: Item switch: turn on/off random drops of stage specific items
 
 ########################################################################################################################
 # Allow stage to set custom ItmParam as well as custom itCustomizer                                                    #
