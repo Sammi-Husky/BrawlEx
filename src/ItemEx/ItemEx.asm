@@ -1,6 +1,6 @@
 
 ################################################
-ItemEx Clone Engine v1.0 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.1 [Sammi Husky, Kapedani]
 ################################################
 # Stages can override items
 # Character specific items
@@ -827,6 +827,14 @@ HOOK @ $80827b28    # ftSlot::remove
     addi r4, r4, 18             # added parameter: itArchiveType = ftSlotId + 18
     %call (itManager__removeItemAllTempArchive)
     li r26, 0   # Original operation
+}
+HOOK @ $809bcfa4    # itArchive::isRemovable
+{
+    li r3, 0
+    lwz r12, 0x0(r30)   # \
+    cmpwi r12, 18       # | Check if itArchiveType >= 18 (fighter specific item)
+    blt+ %end%          # /
+    li r3, 1            # Remove immediately regardless
 }
 
 HOOK @ $809b69f4 # itManager::removeItemAllTempArchive
