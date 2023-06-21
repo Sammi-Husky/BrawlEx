@@ -202,7 +202,7 @@ notSubspace:
     stb r10, 0x44(r11)              # stLoader->state to 5 to tell it to reload sawnd
 dontReloadPkmnSawnd:
     addi r4, r1, 0x1c                   # \
-    %lwi (r3, PKM_OVERRIDE_STR_ADDR     # | Copy new Pokemon folder name
+    %lwi (r3, PKM_OVERRIDE_STR_ADDR)    # | Copy new Pokemon folder name
     %call (strcpy)                      # /
     addi r4, r1, 0x10                   # \
     %lwi (r3, ITM_OVERRIDE_STR_ADDR)    # |
