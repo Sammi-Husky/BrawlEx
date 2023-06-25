@@ -1,7 +1,7 @@
 
-################################################
-ItemEx Clone Engine v1.2 [Sammi Husky, Kapedani]
-################################################
+#################################################
+ItemEx Clone Engine v1.21 [Sammi Husky, Kapedani]
+#################################################
 # Stages can override items
 # Character specific items
 # Variants setup for Pokemon/Assist Trophies
@@ -983,12 +983,12 @@ HOOK @ $807c3394    # soItemManageModuleImpl::createThrowItem
 }
 HOOK @ $8079813c    # soArticleMediatorHelper::createItem
 {
+    li r5, 0x0          # Original operation
     cmplwi r29, 0xFFFF  # \ check if clone item
     ble+ %end%          # /
     stw r3, 0xC(r1)     # Store itManager for later
     %lwd (r3, g_ftEntryManager)
-    mr r4, r31                                      # \ 
-    li r5, 0x0                                      # | get entryId from emitterTaskId
+    mr r4, r31                                      # \ get entryId from emitterTaskId
     %call (ftEntryManager__getEntryIdFromTaskId)    # /
     mr r4, r3                           # \
     %lwd (r3, g_ftEntryManager)         # | get ftEntry from entryId
