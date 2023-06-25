@@ -1,6 +1,6 @@
 
 ################################################
-ItemEx Clone Engine v1.1 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.2 [Sammi Husky, Kapedani]
 ################################################
 # Stages can override items
 # Character specific items
@@ -29,6 +29,8 @@ ItemEx Clone Engine v1.1 [Sammi Husky, Kapedani]
 .alias ftManager__getFighter                = 0x80814f20
 .alias g_ftEntryManager                     = 0x80B87c48
 .alias ftEntryManager__getEntryIdFromPlayerNo   = 0x80823dd0
+.alias ftEntryManager__getEntryIdFromTaskId = 0x80823f90
+.alias ftEntryManager__getEntity            = 0x80823b24
 .alias gfArchiveDatabase__get               = 0x80016664
 .alias gfFileArchive__getData               = 0x80015ddc
 .alias gfFileIO__checkFile                  = 0x8001F0D0
@@ -974,10 +976,30 @@ HOOK @ $807c3394    # soItemManageModuleImpl::createThrowItem
     lwz r12, 0x0(r12)               # | ftEntryManager->ftEntries + (entryId & 0xff) (same functionality as ftEntryManager::getEntity)
     mulli r11, r11, 580             # |
     add r12, r12, r11               # /
-    lwz r11, 0x18(r12)  # fitEntry->slotNo
+    lwz r11, 0x18(r12)  # ftEntry->slotNo
     slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
     add r6, r6, r11     # /
     li r5, 0x4b         # set itKind to Sidestepper
+}
+HOOK @ $8079813c    # soArticleMediatorHelper::createItem
+{
+    cmplwi r29, 0xFFFF  # \ check if clone item
+    ble+ %end%          # /
+    stw r3, 0xC(r1)     # Store itManager for later
+    %lwd (r3, g_ftEntryManager)
+    mr r4, r31                                      # \ 
+    li r5, 0x0                                      # | get entryId from emitterTaskId
+    %call (ftEntryManager__getEntryIdFromTaskId)    # /
+    mr r4, r3                           # \
+    %lwd (r3, g_ftEntryManager)         # | get ftEntry from entryId
+    %call (ftEntryManager__getEntity)   # /
+    lwz r11, 0x18(r3)  # ftEntry->slotNo
+    slwi r11, r11, 20   # \ variant = itKind + ftSlotNo*0x100000
+    add r5, r29, r11    # /
+    li r4, 0x4b         # set itKind to Sidestepper
+    mr r6, r31          # emitterTaskId
+    lwz r9, 0x8(r1)     # Restore -1 in r9
+    lwz r3, 0xC(r1)     # Restore itManager in r3
 }
 HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
 {
