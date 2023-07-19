@@ -1286,7 +1286,7 @@ loop:
     lwzx r5, r12, r6                    # | Check if the itArchive is the main archive for the Pokemon (i.e. not just the shot)
     cmpw r5, r4                         # | 
     bne- startLoop                      # /
-    lwz r6, 0xc(r25)                    # \
+    lwz r6, 0x8(r25)                    # \
     rlwinm r6, r6, 2, 0, 29             # |
     lwzx r6, r12, r6                    # | Check if corresponding itKind already exists
     cmpw r5, r6                         # |
