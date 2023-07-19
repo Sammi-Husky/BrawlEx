@@ -1,7 +1,7 @@
 
-#################################################
-ItemEx Clone Engine v1.21 [Sammi Husky, Kapedani]
-#################################################
+################################################
+ItemEx Clone Engine v1.3 [Sammi Husky, Kapedani]
+################################################
 # Stages can override items
 # Character specific items
 # Variants setup for Pokemon/Assist Trophies
@@ -21,10 +21,12 @@ ItemEx Clone Engine v1.21 [Sammi Husky, Kapedani]
 .alias g_itManager                          = 0x80B8B7F4
 .alias itManager__preloadItemKindArchive    = 0x809ae960
 .alias itManager__removeItemAllTempArchive  = 0x809b69d8
+.alias itManager__removeItemArchive         = 0x809b6718
 .alias itManager__getItemGroup              = 0x809ab74c  
 .alias itManager__getRandBasicItemSheet     = 0x809b3a60
 .alias itManager__getLotOneItemKind         = 0x809b4864
 .alias g_itKindVariationNums                = 0x80ADB548
+.alias g_itKindRemovableItKind              = 0x80ADBE58
 .alias g_ftManager                          = 0x80B87C28
 .alias ftManager__getFighter                = 0x80814f20
 .alias g_ftEntryManager                     = 0x80B87c48
@@ -34,10 +36,13 @@ ItemEx Clone Engine v1.21 [Sammi Husky, Kapedani]
 .alias gfArchiveDatabase__get               = 0x80016664
 .alias gfFileArchive__getData               = 0x80015ddc
 .alias gfFileIO__checkFile                  = 0x8001F0D0
+.alias gfHeapManager__getMaxFreeSize        = 0x80024a34
 .alias snprintf                             = 0x803f8924
 .alias strcpy                               = 0x803fa280
 .alias strcmp                               = 0x803fa3fc
 .alias randi                                = 0x8003fc7c
+.alias __memfill                            = 0x8000443c
+.alias memcpy                               = 0x80004338
 
 .alias ITM_OVERRIDE_STR_ADDR        = 0x80B518F8 
 .alias PKM_OVERRIDE_STR_ADDR        = 0x80B51908
@@ -46,6 +51,10 @@ ItemEx Clone Engine v1.21 [Sammi Husky, Kapedani]
 .alias ITM_FT_PARAM_ARCHIVES        = 0x80B5191C
 .alias FIGHTER_STR                  = 0x80B08850
 .alias BRAWLEX_FIGHTER_NAMES        = 0x817CD820
+.alias ITM_OVERRIDE_SETTINGS        = 0x80B51939
+.alias PKM_OVERRIDE_SETTINGS        = 0x80B518D8
+.alias DEFAULT_PKM_VARIETY_AMOUNT   = 5
+.alias PKM_OVERLOAD_AMOUNT_ADDR     = 0x80B51938
 
 .macro swd(<storeReg>, <addrReg>, <addr>)
 {
@@ -64,6 +73,15 @@ ItemEx Clone Engine v1.21 [Sammi Husky, Kapedani]
     .alias  temp_Hi = temp_Hi_ + temp_r
     lis     <reg>, temp_Hi
     lwz     <reg>, temp_Lo(<reg>)
+}
+.macro lbd(<reg>, <addr>)
+{
+    .alias  temp_Lo = <addr> & 0xFFFF
+    .alias  temp_Hi_ = <addr> / 0x10000
+    .alias  temp_r = temp_Lo / 0x8000
+    .alias  temp_Hi = temp_Hi_ + temp_r
+    lis     <reg>, temp_Hi
+    lbz     <reg>, temp_Lo(<reg>)
 }
 .macro lwi(<reg>, <val>)
 {
@@ -95,15 +113,11 @@ CODE @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
     lis r12, 0x80B5
     stw r11, 0x18F8(r12)    # Empty ITM_OVERRIDE_STR
     stw r11, 0x1908(r12)    # Empty PKM_OVERRIDE_STR
-    stw r11, 0x191C(r12)    # \
-    stw r11, 0x1920(r12)    # |
-    stw r11, 0x1924(r12)    # |
-    stw r11, 0x1928(r12)    # | Set ITM_FT_ARCHIVES to NULL
-    stw r11, 0x192C(r12)    # |
-    stw r11, 0x1930(r12)    # |
-    stw r11, 0x1934(r12)    # /
     stw r11, 0x24E8(r12)    # Empty SND_OVERRIDE_STR_ADDR
-
+    addi r3, r12, 0x191C    # \
+    li r4, 0x0              # | Set ITM_FT_ARCHIVES to NULL
+    li r5, 110              # | Reset item override settings
+    %call (__memfill)       # /
     b 0xC8 # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 }
 
@@ -171,6 +185,13 @@ HOOK @ $8094a5c8    # stLoaderStage::entryEntity
     li r10, 0           # \
     stw r10, 0x10(r1)   # | set temp string to empty
     stw r10, 0x1c(r1)   # /
+
+    %lwi (r3, PKM_OVERLOAD_AMOUNT_ADDR)
+    li r4, 0x0
+    li r5, 82
+    %call (__memfill)
+
+    lwz	r3, 0xC4(r31)
     lwz r3, 0x1A0(r3)           # stage filedata
     li r4, 1                    # Data_Type_Misc
     li r5, 20000                # fileIndex
@@ -187,6 +208,11 @@ HOOK @ $8094a5c8    # stLoaderStage::entryEntity
     addi r4, r4, 0x4    # |
     addi r3, r1, 0x10   # |
     %call (strcpy)      # /
+    lwz r4, 0x8(r1)                     # \
+    addi r4, r4, 0x1c                   # | Copy Item Override settings
+    %lwi (r3, PKM_OVERLOAD_AMOUNT_ADDR)       # |
+    li r5, 82                           # |
+    %call (memcpy)                      # /
 noItov:
     addi r4, r1, 0x1c                   # \
     %lwi (r3, PKM_OVERRIDE_STR_ADDR)    # |
@@ -371,22 +397,6 @@ HOOK @ $808382f0    # Fighter::startFinal
 # Setup paths for item archive pacs #
 #####################################
     
-.macro setupAltItmPath(<formatterOffset>)
-{
-    addi r6, r31, 0x1A44    # "item"
-    addi r5, r31, <formatterOffset> 
-    %lwi (r7, ITM_OVERRIDE_STR_ADDR)	
-    stw r7, 0x1c(r1)   # Store to initialize to loop	    
-}
-
-.macro setupAltPkmPath(<formatterOffset>)
-{
-    addi r6, r31, 0x1A44    # "item"
-    addi r5, r31, <formatterOffset> 
-    %lwi (r7, PKM_OVERRIDE_STR_ADDR)	
-    stw r7, 0x1c(r1)   # Store to initialize to loop	    
-}
-
 op lwzx	r27, r3, r0 @ $809aeeb4 # \
 op lwzx	r25, r3, r5 @ $809aeebc # |
 CODE @ $809af1d0                # |
@@ -396,95 +406,74 @@ CODE @ $809af1d0                # |
 }                               # /
 
 # Fetch alternate ItmCommonBrres.pac path
-HOOK @ $809af08c
-{
-    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%s%s.%s"    
-}
 HOOK @ $809af094
 {
+    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
+    addi r7, r31, 0x1A44    # "item"
     addi r8, r31, 0x1A4C    # "Itm"
     addi r9, r31, 0x1A3C    # "Common"
     addi r10, r31, 6769     # "Brres"
     stw r14, 0x8(r1)        # ".pac"
+    lbz r11, 0xEB1(r31)     # ITM_OVERRIDE_SETTING
+    andi. r11, r11, 0x1     # \ Check if override brres
+    beq+ %end%              # /
+    addi r5, r31, 0x1AE6    # "/%s/%s/%s%s%s.%s"  
+    addi r6, r31, 0x1A44    # "item"
+    addi r7, r31, 0xE70     # ITM_OVERRIDE_STR_ADDR
 }
-HOOK @ $809af0a4
-{   
-    lwz r3, 0x1c(r1)    # \
-    cmpwi r3, 0         # | Check if has already looped once
-    beq- %end%          # /
-    addi r3, r1, 532                # \ Check if alt ItmCommonBrres.pac exists on the SD card
-	%call (gfFileIO__checkFile)	    # /
-    li r12, 0           # \ Store to keep track of whether loop happened once
-    stw r12, 0x1c(r1)    # /
-    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
-    lwz r6, 0x4(r31)
-    addi r7, r31, 0x1A44    # "item"
-    cmpwi r3, 0             
-}
-op bne- -0x18 @ $809af0a8   # Loop if doesn't exist to make default path
 
 # Fetch alternate ItmCommonParam.pac path
 HOOK @ $809af0b0
 {
-    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%s%s.%s"
-}
-HOOK @ $809af0b8
-{       
-    addi r3, r1, 276
+    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
+    addi r7, r31, 0x1A44    # "item"
     addi r8, r31, 0x1A4C    # "Itm"
     addi r9, r31, 0x1A3C    # "Common"
     addi r10, r31, 6919     # "Param"
     stw r14, 0x8(r1)        # ".pac"
-    crclr 6,6
-    %call (snprintf)
-    lwz r3, 0x1c(r1)    # \
-    cmpwi r3, 0        # | Check if has already looped once
-    beq- %end%         # /
-    addi r3, r1, 276                # \ Check if alt ItmCommonParam.pac exists on the SD card
-    %call (gfFileIO__checkFile)     # /
-    li r12, 0           # \ Store to keep track of whether loop happened once
-    stw r12, 0x1c(r1)    # /
-    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
-    lwz r6, 0x4(r31)
-    addi r7, r31, 0x1A44    # "item"
-    cmpwi r3, 0
+    lbz r11, 0xEB1(r31)     # ITM_OVERRIDE_SETTING
+    andi. r11, r11, 0x2     # \ Check if override param
+    beq+ %end%              # /
+    addi r5, r31, 0x1AE6    # "/%s/%s/%s%s%s.%s"  
+    addi r6, r31, 0x1A44    # "item"
+    addi r7, r31, 0xE70     # ITM_OVERRIDE_STR_ADDR
 }
-op bne -0x8 @ $809af0bc # Loop if doesn't exist to make default path
 
 # Fetch alternate ItmParam.pac path
-HOOK @ $809af244
+HOOK @ $809af23c
 {
-    %setupAltItmPath(0x1AE6)   # "/%s/%s/%s%s%s.%s"
-formulatePath:
+    li r12, 0xE70
+    lwz	r6, 0x4(r31)
     addi r3, r1, 0x24
     li r4, 0xef
+    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
+    addi r7, r31, 0x1A44    # "item"
     addi r8, r31, 0x1A4C    # "Itm"
     lwz	r9, 0x04(r31)       # ""
     addi r10, r31, 6919     # "Param"
     stw r14, 0x8(r1)        # ".pac"
+    lbz r11, 0xEB1(r31)     # ITM_OVERRIDE_SETTING
     cmpwi r16, 0x62     # \ check if itKind >= 0x62 (Pokemon and Assist Trophies)
-    blt+ notVariant     # /
-    cmpwi r17, 0x0      # \ check if variant > 0, get alt ItmParam if it is
-    ble+ notVariant     # /
+    blt+ notPkmn        # /
+    li r12, 0xE80
+    cmpwi r17, 0x0       # \ check if variant > 0, get alt ItmParam if it is
+    ble+ notPkmnOverride # / 
     stw r10, 0x8(r1)    # "Param"
     stw r14, 0xc(r1)    # ".pac"
-    subi r5, r5, 0x64    # "/%s/%s/%s%s%02d%s.%s"
+    subi r5, r5, 0x64   # "%s/%s/%s%s%02d%s.%s"
     mr r10, r17         # variant
-notVariant:
-    crclr 6,6
-    %call (snprintf)
-    lwz r3, 0x1c(r1)    # \
-    cmpwi r3, 0        # | Check if has already looped once
-    beq- %end%         # /
-    addi r3, r1, 0x24               # \ Check if alt ItmParam.pac exists on the SD card
-    %call (gfFileIO__checkFile)     # /
-    li r12, 0           # \ Store to keep track of whether loop happened once
-    stw r12, 0x1c(r1)    # /
-    addi r5, r31, 0x1AE7    # "%s/%s/%s%s%s.%s"
-    lwz r6, 0x4(r31)
-    addi r7, r31, 0x1A44    # "item"
-    cmpwi r3, 0
-    bne- formulatePath
+    cmpwi r17, 0x1000   # \ check if variant >= 0x1000, get ItmParam from override folder if it is
+    bge- override       # /
+notPkmnOverride:
+    addi r11, r31, 0xE50    # \
+    lbzx r11, r11, r16      # / PKM_OVERRIDE_SETTING
+notPkmn:
+    andi. r11, r11, 0x2     # \ Check if override param
+    beq+ %end%              # /
+override:
+    subi r5, r5, 0x1        # "/%s/%s/%s%s%s.%s"  
+    addi r6, r31, 0x1A44    # "item"
+    add r7, r31, r12        # OVERRIDE_STR_ADDR
 }
 
 string "/%s/%s/%s/%s%s%02d%s.%s" @ $80B52507    # create string format for variant path
@@ -496,59 +485,36 @@ byte 0x00 @ $80B524FE   # add null terminator to get "Brres" as a string
 byte 0x00 @ $80B52594   # add null terminator to get "Param" as a string
 
 # Fetch alternate item brres path (i.e. for Pokemon and Assist Trophies)
-HOOK @ $809af180
+HOOK @ $809af198
 {
-    %setupAltPkmPath(6883)   # "/%s/%s/%s/%s%s%s.%s"
+    addi r5, r31, 6884  # "%s/%s/%s/%s%s%s.%s"
+    addi r12, r31, 6769 # \
+    stw r12, 0x8(r1)    # / "Brres"
+    stw r14, 0xc(r1)    # ".pac"
+    addi r11, r31, 0xE50    # \
+    lbzx r11, r11, r16      # / PKM_OVERRIDE_SETTING
+    andi. r11, r11, 0x1     # \ Check if override brres
+    beq+ %end%              # /
+    addi r5, r31, 6883      # "/%s/%s/%s/%s%s%s.%s" 
+    addi r6, r31, 0x1A44    # "item"
+    addi r7, r31, 0xE80     # PKM_OVERRIDE_STR_ADDR
 }
-op stw r14, 0xc(r1) @ $809af18c # ".pac"
-op addi r12, r31, 6769  @ $809af198
-HOOK @ $809af1a0
-{
-    stw r12, 0x8(r1)    # "Brres"
-    crclr 6,6
-    %call (snprintf)
-    lwz r3, 0x1c(r1)    # \
-    cmpwi r3, 0        # | Check if has already looped once
-    beq- %end%         # /
-    addi r3, r1, 532            # \ Check if alt Param.pac exists on the SD card
-    %call (gfFileIO__checkFile) # /
-    li r12, 0           # \ Store to keep track of whether loop happened once
-    stw r12, 0x1c(r1)    # /
-    addi r5, r31, 6884    # "%s/%s/%s/%s%s%s.%s"
-    lwz r6, 0x4(r31)
-    addi r7, r31, 0x1A44    # "item"
-    cmpwi r3, 0
-}
-op bne -0x20 @ $809af1a4 # Loop if doesn't exist to make default path
 
 # Fetch alternate item param path (i.e. for Pokemon and Assist Trophies)
-HOOK @ $809af1d8
+HOOK @ $809af1f8
 {
-    %setupAltPkmPath(6883)     # "/%s/%s/%s/%s%s%s.%s"
+    li r4, 255          # Original operation
+    addi r12, r31, 6919 # \
+    stw r12, 0x8(r1)    # / "Param"
+    stw r14, 0xc(r1)    # ".pac"
+    addi r11, r31, 0xE50    # \
+    lbzx r11, r11, r16      # / PKM_OVERRIDE_SETTING
+    andi. r11, r11, 0x2     # \ Check if override param
+    beq+ %end%              # /
+    addi r5, r31, 6883      # "/%s/%s/%s/%s%s%s.%s" 
+    addi r6, r31, 0x1A44    # "item"
+    addi r7, r31, 0xE80     # PKM_OVERRIDE_STR_ADDR
 }
-CODE @ $809af1e8
-{
-    stw	r14, 0xc(r1)        # ".pac"
-    addi r12, r31, 6919     # \ "Param" 
-    stw r12, 0x8(r1)        # /
-}
-HOOK @ $809af1fc
-{
-    crclr 6,6
-    %call (snprintf)
-    lwz r3, 0x1c(r1)    # \
-    cmpwi r3, 0        # | Check if has already looped once
-    beq- %end%         # /
-    addi r3, r1, 276            # \ Check if alt Param.pac exists on the SD card
-    %call (gfFileIO__checkFile) # /
-    li r12, 0           # \ Store to keep track of whether loop happened once
-    stw r12, 0x1c(r1)    # /
-    addi r5, r31, 6884      # "%s/%s/%s/%s%s%s.%s"
-    lwz r6, 0x4(r31)
-    addi r7, r31, 0x1A44    # "item"
-    cmpwi r3, 0
-}
-op bne -0x24 @ $809af200 # Loop if doesn't exist to make default path
 
 HOOK @ $809af13c
 {
@@ -563,33 +529,32 @@ HOOK @ $809af13c
 HOOK @ $809af150
 {
     li r22, 532
-    stw r17, 0x8(r1)    # variant
-    stw	r14, 0x10(r1)   # ".pac"
     addi r12, r31, 6769 # \
     stw r12, 0xc(r1)    # / "Brres"
 formulatePath:
-    %setupAltPkmPath(6783) # "/%s/%s/%s/%s%s%02d%s.%s"
-formulateOriginalPath:
+    addi r5, r31, 6784  # "%s/%s/%s/%s%s%02d%s.%s"
+    lwz	r6, 0x4(r31)
+    mr r7, r22
     add r3, r1, r22
-    li r4, 0xff
+    li r4, 255          # Original operation
     mr r8, r25          # item name 
     mr r9, r21          # "Itm" or "Pkm" or "Asf" or "Wpn"
     mr r10, r24
+    stw r17, 0x8(r1)    # variant
+    stw	r14, 0x10(r1)   # ".pac"
+    cmpwi r17, 0x1000   # \ check if variant >= 0x1000, get from override folder if it is
+    bge+ pkmnOverride   # /
+    addi r11, r31, 0xE50    # \
+    lbzx r11, r11, r16      # / PKM_OVERRIDE_SETTING
+    andi. r11, r11, 0x2     # \ Check if override param
+    beq+ notOverride   
+pkmnOverride:
+    addi r5, r31, 6783      # "/%s/%s/%s/%s%s%s.%s" 
+    addi r6, r31, 0x1A44    # "item"
+    addi r7, r31, 0xE80     # PKM_OVERRIDE_STR_ADDR
+notOverride:
     crclr 6,6
     %call (snprintf)
-    lwz r3, 0x1c(r1)        # \
-    cmpwi r3, 0             # | Check if has already looped once
-    beq- skipExistsCheck    # /
-    add r3, r1, r22            # \ Check if alt Brres.pac exists on the SD card
-    %call (gfFileIO__checkFile) # /
-    li r12, 0           # \ Store to keep track of whether loop happened once
-    stw r12, 0x1c(r1)    # /
-    addi r5, r31, 6784      # "%s/%s/%s/%s%s%02d%s.%s"
-    lwz r6, 0x4(r31)
-    addi r7, r31, 0x1A44    # "item"
-    cmpwi r3, 0
-    bne- formulateOriginalPath
-skipExistsCheck:
     addi r12, r31, 6919 # \
     stw r12, 0xc(r1)    # / "Param"
     cmpwi r22, 276
@@ -1174,20 +1139,27 @@ CODE @ $809b5afc    # itManager::safeLotCreateItem
     srwi r5, r20, 16            # Get itVariation from first two bytes
 }
 op b 0x38 @ $809b5c5c # Skip checking if variant is less than max variant
+HOOK @ $809b1b4c    # itManager::removeItemAfter
+{
+    mr r26, r5          # \ Store itVariation on stack
+    stw r26, 0x8(r1)    # /
+}
 HOOK @ $809b2088    # itManager::removeItemAfter
 {
-    srwi r12, r0, 16          # Get itVariation from first two bytes
-    andi. r0, r0, 0xffff      # Get itKind from last two bytes
-    cmpw r29, r0                # \ Check if desired itKind
-    bne+ %end%                  # /
-    cmpw r26, r12               # Check if desired itVariation
+    srwi r12, r0, 16        # Get itVariation from first two bytes
+    andi. r0, r0, 0xffff    # Get itKind from last two bytes
+    cmpw r29, r0            # \ Check if desired itKind
+    bne+ %end%              # /
+    lwz r11, 0x8(r1)        # \ Check if desired itVariation
+    cmpw r11, r12           # /
 }
 HOOK @ $809b2158    # itManager::removeItemAfter
 {
-    lwz r12, 0xc(r3)    # Get itArchive->itVariation
+    lwz r12, 0xc(r4)    # Get itArchive->itVariation
     cmpw r0, r29        # \ Check if desired itKind
     bne+ %end%          # /
-    cmpw r12, r26       # Check if desired itVariation
+    lwz r11, 0x8(r1)    # \ Check if desired itVariation
+    cmpw r12, r11       # / 
 }
 CODE @ $809b0b9c    # itManager::checkCreatableItem
 {
@@ -1253,7 +1225,15 @@ startLoop:
     cmpwi r29, 0
     bgt+ loop
 endLoop:
-    cmpwi r30, 5 # Original operation
+    %lbd (r12, PKM_OVERLOAD_AMOUNT_ADDR)        # \ Add Pokemon overload amount 
+    addi r12, r12, DEFAULT_PKM_VARIETY_AMOUNT   # /
+    cmpw r30, r12       # Original operation
+}
+HOOK @ $809ad73c    # itManager::processBegin
+{
+    %lbd (r12, PKM_OVERLOAD_AMOUNT_ADDR)        # \ Add Pokemon overload amount 
+    addi r12, r12, DEFAULT_PKM_VARIETY_AMOUNT   # /
+    cmpw r3, r12       # Original operation
 }
 HOOK @ $809afe68    # itManager::preloadPokemon
 {
@@ -1275,6 +1255,64 @@ HOOK @ $809aff30    # itManager::preloadPokemon
 }
 op lhz r5, 0x8(r1) @ $809aff84  # itManager::preloadPokemon
 op lhz r4, 0xA(r1) @ $809aff8c  # itManager::preloadPokemon
+HOOK @ $809bca24    # itArchive::__ct
+{
+    li r12, 11          # \ Set itArchiveType to 11 (custom itArchiveType for Pokemon loaded in PokemonResource)
+    stw r12, 0x0(r25)   # /
+    li r24, 0
+    %lwd (r3, g_itManager)  # \
+    lwzu r12, 0xC8(r3)      # |
+    lwz r12, 0x14(r12)      # | itManager->itArchiveArrayList.size()
+    mtctr r12               # |
+    bctrl                   # /
+    mr r29, r3
+    b startLoop
+loop:
+    mr r4, r29              # \
+    %lwd (r3, g_itManager)  # |
+    lwzu r12, 0xC8(r3)      # | itArchive** archive = itManager->itArchiveArrayList.at(i)
+    lwz r12, 0x10(r12)      # |
+    mtctr r12               # |
+    bctrl                   # /
+    lwz r3, 0x0(r3)                     # \
+    cmpwi r3, 0x0                       # | Check if itArchive is not null
+    beq+ startLoop                      # / 
+    lwz r4, 0x0(r3)                     # \
+    cmpwi r4, 11                        # | Check if the itArchive has an itArchiveType of 11 
+    bne+ startLoop                      # /
+    lwz r4, 0x8(r3)                     # \
+    rlwinm r6, r4, 2, 0, 29             # |
+    %lwi (r12, g_itKindRemovableItKind) # |
+    lwzx r5, r12, r6                    # | Check if the itArchive is the main archive for the Pokemon (i.e. not just the shot)
+    cmpw r5, r4                         # | 
+    bne- startLoop                      # /
+    lwz r6, 0xc(r25)                    # \
+    rlwinm r6, r6, 2, 0, 29             # |
+    lwzx r6, r12, r6                    # | Check if corresponding itKind already exists
+    cmpw r5, r6                         # |
+    beq- startLoop                      # /
+    addi r24, r24, 0x1                  # Add to Pokemon loaded in PokemonResource count
+startLoop:
+    subi r29, r29, 0x1
+    cmpwi r29, 0
+    bge- loop
+    li r29, 38  # Original operation
+    cmpwi r24, DEFAULT_PKM_VARIETY_AMOUNT   # \ Check if PokemonResource is full
+    blt+ %end%                              # /
+    li r12, 12          # \ Set itArchiveType to 12 (custom itArchiveType for Pokemon loaded in StageResource)
+    stw r12, 0x0(r25)   # /
+    li r29, 0x11    # Use StageResource to load Pokemon instead
+}
+HOOK @ $809ad238    # itManager::finish
+{
+    mr r3, r31                              # \
+    li r4, 11                               # |
+    %call (itManager__removeItemArchive)    # | Remove custion itArchiveType for Pokemon
+    mr r3, r31                              # |
+    li r4, 12                               # |
+    %call (itManager__removeItemArchive)    # /
+    li r0, -1   # Original operation
+}
 
 ###############################
 # Variant support for Assists #
@@ -1487,3 +1525,4 @@ HOOK @ $8098f6d0    # BaseItem::reset
     bne+ %end%      # / 
     li r24, 0x0
 }     
+
