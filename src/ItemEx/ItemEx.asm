@@ -1,7 +1,7 @@
 
-################################################
-ItemEx Clone Engine v1.3 [Sammi Husky, Kapedani]
-################################################
+#################################################
+ItemEx Clone Engine v1.31 [Sammi Husky, Kapedani]
+#################################################
 # Stages can override items
 # Character specific items
 # Variants setup for Pokemon/Assist Trophies
@@ -116,7 +116,7 @@ CODE @ $806bfc2c        # stDecentralizationNandLoader::loadFiles2
     stw r11, 0x24E8(r12)    # Empty SND_OVERRIDE_STR_ADDR
     addi r3, r12, 0x191C    # \
     li r4, 0x0              # | Set ITM_FT_ARCHIVES to NULL
-    li r5, 110              # | Reset item override settings
+    li r5, 122              # | Reset item override settings
     %call (__memfill)       # /
     b 0xC8 # Skip fetching itmParam, itmCommonParam and itmCommonBrres from common3.pac
 }
@@ -188,7 +188,7 @@ HOOK @ $8094a5c8    # stLoaderStage::entryEntity
 
     %lwi (r3, PKM_OVERLOAD_AMOUNT_ADDR)
     li r4, 0x0
-    li r5, 82
+    li r5, 94
     %call (__memfill)
 
     lwz	r3, 0xC4(r31)
@@ -210,8 +210,8 @@ HOOK @ $8094a5c8    # stLoaderStage::entryEntity
     %call (strcpy)      # /
     lwz r4, 0x8(r1)                     # \
     addi r4, r4, 0x1c                   # | Copy Item Override settings
-    %lwi (r3, PKM_OVERLOAD_AMOUNT_ADDR)       # |
-    li r5, 82                           # |
+    %lwi (r3, PKM_OVERLOAD_AMOUNT_ADDR) # |
+    li r5, 94                           # |
     %call (memcpy)                      # /
 noItov:
     addi r4, r1, 0x1c                   # \
@@ -287,6 +287,7 @@ HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizati
 
 HOOK @ $809bcaec # itArchive::__ct
 {
+    li r29, 17          # Use StageResource to load if not found on stage pac
     stw	r0, 0xC(r1)     # \ *itmParam = NULL
     addi r8, r1, 0xc    # /
     li r9, 0x0          # itCustomizer = NULL
@@ -453,11 +454,19 @@ HOOK @ $809af23c
     addi r10, r31, 6919     # "Param"
     stw r14, 0x8(r1)        # ".pac"
     lbz r11, 0xEB1(r31)     # ITM_OVERRIDE_SETTING
-    cmpwi r16, 0x62     # \ check if itKind >= 0x62 (Pokemon and Assist Trophies)
+    cmpwi r16, 0x46     # \ check if itKind < 0x46 (common items)
     blt+ notPkmn        # /
+    li r12, 0xF02
+    cmpwi r17, 0x1000   # \ check if variant >= 0x1000, get from override folder if it is
+    bge+ variantParam   # /
+    cmpwi r16, 0x52     # \ check if itKind <= 0x52 (for stage specific items)
+    ble- override       # /
+    cmpwi r16, 0x62     # \ check if itKind >= 0x62 (Pokemon and Assist Trophies)
+    blt+ notPkmn        # /    
     li r12, 0xE80
     cmpwi r17, 0x0       # \ check if variant > 0, get alt ItmParam if it is
     ble+ notPkmnOverride # / 
+variantParam:
     stw r10, 0x8(r1)    # "Param"
     stw r14, 0xc(r1)    # ".pac"
     subi r5, r5, 0x64   # "%s/%s/%s%s%02d%s.%s"
@@ -490,14 +499,19 @@ HOOK @ $809af198
     addi r5, r31, 6884  # "%s/%s/%s/%s%s%s.%s"
     addi r12, r31, 6769 # \
     stw r12, 0x8(r1)    # / "Brres"
+    li r12, 0xF02
     stw r14, 0xc(r1)    # ".pac"
+    cmpwi r16, 0x52     # \ check if itKind <= 0x52 (for stage specific items)
+    ble- override       # /
+    li r12, 0xE80
     addi r11, r31, 0xE50    # \
     lbzx r11, r11, r16      # / PKM_OVERRIDE_SETTING
     andi. r11, r11, 0x1     # \ Check if override brres
     beq+ %end%              # /
+override:
     addi r5, r31, 6883      # "/%s/%s/%s/%s%s%s.%s" 
     addi r6, r31, 0x1A44    # "item"
-    addi r7, r31, 0xE80     # PKM_OVERRIDE_STR_ADDR
+    add r7, r31, r12        # OVERRIDE_STR_ADDR
 }
 
 # Fetch alternate item param path (i.e. for Pokemon and Assist Trophies)
@@ -506,14 +520,19 @@ HOOK @ $809af1f8
     li r4, 255          # Original operation
     addi r12, r31, 6919 # \
     stw r12, 0x8(r1)    # / "Param"
+    li r12, 0xF02
     stw r14, 0xc(r1)    # ".pac"
+    cmpwi r16, 0x52     # \ check if itKind <= 0x52 (for stage specific items)
+    ble- override       # /
+    li r12, 0xE80
     addi r11, r31, 0xE50    # \
     lbzx r11, r11, r16      # / PKM_OVERRIDE_SETTING
     andi. r11, r11, 0x2     # \ Check if override param
     beq+ %end%              # /
+override:
     addi r5, r31, 6883      # "/%s/%s/%s/%s%s%s.%s" 
     addi r6, r31, 0x1A44    # "item"
-    addi r7, r31, 0xE80     # PKM_OVERRIDE_STR_ADDR
+    add r7, r31, r12        # OVERRIDE_STR_ADDR
 }
 
 HOOK @ $809af13c
@@ -532,9 +551,10 @@ HOOK @ $809af150
     addi r12, r31, 6769 # \
     stw r12, 0xc(r1)    # / "Brres"
 formulatePath:
+    li r12, 0xF02
     addi r5, r31, 6784  # "%s/%s/%s/%s%s%02d%s.%s"
     lwz	r6, 0x4(r31)
-    mr r7, r22
+    addi r7, r31, 0x1A44    # "item"
     add r3, r1, r22
     li r4, 255          # Original operation
     mr r8, r25          # item name 
@@ -542,16 +562,24 @@ formulatePath:
     mr r10, r24
     stw r17, 0x8(r1)    # variant
     stw	r14, 0x10(r1)   # ".pac"
+    cmpwi r16, 0x52     # \ check if itKind <= 0x52 (for stage specific items)
+    ble- override       # /
     cmpwi r17, 0x1000   # \ check if variant >= 0x1000, get from override folder if it is
-    bge+ pkmnOverride   # /
+    bge+ override       # /
+    li r12, 0xE80
     addi r11, r31, 0xE50    # \
     lbzx r11, r11, r16      # / PKM_OVERRIDE_SETTING
-    andi. r11, r11, 0x2     # \ Check if override param
+    li r0, 0x1          # \
+    cmpwi r22, 532      # |
+    beq+ isBrres        # |
+    li r0, 0x2          # | Check if override brres/param
+isBrres:                # |
+    and. r11, r11, r0   # / 
     beq+ notOverride   
-pkmnOverride:
+override:
     addi r5, r31, 6783      # "/%s/%s/%s/%s%s%s.%s" 
     addi r6, r31, 0x1A44    # "item"
-    addi r7, r31, 0xE80     # PKM_OVERRIDE_STR_ADDR
+    add r7, r31, r12        # OVERRIDE_STR_ADDR
 notOverride:
     crclr 6,6
     %call (snprintf)
@@ -984,7 +1012,12 @@ HOOK @ $80990328    # BaseItem::notifyEventAnimCmd
 }
 
 # Note: Number of variants dependent on array on in 80b50b60
-int 4 @ $80adb674   # Set Sidestepper to have > 0 variants
+int[6] 1, 1, 1, 1, 1, 1 @ $80ADB664     # \ Set stage items to have > 0 variants
+int[3] 1, 1, 1 @ $80ADB688              # /
+
+op lwz r5, 0x4(r3) @ $809b637c  # \ Preload using variants
+op mr r3, r23 @ $809b6384       # /
+
 
 ##################################
 # Adding Pokemon/Assist Variants #
@@ -1526,3 +1559,4 @@ HOOK @ $8098f6d0    # BaseItem::reset
     li r24, 0x0
 }     
 
+## TODO: Use StageResource, also use StageFolder name for Pokemon above in sawnd instead of Pkm Overload if >= 1000, also check if can be optimized for less sd file loads
