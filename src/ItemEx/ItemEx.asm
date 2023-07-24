@@ -1,6 +1,6 @@
 
 #################################################
-ItemEx Clone Engine v1.31 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.32 [Sammi Husky, Kapedani]
 #################################################
 # Stages can override items
 # Character specific items
@@ -25,6 +25,7 @@ ItemEx Clone Engine v1.31 [Sammi Husky, Kapedani]
 .alias itManager__getItemGroup              = 0x809ab74c  
 .alias itManager__getRandBasicItemSheet     = 0x809b3a60
 .alias itManager__getLotOneItemKind         = 0x809b4864
+.alias itManager__checkCreatableItem        = 0x809b08f4
 .alias g_itKindVariationNums                = 0x80ADB548
 .alias g_itKindRemovableItKind              = 0x80ADBE58
 .alias g_ftManager                          = 0x80B87C28
@@ -273,6 +274,7 @@ HOOK @ $806bf8e8    # Store 076.sawnd heap level when loaded in stDecentralizati
     lwz	r3, 0x1D0(r27)  # original operation
 }
 
+# TODO: Toggle explosives from capsules in ItemSwitch by pressing a certain button on capsules in Item Switch
 # TODO: Random sets?
 ## Code menu option to disable overrides and use default
 # TODO: Item switch: turn on/off random drops of stage specific items
@@ -480,6 +482,9 @@ notPkmn:
     andi. r11, r11, 0x2     # \ Check if override param
     beq+ %end%              # /
 override:
+    lbzx r0, r31, r12       # \
+    cmpwi r0, 0x0           # | Check if override string is empty
+    beq+ %end%              # /
     subi r5, r5, 0x1        # "/%s/%s/%s%s%s.%s"  
     addi r6, r31, 0x1A44    # "item"
     add r7, r31, r12        # OVERRIDE_STR_ADDR
@@ -1018,6 +1023,82 @@ int[3] 1, 1, 1 @ $80ADB688              # /
 op lwz r5, 0x4(r3) @ $809b637c  # \ Preload using variants
 op mr r3, r23 @ $809b6384       # /
 
+HOOK @ $809b1324    # itManager::createBaseItem
+{
+    stb r3, 0x8(r1) # \
+    cmpwi r3, 0     # | If item is creatable, skip
+    bne- %end%      # /
+    mr r3, r15                              # \
+    mr r4, r18                              # |
+    li r5, 0                                # | Try item variant 0 instead
+    li r6, 1                                # |
+    %call (itManager__checkCreatableItem)   # |
+    cmpwi r3, 0                             # /
+}
+HOOK @ $809b137c    # itManager::createBaseItem
+{
+    andc r25, r19, r0   # Original operation
+    lbz r12, 0x8(r1)    # \
+    cmpwi r12, 0x1      # | If desired item variant isn't creatable
+    beq+ %end%          # |
+    li r25, 0x0         # /
+}
+HOOK @ $809b1540    # itManager::createBaseItem
+{
+    andc r28, r19, r0   # Original operation
+    lbz r12, 0x8(r1)    # \
+    cmpwi r12, 0x1      # | If desired item variant isn't creatable
+    beq+ %end%          # |
+    li r28, 0x0         # /
+}
+HOOK @ $809b0550    # itManager::getItemKindArchive
+{   
+    addi r3, r28, 200       # \
+    lwz	r12, 0x0014(r12)    # |
+    mtctr r12               # | Original operations
+    bctrl	                # | 
+    cmpw r29, r3            # /
+}                           
+CODE @ $809b0554    # itManager::getItemKindArchive
+{
+    blt+ -0x4C      # \
+    li r29, 0x0     # |
+    cmpwi r31, 0x0  # | If itArchive with specific variant was not found, look for itArchive with variant 0
+    li r31, 0x0     # |
+    bne+ -0x5C      # /
+}
+HOOK @ $809b1cb4    # itManager::removeItemAfter
+{
+    addi r3, r24, 200       # \
+    lwz	r12, 0x0014(r12)    # |
+    mtctr r12               # | Original operations
+    bctrl	                # | 
+    cmpw r23, r3            # /
+}
+CODE @ $809b1cb8    # itManager::removeItemAfter
+{
+    blt+ -0x4C      # \
+    li r23, 0x0     # |
+    cmpwi r29, 0x0  # | If itArchive with specific variant was not found, look for itArchive with variant 0
+    li r29, 0x0     # |
+    bne+ -0x5C      # /
+}
+HOOK @ $809b1e60    # itManager::removeItemAfter
+{
+    addi r3, r24, 200       # \
+    lwz	r12, 0x0014(r12)    # |
+    mtctr r12               # | Original operations
+    bctrl	                # | 
+    cmpw r26, r3            # /
+}
+CODE @ $809b1e64    # itManager::removeItemAfter
+{
+    blt+ -0x4C      # \
+    li r26, 0x0     # |
+    cmpwi r23, 0x0  # | If itArchive with specific variant was not found, look for itArchive with variant 0
+    li r23, 0x0     # |
+    bne+ -0x5C      # /
+}
 
 ##################################
 # Adding Pokemon/Assist Variants #
