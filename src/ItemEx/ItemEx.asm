@@ -1558,5 +1558,3 @@ HOOK @ $8098f6d0    # BaseItem::reset
     bne+ %end%      # / 
     li r24, 0x0
 }     
-
-## TODO: Use StageResource, also use StageFolder name for Pokemon above in sawnd instead of Pkm Overload if >= 1000, also check if can be optimized for less sd file loads
