@@ -1,6 +1,6 @@
 
 #################################################
-ItemEx Clone Engine v1.32 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.33 [Sammi Husky, Kapedani]
 #################################################
 # Stages can override items
 # Character specific items
@@ -259,7 +259,7 @@ dontReloadPkmnSawnd:
     %lwd (r3, g_itManager)
     li r4, 0x3e # itKind
     li r5, 0x0  # variation
-    li r6, 0x0  # itArchiveType - Temp
+    li r6, 17  # itArchiveType - Temp
     li r7, 0x1
     %call (itManager__preloadItemKindArchive)
     lwz r4, 0x10(r3)                # \
