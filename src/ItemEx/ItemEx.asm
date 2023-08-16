@@ -1,6 +1,6 @@
 
 #################################################
-ItemEx Clone Engine v1.33 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.34 [Sammi Husky, Kapedani]
 #################################################
 # Stages can override items
 # Character specific items
@@ -31,7 +31,6 @@ ItemEx Clone Engine v1.33 [Sammi Husky, Kapedani]
 .alias g_ftManager                          = 0x80B87C28
 .alias ftManager__getFighter                = 0x80814f20
 .alias g_ftEntryManager                     = 0x80B87c48
-.alias ftEntryManager__getEntryIdFromPlayerNo   = 0x80823dd0
 .alias ftEntryManager__getEntryIdFromTaskId = 0x80823f90
 .alias ftEntryManager__getEntity            = 0x80823b24
 .alias gfArchiveDatabase__get               = 0x80016664
@@ -326,23 +325,11 @@ HOOK @ $8098d574    # BaseItem::activate
     lwz r4, 0x8C0(r29)  # Original operation
     lwz r5, 0x8C4(r29)  # Pass itVariation to itManager::getCustomizer as extra parameter
 }
-CODE @ $809abc14        # itManager::getCustomizer
-{                                   # \
-    stwu r1, -0x60(r1)              # |
-    mflr r0                         # | 
-    stw	r0, 0x64(r1)                # |
-    addi r11, r1, 0x60              # | Increase stack size
-}                                   # |
-op addi r11, r1, 0x60 @ $809ac114   # |
-op lwz r0, 0x64(r1) @ $809ac11c     # |
-op addi r1, r1, 0x60 @ $809ac124    # /
 HOOK @ $809abc28    # itManager::getCustomizer
 {
     li r29, 0
     stw r29, 0x8(r1)
     stw r29, 0xc(r1)
-    stw r29, 0x10(r1)
-    stw r29, 0x14(r1)
     mr r30, r4  
     mr r31, r5
 grabItCustomizerFromModule:
@@ -352,34 +339,60 @@ grabItCustomizerFromModule:
     cmpwi r3, 0
     beq- skipGettingItCustomizerFromModule
     addi r4, r1, 0x8    # \
-    addi r5, r1, 0xc    # |
+    addi r5, r1, 0x8    # |
     mr r6, r30          # |
     mr r7, r31          # |
-    addi r8, r1, 0x10   # |
-    addi r9, r1, 0x14   # | stage->getItemPac(gfArchive** brres, gfArchive** param, itKind itemID, int variantID, gfArchive** commonParam, itCustomizerInterface** customizer)
+    addi r8, r1, 0x8    # |
+    addi r9, r1, 0xc    # | stage->getItemPac(gfArchive** brres, gfArchive** param, itKind itemID, int variantID, gfArchive** commonParam, itCustomizerInterface** customizer)
     lwz r12, 0x3c(r3)   # |
     lwz r12, 0x80(r12)  # |
     mtctr r12           # |
     bctrl               # /
     b fetchItCustomizer
 grabItCustomizerFromFighter:
-    srawi r4, r31, 20           # variant / 0x100000 to get ftSlotId
-    %lwd (r3, g_ftEntryManager) 
-    %call (ftEntryManager__getEntryIdFromPlayerNo)
-    mr r4, r3
+    %lwd (r28, g_ftEntryManager)    # \
+    addi r3, r28, 0x8               # |
+    lwz r12, 0x8(r28)               # | ftEntryManager->ftEntryArrayVector.size();
+    lwz r12, 0x14(r12)              # |
+    mtctr r12                       # |
+    bctrl                           # /
+    mr r27, r3
+    li r26, 0x0
+    b startCheckEntriesLoop
+checkEntriesLoop:
+    mr r4, r26                      # \
+    addi r3, r28, 0x8               # |
+    lwz r12, 0x8(r28)               # | ftEntryManager->ftEntryArrayVector.at(i);
+    lwz r12, 0x10(r12)              # |
+    mtctr r12                       # |
+    bctrl                           # /
+    lwz r3, 0x0(r3)
+    lwz r4, 0x18(r3)    # ftEntry->slotId
+    srawi r5, r31, 20   # variant / 0x100000 to get ftSlotId
+    cmpw r4, r5         # check if slotId matches
+    bne+ notSlot
+    lwz r4, 0x4(r3)     # ftEntry->entryId
+    b foundSlot
+notSlot:
+    addi r26, r26, 0x1
+startCheckEntriesLoop:
+    cmpw r26, r27
+    blt+ checkEntriesLoop 
+    li r4, -0x1         # entryId = -1
+foundSlot:
     %lwd (r3, g_ftManager)
     li r5, -1
     %call (ftManager__getFighter)
     cmpwi r3, 0x0
     beq- skipGettingItCustomizerFromModule
     rlwinm r4,r31,0,12,31   # variant id & 0xFFFFF (i.e. remove the ftslotid)
-    addi r5, r1, 0x14   # \
+    addi r5, r1, 0xc    # \
     lwz r12, 0x3c(r3)   # |
     lwz r12, 0x278(r12) # | fighter->onStartFinal(int variantId, itCustomizerInterface** customizer)
     mtctr r12           # |
     bctrl               # /
 fetchItCustomizer:
-    lwz r29, 0x14(r1)   # fetch obtained itCustomizer from stage
+    lwz r29, 0xc(r1)    # fetch obtained itCustomizer from stage
 skipGettingItCustomizerFromModule:
     mr r4, r30
     mr r3, r29          
