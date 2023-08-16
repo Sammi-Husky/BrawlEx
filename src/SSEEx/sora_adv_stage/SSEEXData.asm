@@ -1,5 +1,5 @@
 loc_NumAddedTeamMembers:
-        .byte 0x5 #0x1
+        .byte 0x4 #0x1
 #loc_NumOverrideTeamMembers:
 #        .byte 0x2A #0x24  
 #loc_OverrideTeamMemberIds:
@@ -43,8 +43,8 @@ loc_AddedTeamMemberCSSIds:
         .byte 0x2D      # Roy
         .byte 0x2F      # Knuckles
         .byte 0x32      # Ridley
-        .byte 0x33      # Dark Samus
-        .byte 0x32      # Ridley
+        .byte 0x39      # Waluigi
+        .byte 0x33      # Ridley
         .byte 0x32      # Ridley
         .byte 0x00      # 42
         .byte 0x00      # 43

@@ -16,6 +16,7 @@
 # TODO: Investigate putting entirely new level markers on the map
 ## Unlock levels similar to characters detecting jumpLevelId
 ## Seems to be setup in initDisp
+# TODO: Enable enemies on VS 
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
 # TODO: Stickers don't get deleted upon use
@@ -30,8 +31,10 @@
 # TODO: For coin, modify code @ 8081BC74 in All Star VS to check if user has coins and wipe if they don't (and then implement dropping coins upon death)
 # TODO: Make sublevel id above 0x1A (z) just use hex instead for the file name, make ids above 0x99 use hex in the file name
 # TODO: Make door not be able to entered by putting requirements in potentially unused door, investigate three pin door (i.e. investigate triggers more, make new triggers based on current character being used)
+# TODO: Hold L makes cursor a different colour, display Hold X for Time Attack on the map
 # TODO: investigae movie menu (hold L for alternate menu of SSE)
 # TODO: Load optional tlst at beginning of stage
+# TODO: Item switch settings
 # TODO: Control enemies
 # TODO: Split gimmicks into rels so each stage could have a completely different gimmicks as well as can put new itCustomizers there
 ## Default rel with gimmicks would go in adventure_common, otherwise stages could have their own rel in it
