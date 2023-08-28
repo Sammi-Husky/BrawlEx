@@ -1,6 +1,6 @@
 
 #################################################
-ItemEx Clone Engine v1.34 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.35 [Sammi Husky, Kapedani]
 #################################################
 # Stages can override items
 # Character specific items
@@ -472,7 +472,7 @@ HOOK @ $809af23c
     cmpwi r16, 0x46     # \ check if itKind < 0x46 (common items)
     blt+ notPkmn        # /
     li r12, 0xF02
-    cmpwi r17, 0x1000   # \ check if variant >= 0x1000, get from override folder if it is
+    cmplwi r17, 0x8000   # \ check if variant >= 0x1000, get from override folder if it is
     bge+ variantParam   # /
     cmpwi r16, 0x52     # \ check if itKind <= 0x52 (for stage specific items)
     ble- override       # /
@@ -486,7 +486,7 @@ variantParam:
     stw r14, 0xc(r1)    # ".pac"
     subi r5, r5, 0x64   # "%s/%s/%s%s%02d%s.%s"
     mr r10, r17         # variant
-    cmpwi r17, 0x1000   # \ check if variant >= 0x1000, get ItmParam from override folder if it is
+    cmplwi r17, 0x8000   # \ check if variant >= 0x1000, get ItmParam from override folder if it is
     bge- override       # /
 notPkmnOverride:
     addi r11, r31, 0xE50    # \
@@ -582,7 +582,7 @@ formulatePath:
     stw	r14, 0x10(r1)   # ".pac"
     cmpwi r16, 0x52     # \ check if itKind <= 0x52 (for stage specific items)
     ble- override       # /
-    cmpwi r17, 0x1000   # \ check if variant >= 0x1000, get from override folder if it is
+    cmplwi r17, 0x8000   # \ check if variant >= 0x1000, get from override folder if it is
     bge+ override       # /
     li r12, 0xE80
     addi r11, r31, 0xE50    # \
@@ -796,7 +796,7 @@ HOOK @ $809bcfec    # itArchive::getAllParam
 {
     mr r29, r4  # Original operation
     lwz r12, 0xc(r27)   # \
-    cmpwi r12, 0x1400   # | Check if variant id is attribute index intercept range
+    cmplwi r12, 0xA000   # | Check if variant id is attribute index intercept range
     blt+ %end%          # /
     andi. r29,r12,0xFF  # (variant id & 0xFF) to get itParam attribute index
 }
@@ -804,7 +804,7 @@ HOOK @ $809c70dc    # itResourceModuleImpl::__ct
 {
     lwz	r4, 0x2C(r31)   # Original operation
     lwz r12, 0xc(r27)   # \
-    cmpwi r12, 0x1400   # | Check if variant id is in attribute index intercept range
+    cmplwi r12, 0xA000   # | Check if variant id is in attribute index intercept range
     blt+ %end%          # /
     andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
 }
@@ -812,7 +812,7 @@ HOOK @ $809c729c    # itResourceModuleImpl::reset
 {
     lwz	r4, 0x2C(r28)   # Original operation
     lwz r12, 0xc(r29)   # \
-    cmpwi r12, 0x1400   # | Check if variant id is in attribute index intercept range
+    cmplwi r12, 0xA000   # | Check if variant id is in attribute index intercept range
     blt+ %end%          # /
     andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
 }
@@ -899,7 +899,7 @@ HOOK @ $8098a514    # BaseItem::__ct
 {
     lwz	r0, 0xC(r30)    # Original operation
     lwz r12, 0x10(r30)  # \
-    cmpwi r12, 0x1400   # | If clone, set itKind to it's base itKind
+    cmplwi r12, 0xA000   # | If clone, set itKind to it's base itKind
     blt+ %end%          # |
     andi. r0,r12,0xFF   # /
 }
@@ -908,7 +908,7 @@ HOOK @ $8098d524    # BaseItem::activate
 {
     lwz r6, 0xc(r30)    # Original operation
     lwz r12, 0x10(r30)  # \
-    cmpwi r12, 0x1400   # | If clone, set itKind to it's base itKind
+    cmplwi r12, 0xA000   # | If clone, set itKind to it's base itKind
     blt+ %end%          # |
     andi. r6,r12,0xFF   # /
 }
@@ -916,7 +916,7 @@ HOOK @ $8098d524    # BaseItem::activate
 HOOK @ $809b03d8    # itManager::getItemKindArchive
 {
     mflr r0     # Original operation
-    cmpwi r5, 0x1400    # \
+    cmplwi r5, 0xA000    # \
     blt+ %end%          # | If clone, set itKind to SideStepper
     li r4, 0x4B         # /
 }
@@ -924,7 +924,7 @@ HOOK @ $809b03d8    # itManager::getItemKindArchive
 HOOK @ $809ab8f0    # itManager::getItemKindArchiveGroup
 {
     mflr r0     # Original operation
-    cmpwi r5, 0x1400    # \
+    cmplwi r5, 0xA000    # \
     blt+ %end%          # | If clone, set itKind to SideStepper
     li r4, 0x4B         # /
 }
@@ -932,7 +932,7 @@ HOOK @ $809ab8f0    # itManager::getItemKindArchiveGroup
 HOOK @ $809ab838    # itManager::getItemKindArchiveId
 {
     lbz	r0, 0x14A0(r3)  # Original operation
-    cmpwi r5, 0x1400    # \
+    cmplwi r5, 0xA000    # \
     blt+ %end%          # | If clone, set itKind to SideStepper
     li r4, 0x4B         # /
 }
@@ -940,7 +940,7 @@ HOOK @ $809ab838    # itManager::getItemKindArchiveId
 HOOK @ $809b1b2c    # itManager::removeItemAfter
 {
     mflr r0     # Original operation
-    cmpwi r5, 0x1400    # \
+    cmplwi r5, 0xA000    # \
     blt+ %end%          # | If clone, set itKind to SideStepper
     li r4, 0x4B         # /
 }
@@ -1024,7 +1024,7 @@ HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
 HOOK @ $80990328    # BaseItem::notifyEventAnimCmd
 {
     mr r7, r31    # Original operation
-    cmpwi r31, 0x1400   # \ check if clone item
+    cmplwi r31, 0xA000   # \ check if clone item
     blt+ %end%          # /
     li r6, 0x4b     # set itKind to Sidestepper
 }
