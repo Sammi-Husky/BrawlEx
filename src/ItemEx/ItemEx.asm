@@ -1,6 +1,6 @@
 
 #################################################
-ItemEx Clone Engine v1.35 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.36 [Sammi Husky, Kapedani]
 #################################################
 # Stages can override items
 # Character specific items
@@ -792,29 +792,13 @@ forceClone:
     li r6, 1    # Force clone = true    
 } 
 
-HOOK @ $809bcfec    # itArchive::getAllParam
+HOOK @ $809c7820    # itResourceIdAccesserImpl::getItKind
 {
-    mr r29, r4  # Original operation
-    lwz r12, 0xc(r27)   # \
-    cmplwi r12, 0xA000   # | Check if variant id is attribute index intercept range
-    blt+ %end%          # /
-    andi. r29,r12,0xFF  # (variant id & 0xFF) to get itParam attribute index
-}
-HOOK @ $809c70dc    # itResourceModuleImpl::__ct
-{
-    lwz	r4, 0x2C(r31)   # Original operation
-    lwz r12, 0xc(r27)   # \
-    cmplwi r12, 0xA000   # | Check if variant id is in attribute index intercept range
-    blt+ %end%          # /
-    andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
-}
-HOOK @ $809c729c    # itResourceModuleImpl::reset
-{
-    lwz	r4, 0x2C(r28)   # Original operation
-    lwz r12, 0xc(r29)   # \
-    cmplwi r12, 0xA000   # | Check if variant id is in attribute index intercept range
-    blt+ %end%          # /
-    andi. r3,r12,0xFF   # (variant id & 0xFF) to get itParam attribute index
+    lwz r12, 0x8c4(r3)  # get itVariation 
+    lwz	r3, 0x8C0(r3)  # Original operation
+    cmplwi r12, 0xFFFF # \ Check if itVariation >= 0x10000
+    blt+ %end%         # /
+    rlwinm r3, r12, 24,24,31    # kind = (itVaration >> 8) && 0xff (use subvariant index for param attributes)
 }
 
 HOOK @ $80827a80    # ftSlot::exit
@@ -898,6 +882,7 @@ op lwz r4, 0x8(r1) @ $809b6a8c  # clear out archives with type that was passed i
 HOOK @ $8098a514    # BaseItem::__ct
 {
     lwz	r0, 0xC(r30)    # Original operation
+    stb r0, 0x8D5(r29)  # Store original itKind in unused byte
     lwz r12, 0x10(r30)  # \
     cmplwi r12, 0xA000   # | If clone, set itKind to it's base itKind
     blt+ %end%          # |
@@ -907,6 +892,7 @@ HOOK @ $8098a514    # BaseItem::__ct
 HOOK @ $8098d524    # BaseItem::activate
 {
     lwz r6, 0xc(r30)    # Original operation
+    stb r6, 0x8D5(r29)  # Store original itKind in unused byte
     lwz r12, 0x10(r30)  # \
     cmplwi r12, 0xA000   # | If clone, set itKind to it's base itKind
     blt+ %end%          # |
