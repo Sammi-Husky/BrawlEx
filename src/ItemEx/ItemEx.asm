@@ -1,6 +1,6 @@
 
 #################################################
-ItemEx Clone Engine v1.36 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.37 [Sammi Husky, Kapedani]
 #################################################
 # Stages can override items
 # Character specific items
@@ -1004,7 +1004,7 @@ HOOK @ $80990004    # BaseItem::notifyEventAnimCmd
     cmpwi r31, 0xFFFF   # \
     ble+ %end%          # /
     lwz r11, 0x8c4(r21) # baseItem->itVariant
-    srawi r11, r11, 20  # ftSlotId = current item variant / 0x100000
+    rlwinm r11,r11,0,8,11  # isolate ftSlotId (variant & 0x00f00000)
     add r31, r31, r11   # variant += ftSlotId
 }
 HOOK @ $80990328    # BaseItem::notifyEventAnimCmd
