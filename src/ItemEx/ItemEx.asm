@@ -761,24 +761,24 @@ HOOK @ $809bca28    # itArchive::__ct
 
 HOOK @ $809bcbbc # itArchive::__ct
 {
-    li r6, 0    # Force clone = false
+    li r6, 0    # Force unique = false
     lwz r12, 0xc(r25)   # \
     cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
     ble+ %end%          # /
-    li r6, 1    # Force clone = true
+    li r6, 2    # Force unique = true
 }
 HOOK @ $809bcc18    # itArchive::__ct
 {
-    li r6, 0    # Force clone = false
+    li r6, 0    # Force unique = false
     lwz r12, 0xc(r25)   # \
     cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
     ble+ %end%          # /
-    li r6, 1    # Force clone = true
+    li r6, 2    # Force unique = true
 }
 HOOK @ $809bcc74    # itArchive::__ct
 {
     mr r5, r29  # Use heapType instead of only ItemResource
-    li r6, 0    # Force clone = false
+    li r6, 0    # Force unique = false
     lwz r12, 0xc(r25)   # itArchive->itVariation
     lwz r11, 0x8(r25)   # itArchive->itKind
     cmpwi r11, 0x62                 # \ check if itKind >= 0x62 (Pokemon and Assist Trophies)
@@ -789,7 +789,7 @@ notPokemonAssistVariant:
     cmplwi r12, 0xFFFF  # | Check if itVariation >= 0x10000
     ble+ %end%          # /
 forceClone:
-    li r6, 1    # Force clone = true    
+    li r6, 2    # Force unique = true    
 } 
 
 HOOK @ $809c7820    # itResourceIdAccesserImpl::getItKind
@@ -1638,3 +1638,17 @@ HOOK @ $8098f6d0    # BaseItem::reset
     bne+ %end%      # / 
     li r24, 0x0
 }     
+
+########################################################################################
+utArchive::reqLoad 4th Parameter as 2 forces read instead of clone [DukeItOut, Kapedani]
+########################################################################################
+HOOK @ $800453F0
+{
+    mr r5, r22            # Original operation
+    cmpwi r6, 0x2
+    bne+ %end%
+    lis r3, 0x8004      # \
+    ori r3, r3, 0x5448  # | Force file to not clone.
+    mtctr r3            # | 
+    bctr                # / 
+}
