@@ -1,6 +1,6 @@
 
 #################################################
-ItemEx Clone Engine v1.37 [Sammi Husky, Kapedani]
+ItemEx Clone Engine v1.38 [Sammi Husky, Kapedani]
 #################################################
 # Stages can override items
 # Character specific items
@@ -1055,15 +1055,20 @@ HOOK @ $809b0550    # itManager::getItemKindArchive
     addi r3, r28, 200       # \
     lwz	r12, 0x0014(r12)    # |
     mtctr r12               # | Original operations
-    bctrl	                # | 
-    cmpw r29, r3            # /
+    bctrl	                # / 
+    li r12, 0               # variant = 0
+    cmplwi r31, 0xFFFF      # \ check if fighter item
+    ble+ notFighterItem     # /
+    rlwinm r12,r31,0,24,15  # variant = variant & 0xFFFF00FF
+notFighterItem:             
+    cmpw r29, r3            # Original operation
 }                           
 CODE @ $809b0554    # itManager::getItemKindArchive
 {
-    blt+ -0x4C      # \
-    li r29, 0x0     # |
-    cmpwi r31, 0x0  # | If itArchive with specific variant was not found, look for itArchive with variant 0
-    li r31, 0x0     # |
+    blt+ -0x4C      # Original operation
+    li r29, 0x0     # \
+    cmpw r31, r12   # | If itArchive with specific variant was not found, look for itArchive with default variant
+    mr r31, r12     # |
     bne+ -0x5C      # /
 }
 HOOK @ $809b1cb4    # itManager::removeItemAfter
@@ -1071,15 +1076,20 @@ HOOK @ $809b1cb4    # itManager::removeItemAfter
     addi r3, r24, 200       # \
     lwz	r12, 0x0014(r12)    # |
     mtctr r12               # | Original operations
-    bctrl	                # | 
-    cmpw r23, r3            # /
+    bctrl	                # / 
+    li r12, 0               # variant = 0
+    cmplwi r29, 0xFFFF      # \ check if fighter item
+    ble+ notFighterItem     # /
+    rlwinm r12,r29,0,24,15  # variant = variant & 0xFFFF00FF
+notFighterItem:   
+    cmpw r23, r3            # Original operation
 }
 CODE @ $809b1cb8    # itManager::removeItemAfter
 {
-    blt+ -0x4C      # \
-    li r23, 0x0     # |
-    cmpwi r29, 0x0  # | If itArchive with specific variant was not found, look for itArchive with variant 0
-    li r29, 0x0     # |
+    blt+ -0x4C      # Original operation
+    li r23, 0x0     # \
+    cmpw r29, r12   # | If itArchive with specific variant was not found, look for itArchive with default variant
+    mr r29, r12     # |
     bne+ -0x5C      # /
 }
 HOOK @ $809b1e60    # itManager::removeItemAfter
@@ -1087,17 +1097,21 @@ HOOK @ $809b1e60    # itManager::removeItemAfter
     addi r3, r24, 200       # \
     lwz	r12, 0x0014(r12)    # |
     mtctr r12               # | Original operations
-    bctrl	                # | 
-    cmpw r26, r3            # /
+    bctrl	                # / 
+    li r12, 0               # variant = 0
+    cmplwi r23, 0xFFFF      # \ check if fighter item
+    ble+ notFighterItem     # /
+    rlwinm r12,r23,0,24,15  # variant = variant & 0xFFFF00FF
+notFighterItem:   
+    cmpw r26, r3            # Original operation
 }
 CODE @ $809b1e64    # itManager::removeItemAfter
 {
-    blt+ -0x4C      # \
-    li r26, 0x0     # |
-    cmpwi r23, 0x0  # | If itArchive with specific variant was not found, look for itArchive with variant 0
-    li r23, 0x0     # |
+    blt+ -0x4C      # Original operation
+    li r26, 0x0     # \
+    cmpw r23, r12   # | If itArchive with specific variant was not found, look for itArchive with default variant
+    mr r23, r12     # |
     bne+ -0x5C      # /
-}
 
 ##################################
 # Adding Pokemon/Assist Variants #
