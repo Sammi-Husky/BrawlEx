@@ -1030,6 +1030,10 @@ HOOK @ $809b1324    # itManager::createBaseItem
     mr r3, r15                              # \
     mr r4, r18                              # |
     li r5, 0                                # | Try item variant 0 instead
+    cmplwi r19, 0xFFFF                      # |
+    ble+ notFighterItem                     # | (or variant & 0xFFFF00FF if it's a fighter item)
+    rlwinm r5,r19,0,24,15                   # |
+notFighterItem:                             # |
     li r6, 1                                # |
     %call (itManager__checkCreatableItem)   # |
     cmpwi r3, 0                             # /
@@ -1040,15 +1044,21 @@ HOOK @ $809b137c    # itManager::createBaseItem
     lbz r12, 0x8(r1)    # \
     cmpwi r12, 0x1      # | If desired item variant isn't creatable
     beq+ %end%          # |
-    li r25, 0x0         # /
+    li r25, 0x0         # use variant 0
+    cmplwi r19, 0xFFFF         # \
+    ble+ %end%                 # | variant & 0xFFFF00FF if it's a fighter item)-
+    rlwinm r25,r19,0,24,15     # /
 }
 HOOK @ $809b1540    # itManager::createBaseItem
 {
     andc r28, r19, r0   # Original operation
     lbz r12, 0x8(r1)    # \
-    cmpwi r12, 0x1      # | If desired item variant isn't creatable
-    beq+ %end%          # |
-    li r28, 0x0         # /
+    cmpwi r12, 0x1      # | Check if desired item variant isn't creatable
+    beq+ %end%          # /
+    li r28, 0x0         # use variant 0
+    cmplwi r19, 0xFFFF         # \
+    ble+ %end%                 # | variant & 0xFFFF00FF if it's a fighter item)-
+    rlwinm r28,r19,0,24,15     # /
 }
 HOOK @ $809b0550    # itManager::getItemKindArchive
 {   
