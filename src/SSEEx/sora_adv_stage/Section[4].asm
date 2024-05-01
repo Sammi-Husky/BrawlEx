@@ -790,7 +790,9 @@ loc_930:
         .2byte 0x0000
         .4byte 0x00000101
         .4byte 0x0101020B
-        .4byte 0x020C0352
+        .2byte 0x020C
+        .byte 0x03
+        .byte 0x52 + addedMembers
         .4byte 0x00000000
 loc_9A0:
         .4byte 0x43300000

@@ -416,86 +416,99 @@ HOOK @ $806ec4d4
 
 op lbz r6,0x5FA(r4) @ $806ec610   # Use advSaveData->numReserveStocks instead of advSelchrResult->numSelectedFighters 
 
-################################################
-Default Subspace Sound Group is 0x0F2 [Kapedani]
-################################################
+#########################################
+# Default Subspace Sound Group is 0x0F2 #
+#########################################
 op li r3, 0xF2 @ $8094c1e0
 op li r3, 0xF2 @ $8094c25c
+
+###############################################
+# Use Passed in MsBin Pointer for Enemy Names #
+###############################################
+op nop @ $80107874  # IfAdvMngr::dispBoss   # \ 
+op nop @ $800dced4  # IfMngr::dispBoss      # | pass original struct instead of copied struct
+op nop @ $80107804  # IfAdvMngr::dispZako   # /
+
+HOOK @ $80109454    # IfAdvBoss::dispBoss
+{
+    mr r5, r30  # Original operation
+    lwz r12, 0x14(r26)  # \
+    cmpwi r12, 0x0      # | check if msBinPtr is null
+    beq+ %end%          # /
+    mr r6, r12
+    li r5, 0
+}
+HOOK @ $801086ac    # IfAdvZako::dispZako
+{
+    mr r5, r30  # Original operation
+    lwz r12, 0x14(r26)  # \
+    cmpwi r12, 0x0      # | check if msBinPtr is null
+    beq+ %end%          # /
+    mr r6, r12
+    li r5, 0
+}
+
+##########################
+# AdvEx Autosave Support # 
+##########################
+HOOK @ $806d772c    # scAdvSave::start
+{
+    li r3, 0                # set first parameter to 0
+    lis r12, 0x806D         # \
+    ori r12, r12, 0x76ec    # | jump to creating muAdvSaveTask in sora_adv_stage module
+    mtctr r12               # |
+    bctr                    # /
+}   
+HOOK @ $806d76f8
+{
+    lwz	r0, 0x35C(r30)  # Original operation
+    cmpwi r3, -1            # \ check if returned -1, and skip back to end
+    bne+ %end%              # /
+    lis r12, 0x806D
+    ori r12, r12, 0x773c
+    mtctr r12
+    bctr 
+}
+
+##########################################################
+Fix Behaviour After Vs Melee Fights in Subspace [Kapedani]
+##########################################################
+.alias g_GameGlobal                         = 0x805a00E0
+.alias __memfill                            = 0x8000443c
+.alias STEX_PARAM                           = 0x8053F010
+
+.macro lwi(<reg>, <val>)
+{
+    .alias  temp_Hi = <val> / 0x10000
+    .alias  temp_Lo = <val> & 0xFFFF
+    lis     <reg>, temp_Hi
+    ori     <reg>, <reg>, temp_Lo
+}
+.macro call(<addr>)
+{
+  %lwi(r12, <addr>)
+  mtctr r12
+  bctrl    
+}
+
+HOOK @ $806eba40    # sqAdventure::setAdventureCondition
+{
+    %lwi (r3, STEX_PARAM)   # \
+    li r4, 0x0              # | zero out part of stage param
+    li r5, 0x10             # /
+    %call (__memfill)
+    %lwi (r12, 0xFFE7FFFF)  # \
+    stw r12, 0x30(r23)      # | Edit default itSwitch 
+    li r12, -1              # |
+    stw r12, 0x34(r23)      # /
+    lbz	r3, 0x606(r22)   # Original operation
+}
 
 ##############################################
 !All Players Can Interact With Warps [Kapedani]
 ##############################################
+## TODO: Maybe check if not in adventure mode? Also make one for doors
 op b 0x48 @ $8085f47c
-
-##########################################################################
-!Stamina Behaviour is Defined Individually Per Fighter v1.1 [Kapedani, Eon]
-##########################################################################
-CODE @ $80861c38    # ftOutsideEventPresenter::notifyOutsideEventSetDamage
-{
-    lwz r10, 0x0(r3)    # \
-    lwz r10,0x8(r10)    # |  Check if ftOwner->ftOwnerData->hitPointMax was set  
-    cmpwi r10, 0x0      # |
-    beq- 0x18           # /
-}
-
-CODE @ $808619a0    # ftOutsideEventPresenter::addDamage
-{
-    lwz r10, 0x0(r3)    # \
-    lwz r10,0x8(r10)    # |  Check if ftOwner->ftOwnerData->hitPointMax was set  
-    cmpwi r10, 0x0      # |
-    beq- 0x18           # /
-}
-
-CODE @ $808616ac    # ftOutsideEventPresenter::onDamage
-{
-    lwz r10, 0x0(r3)    # \
-    lwz r10,0x8(r10)    # |  Check if ftOwner->ftOwnerData->hitPointMax was set  
-    cmpwi r10, 0x0      # |
-    beq- 0x18           # /
-}
-
-CODE @ $80843354    # Fighter::setCurry
-{
-    lwz	r12, 0x003C(r3)     # \
-    lwz	r12, 0x02EC(r12)    # | Fighter->getOwner()
-    mtctr r12               # |
-    bctrl                   # /
-    lwz r10, 0x0(r3)    # \
-    lwz r10,0x8(r10)    # | Check if ftOwner->ftOwnerData->hitPointMax was set  
-    cmpwi r10, 0x0      # |
-    beq- 0x58           # /
-}
-
-CODE @ $80840dcc    # Fighter::notifyEventAddDamage
-{
-    mr r3, r31              # \
-    lwz	r12, 0x003C(r3)     # |
-    lwz	r12, 0x02EC(r12)    # | Fighter->getOwner()
-    mtctr r12               # |
-    bctrl                   # /
-    lwz r10, 0x0(r3)    # \
-    lwz r10,0x8(r10)    # | Check if ftOwner->ftOwnerData->hitPointMax was set  
-    cmpwi r10, 0x0      # |
-    beq- 0x58           # / 
-}
-
-CODE @ $80840c40 # Fighter::notifyEventOnDamage
-{
-    mr r3, r29              # \
-    lwz	r12, 0x003C(r3)     # |
-    lwz	r12, 0x02EC(r12)    # | Fighter->getOwner()
-    mtctr r12               # |
-    bctrl                   # /
-    lwz r10, 0x0(r3)    # \
-    lwz r10,0x8(r10)    # | Check if ftOwner->ftOwnerData->hitPointMax was set  
-    cmpwi r10, 0x0      # |
-    beq- 0x58           # /  
-}
-
-# Fighter::onDeadEnd (check is skipped by PM Stamina)
-
-# TODO: ftDamageTransactorImpl::getDamageForReaction
-
 
 #############################################################################
 !Change filename of figdisp.pac to figdisx.pac Except During SSE [Kapedani]
@@ -514,6 +527,7 @@ HOOK @ $80103980
     stb r12, -0x4131(r23)   # /
 }
 
+## TODO: Change to module edit
 HOOK @ $81169f84
 {
     lis r31, 0x8046         # \ Change filename path location to use the same one as in main.dol

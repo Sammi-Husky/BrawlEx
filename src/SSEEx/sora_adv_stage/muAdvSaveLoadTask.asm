@@ -4866,15 +4866,21 @@ loc_4751C:
     /* 0004753C: */    addi r1,r1,0x70
     /* 00047540: */    blr
 muAdvSaveTask__create:
-    /* 00047544: */    stwu r1,-0x20(r1)
+    /* 00047544: */    stwu r1,-0xE0(r1) #stwu r1,-0x20(r1)
     /* 00047548: */    mflr r0
-    /* 0004754C: */    stw r0,0x24(r1)
-    /* 00047550: */    stw r31,0x1C(r1)
-    /* 00047554: */    stw r30,0x18(r1)
+    /* 0004754C: */    stw r0,0xE4(r1) #stw r0,0x24(r1)
+    addi r11,r1,0xE0
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_28")]
+    /* 00047550: */    #stw r31,0x1C(r1)
+    /* 00047554: */    #stw r30,0x18(r1)
+    /* 0004755C: */    #stw r29,0x14(r1)
+    /* 00047564: */    #stw r28,0x10(r1)
+    cmpwi r3, 0x0               # \ if null, autosave ex
+    bne+ loc_notAutoSave        # /
+    b __unresolved                                             [R_PPC_REL24(40, 7, "loc_muAdvSaveTask__create_writeExAutoSave")]
+loc_notAutoSave:
     /* 00047558: */    mr r30,r5
-    /* 0004755C: */    stw r29,0x14(r1)
     /* 00047560: */    mr r29,r4
-    /* 00047564: */    stw r28,0x10(r1)
     /* 00047568: */    mr r28,r3
     /* 0004756C: */    li r3,0x1898
     /* 00047570: */    bl __unresolved                          [R_PPC_REL24(0, 4, "srHeapType____nw")]
@@ -4893,14 +4899,18 @@ muAdvSaveTask__create:
     /* 000475A4: */    stb r0,0x1422(r31)
 loc_475A8:
     /* 000475A8: */    mr r3,r31
-    /* 000475AC: */    lwz r31,0x1C(r1)
-    /* 000475B0: */    lwz r30,0x18(r1)
-    /* 000475B4: */    lwz r29,0x14(r1)
-    /* 000475B8: */    lwz r28,0x10(r1)
-    /* 000475BC: */    lwz r0,0x24(r1)
+loc_wroteExAutoSave:
+    /* 000475AC: */    #lwz r31,0x1C(r1)
+    /* 000475B0: */    #lwz r30,0x18(r1)
+    /* 000475B4: */    #lwz r29,0x14(r1)
+    /* 000475B8: */    #lwz r28,0x10(r1)
+    addi r11,r1,0xE0
+    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_28")]
+    /* 000475BC: */    lwz r0,0xE4(r1) #lwz r0,0x24(r1)
     /* 000475C0: */    mtlr r0
-    /* 000475C4: */    addi r1,r1,0x20
+    /* 000475C4: */    addi r1,r1,0xE0 #addi r1,r1,0x20
     /* 000475C8: */    blr
+    nop 
 muAdvSaveTask____dt:
     /* 000475CC: */    stwu r1,-0x10(r1)
     /* 000475D0: */    mflr r0

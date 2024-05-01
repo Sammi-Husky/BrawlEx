@@ -6,7 +6,8 @@
 ## Make it have 1hp too?
 # TODO: Show song title on HUD (when stage starts as well as on pause)
 
-# TODO: Investigate Warioman crashing on respawn in Vs stages, investigate Giga Bowser being able to through doors
+# TODO: Fix P2 crashing when picking PT in cutscene
+# TODO: Investigate Warioman crashing on respawn in Vs stages
 # TODO: Investigate Lucas up throw on enemy crash
 # TODO: Fix pointer wizardry in SSE?
 # TODO: Fix Hitbox Sound Change code to work in SSE
@@ -16,7 +17,6 @@
 # TODO: Investigate putting entirely new level markers on the map
 ## Unlock levels similar to characters detecting jumpLevelId
 ## Seems to be setup in initDisp
-# TODO: Enable enemies on VS 
 # TODO: Select different costume by incrementing with cstick up or down on SSE CSS?
 # TODO: Ex characters in Sticker menu
 # TODO: Stickers don't get deleted upon use
@@ -27,15 +27,19 @@
 # TODO: If '.param' is in the jump bone, then load VS stage
 ## Happens in setAdventureMeleeCondition
 ## Have an 'event param' to set up fighter, status (e.g. metal), num stocks, stamina mode etc. can be used for custom event mode / classic mode / trophy spirits
-# TODO: Handle autosave (or could potentially use sd save redirect), game autosaves on exiting a level (maybe could handle on stage exit and check if level is done somehow)
 # TODO: For coin, modify code @ 8081BC74 in All Star VS to check if user has coins and wipe if they don't (and then implement dropping coins upon death)
 # TODO: Make sublevel id above 0x1A (z) just use hex instead for the file name, make ids above 0x99 use hex in the file name
 # TODO: Make door not be able to entered by putting requirements in potentially unused door, investigate three pin door (i.e. investigate triggers more, make new triggers based on current character being used)
 # TODO: Hold L makes cursor a different colour, display Hold X for Time Attack on the map
 # TODO: investigae movie menu (hold L for alternate menu of SSE)
+# TODO: Disable unrestricted cam during time attack? (might not be neccessary if you can get more points by just during the level) / decrease points if press screenshot button?
 # TODO: Load optional tlst at beginning of stage
+# TODO: Test being able to command grab enemies
 # TODO: Item switch settings
+# TODO: Setup corps for multiple waves of versus fighters / hordes
 # TODO: Control enemies
+# TODO: Use any arbitrary FileIndex for enemy model / psa defined in GFG1 
+# TODO: Use different adventure folders for multiple subspace adventures
 # TODO: Split gimmicks into rels so each stage could have a completely different gimmicks as well as can put new itCustomizers there
 ## Default rel with gimmicks would go in adventure_common, otherwise stages could have their own rel in it
 
@@ -718,6 +722,33 @@ loc_muAdvSaveTask__onDecided_writeExSave:
     bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
     addi r11,r1,0xE0      # Original operation
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_wroteExSave")]
+    
+loc_muAdvSaveTask__create_writeExAutoSave:
+    addi r3, r1, 0x40
+    lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_advExSaveFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_advExSaveFilePath")]
+    addi r4, r4, 0x2    # Omit first formatter from path (which was for "sd:")
+    lis r5, 0x8040      # \ Get build folder from FPC
+    ori r5, r5, 0x6920  # /
+    li r6, 0x0          # save slot number (autosave)
+    #crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    addi r3, r1, 0x10
+    li r5, 0
+    stw r5, 0x4(r3)
+    stw r5, 0x10(r3)
+    lis r4,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r4, r4, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    stw r4, 0xC(r3)				    # Location to write
+    li r4, advExSaveSize			# Save data file Size
+    stw r4, 0x8(r3)
+    li  r4, -1
+    stw r4, 0x14(r3)
+    addi r4, r1, 0x40
+    stw r4, 0(r3)
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
+    li r3, -1           # return -1 and don't actually create muAdvSaveTask
+    b __unresolved                           [R_PPC_REL24(40, 1, "loc_wroteExAutoSave")]
 
 ##########################
 ## WIP: Test Setup Stamina
@@ -755,9 +786,35 @@ loc_stAdventure2__initForGameMode_initStamina:
     lwz r0,0x24(r1)     # Original operation
     b __unresolved                           [R_PPC_REL24(40, 1, "loc_initializedStamina")]
 
+loc_removeItemAll:
+    li r4, -1   # \
+    li r5, -1   # | pass extra parameters
+    li r6, -1   # /
+    b __unresolved                          [R_PPC_REL24(27, 1, "itManager__removeItemAll")]
+
 SSEEX__patchInstruction:
     stw r4, 0x0(r3)
     li r4, 0x8
     subi r3, r3, 0x4
     b __unresolved                           [R_PPC_REL24(0, 1, "flushcache__TRK_flush_cache")]
 
+# vPPLUS_getCosmeticIDHardcode:
+#     stwu r1,-0x10(r1)
+#     mflr r0
+#     stw r0,0x14(r1)
+#     cmpwi r3, 0x2e 
+#     bne+ notMewtwo
+#     li r3, 0x2D 
+#     b gotCosmeticID
+# notMewtwo:
+# #     cmpwi r3, 0x37
+# #     bne+ notSopo
+# #     li r3, 0x2e
+# #     b gotCosmeticID
+# # notSopo:
+#     bl __unresolved                          [R_PPC_REL24(0, 4, "loc_800AF82C")]
+# gotCosmeticID:
+#     lwz r0,0x14(r1)
+#     mtlr r0
+#     addi r1,r1,0x10
+#     blr

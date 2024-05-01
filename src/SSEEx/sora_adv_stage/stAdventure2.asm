@@ -712,7 +712,7 @@ stAdventure2__removeLocalData:
     /* 00000A98: */    cmpwi r0,0x0
     /* 00000A9C: */    beq- loc_AA8
     /* 00000AA0: */    bl __unresolved                          [R_PPC_REL24(27, 1, "itManager__getInstance")]
-    /* 00000AA4: */    bl __unresolved                          [R_PPC_REL24(27, 1, "itManager__removeItemAll")]
+    /* 00000AA4: */    bl __unresolved                          [R_PPC_REL24(40, 7, "loc_removeItemAll")] #[R_PPC_REL24(27, 1, "itManager__removeItemAll")]
 loc_AA8:
     /* 00000AA8: */    lwz r3,0x524(r31)
     /* 00000AAC: */    lbz r0,0x604(r3)

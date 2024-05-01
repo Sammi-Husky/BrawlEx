@@ -31,7 +31,9 @@ loc_muAdvSelMapTask__processDefault_checkForNewExUnlocks:
     blt+ loc_noMapSelectActive     # | check if Great Maze
     cmpwi r11, 0x21                # |
     bgt+ loc_noMapSelectActive     # /
-    stw r10, 0x6C0(r8)  # restore advSaveData->greatMazeShadowClearFlags to be all completed again
+    stw r10, 0x6C0(r8)  # \ 
+    li r10, 0x7F        # | restore advSaveData->greatMazeShadowClearFlags to be all completed again
+    stb r10, 0x6C7(r8)  # /
 loc_noMapSelectActive:
 
     ## SSEEX: Check for unlocks
@@ -132,7 +134,9 @@ loc_muAdvSelmapTask__create_initialize:
     blt+ loc_noRestoreGreatMazeClearFlags     # | check if Great Maze
     cmpwi r11, 0x21                           # |
     bgt+ loc_noRestoreGreatMazeClearFlags     # /
-    stw r10, 0x6C0(r3)  # restore advSaveData->greatMazeShadowClearFlags to be all completed again
+    stw r10, 0x6C0(r3)  # \
+    li r10, 0x7F        # | restore advSaveData->greatMazeShadowClearFlags to be all completed again
+    stb r10, 0x6C7(r3)  # /
 loc_noRestoreGreatMazeClearFlags:
     bl __unresolved                             [R_PPC_REL24(1, 1, "sqAdventure__calculateClearPercent")]
 loc_noPrevTimeAttack:
@@ -201,17 +205,32 @@ loc_noSetDisplaySpeedrunTimer:
     andi. r9, r5, 0x0400            # |
     beq+ loc_noSetTimeAttack        # /
 loc_setTimeAttack:
-    lwz r11, 0x60C(r3)             # Get total score and store to restore later
-    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
-    stw r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
     cmpwi r29, 0x1E                 # \
     blt+ loc_dontResetGreatMaze     # | check if Great Maze
     cmpwi r29, 0x21                 # |
     bgt+ loc_dontResetGreatMaze     # /
-    li r10, 0x0         # \ reset advSaveData->greatMazeShadowClearFlags
-    stw r10, 0x6C0(r3)  # /
+    lwz r12, 0x25c(r3)          # \
+    cmpwi r12, 0x4              # |
+    bne+ loc_noSetTimeAttack    # |
+    lwz r12, 0x270(r3)          # |
+    cmpwi r12, 0x4              # |
+    bne+ loc_noSetTimeAttack    # | Check each Great Maze level to see if fully completed 
+    lwz r12, 0x284(r3)          # |
+    cmpwi r12, 0x4              # |
+    bne+ loc_noSetTimeAttack    # |
+    lwz r12, 0x298(r3)          # |
+    cmpwi r12, 0x4              # |
+    bne+ loc_noSetTimeAttack    # /
+    stw r10, 0x6C0(r3)  # \ 
+    li r10, 0x20        # | reset advSaveData->greatMazeShadowClearFlags (leave flag to make bosses appear on map)
+    stb r10, 0x6C7(r3)  # /
     # TODO: Also reset the colored switchs in Factory area and anywhere else it might have saved? Need to see what controls that
 loc_dontResetGreatMaze:
+
+    lwz r11, 0x60C(r3)             # Get total score and store to restore later
+    lis r12,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_originalTotalScore")]
+    stw r11, 0x0(r12)              [R_PPC_ADDR16_LO(40, 6, "loc_originalTotalScore")]
+
     ## op li r31, 0x4 (temporarily disable save prompt after quit)
     lis r4, 0x3be0
     ori r4, r4, 0x0004
