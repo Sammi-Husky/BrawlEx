@@ -1122,6 +1122,7 @@ CODE @ $809b1e64    # itManager::removeItemAfter
     cmpw r23, r12   # | If itArchive with specific variant was not found, look for itArchive with default variant
     mr r23, r12     # |
     bne+ -0x5C      # /
+}
 
 ##################################
 # Adding Pokemon/Assist Variants #
