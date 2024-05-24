@@ -1,3 +1,5 @@
+.set tempAdvExSaveSize, 0xC9
+
 muAdvResultTask__create:
     /* 00000000: */    stwu r1,-0xF0(r1) #stwu r1,-0x10(r1)
     /* 00000004: */    mflr r0
@@ -82,7 +84,36 @@ loc_dontLoadTempAdvExSaveFile:
     lis r30,0x0                             [R_PPC_ADDR16_HA(0, 11, "loc_805A00E0")]
     lwz r30,0x0(r30)                        [R_PPC_ADDR16_LO(0, 11, "loc_805A00E0")]
     lwz r30,0x30(r30)     # get GameGlobal->advSaveData
+    lwz r12, 0x620(r30)     # \ 
+    lis r11, 0x2A01         # |
+    ori r11, r11, 0x0100    # | check if advSaveData->currentLevelID == 0x2A010100
+    cmpw r12, r11           # |
+    bne+ notTabuu           # /
+    addi r3, r1, 0x38
+    lis r4,0x0                              [R_PPC_ADDR16_HA(40, 5, "loc_advExSaveFilePath")]
+    addi r4,r4,0x0                          [R_PPC_ADDR16_LO(40, 5, "loc_advExSaveFilePath")]
+    addi r4, r4, 0x2    # Omit first formatter from path (which was for "sd:")
+    lis r5, 0x8040      # \ Get build folder from FPC
+    ori r5, r5, 0x6920  # /
+    li r6, 99          # use a normally not accessible save slot number as temp slot name
+    #crclr 6
+    bl __unresolved                          [R_PPC_REL24(0, 4, "printf__sprintf")]
+    addi r3, r1, 0x8
+    li r5, 0
+    stw r5, 0x4(r3)
+    stw r5, 0x10(r3)
+    lis r4,0x0                        [R_PPC_ADDR16_HA(40, 6, "loc_advExSaveData")]
+    addi r4, r4, 0x0                  [R_PPC_ADDR16_LO(40, 6, "loc_advExSaveData")]
+    stw r4, 0xC(r3)				    # Location to write
+    li r4, tempAdvExSaveSize	    # Save data file Size
+    stw r4, 0x8(r3)
+    li  r4, -1
+    stw r4, 0x14(r3)
+    addi r4, r1, 0x38
+    stw r4, 0(r3)
+    bl __unresolved                          [R_PPC_REL24(0, 1, "gfFileIO__writeSDFile")]
 
+notTabuu:
     ## SSEEX: Check if new record and adjust earned coins if time attack
     lis r11,0x0                    [R_PPC_ADDR16_HA(40, 6, "loc_isGlobalTimeAttack")]
     lbz r11, 0x0(r11)              [R_PPC_ADDR16_LO(40, 6, "loc_isGlobalTimeAttack")]
