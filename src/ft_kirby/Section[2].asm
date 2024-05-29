@@ -1,0 +1,17 @@
+loc_0:
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbycpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessfinalcuttercpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocesshammercpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessstonecpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessspecialncpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessspecialndrinkitemcpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessspecialnspitcpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessspecialneatcpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessspecialnswallowcpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessspecialndrinkcpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbystatusuniqprocessfinalcpp____sinit_")]
+        #.4byte 0x00000000         [R_PPC_ADDR32(96, 1, "ftkirbycopyabilitymodulecpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "wnkirbyfinalcutterstatusuniqprocessregularcpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "wnkirbystarmissilestatusuniqprocesscpp____sinit_")]
+        .4byte 0x00000000         [R_PPC_ADDR32(96, 1, "wnkirbynabestatusuniqprocesscpp____sinit_")]
+        .4byte 0x00000000
