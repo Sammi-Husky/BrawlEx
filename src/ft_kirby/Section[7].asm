@@ -19,7 +19,7 @@ loc_ftKirbyCopyAbilityTopStatusKind:
         .4byte 0x00000180       # 0x11
         .4byte 0x000001BB       # 0x12
         .4byte 0x00000142       # 0x13
-        .4byte 0x0000016A       # 0x14
+        .4byte 0x0000016A       # 0x14  # vBrawl: 0x1A6
         .4byte 0x0000014B       # 0x15
         .4byte 0x00000136       # 0x16
         .4byte 0x000001B6       # 0x17
@@ -616,7 +616,7 @@ loc_ftKirbyCopyAbilityInfos:
 # 0x14 ---------------------------------------------------------------
         .4byte 0x00000000
         .4byte 0x00000000
-        .4byte 0x0000026C
+        .4byte 0x0000026C       # vBrawl: 0x2E0
         .4byte 0x00000000
 # 0x15 ---------------------------------------------------------------
         .4byte 0x00000000
@@ -1896,7 +1896,7 @@ loc_ftKirbyCopyAbilityConvertParams:
         .4byte 0x00000000
 # 0x14 ---------------------------------------------------------------
         .4byte 0x00000000
-        .4byte 0x00000000
+        .4byte 0x00000000       [R_PPC_ADDR32(96, 5, "loc_ftKirbyCopyAbilityIdConvertParam_176")]       # vBrawl: 0x0
         .4byte 0x00000000
         .4byte 0x00000000
 # 0x15 ---------------------------------------------------------------
