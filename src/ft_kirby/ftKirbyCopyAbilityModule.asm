@@ -175,10 +175,10 @@ loc_1C4CC:
     /* 0001C4E0: */    addi r1,r1,0x20
     /* 0001C4E4: */    blr
 ftKirbyCopyAbilityModule__prepareCopyAbility:
-    /* 0001C4E8: */    stwu r1,-0xC0(r1)
+    /* 0001C4E8: */    stwu r1,-0xD0(r1)
     /* 0001C4EC: */    mflr r0
-    /* 0001C4F0: */    stw r0,0xC4(r1)
-    /* 0001C4F4: */    addi r11,r1,0xC0
+    /* 0001C4F0: */    stw r0,0xD4(r1)
+    /* 0001C4F4: */    addi r11,r1,0xD0
     /* 0001C4F8: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___savegpr_21")]
     /* 0001C4FC: */    mr r24,r3
     /* 0001C500: */    mr r25,r4
@@ -211,12 +211,12 @@ loc_1C53C:
     /* 0001C568: */    lwz r29,0x8(r3)
     /* 0001C56C: */    lis r3,0x0                               [R_PPC_ADDR16_HA(96, 5, "loc_BD68")]
     /* 0001C570: */    addi r3,r3,0x0                           [R_PPC_ADDR16_LO(96, 5, "loc_BD68")]
-    /* 0001C574: */    stw r3,0x18(r1)
+    /* 0001C574: */    stw r3,0x1C(r1)
     /* 0001C578: */    addi r0,r3,0x48
-    /* 0001C57C: */    stw r0,0x1C(r1)
-    /* 0001C580: */    lwz r0,0x20(r1)
+    /* 0001C57C: */    stw r0,0x20(r1)
+    /* 0001C580: */    lwz r0,0x24(r1)
     /* 0001C584: */    rlwinm r0,r0,0,19,31
-    /* 0001C588: */    stw r0,0x20(r1)
+    /* 0001C588: */    stw r0,0x24(r1)
     /* 0001C58C: */    lwz r3,0x8(r24)
     /* 0001C590: */    lwz r3,0xD8(r3)
     /* 0001C594: */    lwz r3,0xC0(r3)
@@ -271,8 +271,9 @@ loc_1C53C:
     /* 0001C658: */    mr r5,r22
     /* 0001C65C: */    mr r6,r29
     /* 0001C660: */    addi r7,r1,0x10
-    /* 0001C664: */    addi r8,r1,0x18
-    mr r10, r25
+    /* 0001C664: */    addi r8,r1,0x1C
+    mr r10, r25         # Pass copyAbilityKind to r10 so it can be used 
+    stw r10, 0x18(r1)   # Store copyAbilityKind as extra in wnInit
     /* 0001C668: */    lwz r12,0x8(r3)
     /* 0001C66C: */    lwz r12,0x14(r12)
     /* 0001C670: */    mtctr r12
@@ -288,9 +289,9 @@ loc_1C53C:
     /* 0001C698: */    addi r3,r24,0xC
     /* 0001C69C: */    mr r4,r25
     /* 0001C6A0: */    mr r5,r29
-    /* 0001C6A4: */    addi r6,r1,0x18
+    /* 0001C6A4: */    addi r6,r1,0x1C
     /* 0001C6A8: */    bl __unresolved                          [R_PPC_REL24(27, 1, "soArticleDynamicMediator__entryRange")]
-    /* 0001C6AC: */    addi r3,r1,0x18
+    /* 0001C6AC: */    addi r3,r1,0x1C
     /* 0001C6B0: */    li r0,0x0
     /* 0001C6B4: */    extsh r4,r0
     /* 0001C6B8: */    bl soArrayVectorAbstract_P9soArticle_____dt
@@ -342,11 +343,11 @@ loc_1C6C0:
     /* 0001C76C: */    lwz r7,0xC(r24)
     /* 0001C770: */    bl ftFighterBuilder_18ftKirbyBuildConfig___setAnimCmdDataDisguise
 loc_1C774:
-    /* 0001C774: */    addi r11,r1,0xC0
+    /* 0001C774: */    addi r11,r1,0xD0
     /* 0001C778: */    bl __unresolved                          [R_PPC_REL24(0, 4, "runtime___restgpr_21")]
-    /* 0001C77C: */    lwz r0,0xC4(r1)
+    /* 0001C77C: */    lwz r0,0xD4(r1)
     /* 0001C780: */    mtlr r0
-    /* 0001C784: */    addi r1,r1,0xC0
+    /* 0001C784: */    addi r1,r1,0xD0
     /* 0001C788: */    blr
 ftKirbyCopyAbilityInfo__getWeaponInfo:
     /* 0001C78C: */    lwz r3,0x0(r3)
