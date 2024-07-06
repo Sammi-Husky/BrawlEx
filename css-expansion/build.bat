@@ -1,0 +1,1 @@
+"./tools/reltools.exe" -m ./maps -r ./src -o ./bin
