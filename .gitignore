@@ -2,3 +2,6 @@ bin/
 rels/
 build/
 dump/
+*.rel
+*.elf
+*.map
