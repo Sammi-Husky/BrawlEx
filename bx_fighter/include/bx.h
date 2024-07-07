@@ -5,6 +5,7 @@
 #define CONFIG_VER 2
 
 #include "types.h"
+#include "StaticAssert.h"
 
 struct PatchData
 {
@@ -80,6 +81,49 @@ struct ConfigHeader
     int filesize;
     int version;
     int editFlag;
+};
+
+struct VictoryCamera
+{
+    int charID;
+    float pos1;
+    float pos2;
+    float pos3;
+    float pos4;
+};
+
+struct CSSColor
+{
+    char color;
+    char costume;
+};
+struct CSSColors
+{
+    CSSColor color1;
+    CSSColor color2;
+    CSSColor color3;
+    CSSColor color4;
+    CSSColor color5;
+    CSSColor color6;
+    CSSColor color7;
+    CSSColor color8;
+    CSSColor color9;
+    CSSColor color10;
+    CSSColor color11;
+    CSSColor color12;
+    CSSColor color13;
+    CSSColor color14;
+    CSSColor color15;
+    CSSColor color16;
+};
+struct CSSSlotInfo
+{
+    short slotChars;
+    char recordBank;
+    char cosmeticSlot;
+    int wiimotSfx;
+    CSSColors *colors;
+    int unk;
 };
 
 void applyPatches();

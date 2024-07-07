@@ -10,8 +10,8 @@ extern char MOD_PATCH_DIR[];
 // TODO: param layouts
 ConfigInfo info[] = {
     {"%spf/BrawlEx/FighterConfig/Fighter%02X.dat", FighterConfigLayout, MAX_CHARS, 0, 0xd8a},
-    {"%spf/BrawlEx/SlotConfig/Slot%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
-    {"%spf/BrawlEx/CSSSlotConfig/CSSSlot%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
+    {"%spf/BrawlEx/SlotConfig/Slot%02X.dat", SlotConfigLayout, MAX_CHARS, 0, 0xd8a},
+    {"%spf/BrawlEx/CSSSlotConfig/CSSSlot%02X.dat", CSSConfigLayout, MAX_CHARS, 0, 0xd8a},
     {"%spf/BrawlEx/CosmeticConfig/Cosmetic%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
 };
 
@@ -121,12 +121,12 @@ void readConfigs()
                 ParserLayout *layout = info[i].layout;
                 while (layout->magic == 0xD8A)
                 {
-                    if (addr->version < CONFIG_VER && layout->verExclusivity <= addr->version)
+                    if (addr->version <= CONFIG_VER && layout->verExclusivity <= addr->version)
                     {
                         if (!layout->editFlags || layout->editFlags & addr->editFlag)
                         {
-                            memcpy(static_cast<char *>(layout->pDest) + layout->stride * i,
-                                   addr + layout->offset,
+                            memcpy(reinterpret_cast<char *>(layout->pDest) + layout->stride * i,
+                                   reinterpret_cast<char *>(addr) + layout->offset,
                                    layout->size);
                         }
                     }
