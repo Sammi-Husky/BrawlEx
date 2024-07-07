@@ -35,14 +35,33 @@ struct ftSlotCharacterEntry
     int slotCharacters[4];
 };
 
+// TODO Most of these can be made bools or bits
+struct FighterIC
+{
+    int jabType;
+    int jabCount;
+    int hasRapidJab;
+    int canAngleFtilt;
+    int fsmashCount;
+    int numAirJumps;
+    int canGlide;
+    int canCrawl;
+    int daAutoCrouch;
+    int canWallJump;
+    int canWallCling;
+    int canZair;
+    int thrownType;
+    int captureSize;
+};
+
 struct ParserLayout
 {
-    char *pDest;
+    void *pDest;
     int offset;
     u16 stride;
     u16 size;
-    bool requiresElevation;
-    bool verExclusivity;
+    char editFlags;
+    char verExclusivity;
     u16 magic;
 };
 

@@ -1,15 +1,18 @@
 #include "bx.h"
 #include "data/patches.h"
+#include "parser.h"
 
 #include "gf/gf_file_io_handle.h"
 #include "gf/gf_file_io.h"
+#include "printf.h"
 
+extern char MOD_PATCH_DIR[];
 // TODO: param layouts
 ConfigInfo info[] = {
-    {"/private/wii/app/rsbe/pf/BrawlEx/FighterConfig/Fighter%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
-    {"/private/wii/app/rsbe/pf/BrawlEx/SlotConfig/Slot%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
-    {"/private/wii/app/rsbe/pf/BrawlEx/CSSSlotConfig/CSSSlot%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
-    {"/private/wii/app/rsbe/pf/BrawlEx/CosmeticConfig/Cosmetic%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
+    {"%spf/BrawlEx/FighterConfig/Fighter%02X.dat", FighterConfigLayout, MAX_CHARS, 0, 0xd8a},
+    {"%spf/BrawlEx/SlotConfig/Slot%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
+    {"%spf/BrawlEx/CSSSlotConfig/CSSSlot%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
+    {"%spf/BrawlEx/CosmeticConfig/Cosmetic%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
 };
 
 void patchInstructions(u16 *addr1, u16 *addr2, u32 data)
@@ -106,6 +109,7 @@ void readConfigs()
             char buffer[0x100];
             gfFileIORequest request;
 
+            sprintf(filepath, info[i].filenameFormat, &MOD_PATCH_DIR, x);
             gfFileIORequest::setReadParam(&request, filepath, buffer, 0, 0);
             bool fileExists = !gfFileIO::checkFileSD(&request);
 
@@ -119,9 +123,11 @@ void readConfigs()
                 {
                     if (addr->version < CONFIG_VER && layout->verExclusivity <= addr->version)
                     {
-                        if (!layout->requiresElevation || layout->requiresElevation & addr->editFlag)
+                        if (!layout->editFlags || layout->editFlags & addr->editFlag)
                         {
-                            memcpy(layout->pDest + layout->stride * i, addr + layout->offset, layout->size);
+                            memcpy(static_cast<char *>(layout->pDest) + layout->stride * i,
+                                   addr + layout->offset,
+                                   layout->size);
                         }
                     }
                 }
