@@ -23,21 +23,21 @@ ParserLayout FighterConfigLayout[] = {
     {&AIControllers, 0xFC, 0x04, 0x04, 0, 1, 0xD8A},
 };
 
-// [dest] [offset] [stride] [size] [needsEditFlag] [version] [magic]
-ParserLayout SlotConfigLayout[] = {
-    {&ftSlotCharacters, 0x10, 0x10, 0x10, 1, 1, 0xD8A},
-    {&VictoryFanfares, 0x20, 0x04, 0x04, 0, 1, 0xD8A},
-    {&RecordOverrides, 0x24, 0x02, 0x01, 0, 1, 0xD8A},
-    {&VictoryAnnouncers, 0x28, 0x04, 0x04, 0, 2, 0xD8A},
-    {&VictoryCameraDistances[1], 0x30, 0x14, 0x10, 0, 2, 0xD8A},
-};
+// // [dest] [offset] [stride] [size] [needsEditFlag] [version] [magic]
+// ParserLayout SlotConfigLayout[] = {
+//     {&ftSlotCharacters, 0x10, 0x10, 0x10, 1, 1, 0xD8A},
+//     {&VictoryFanfares, 0x20, 0x04, 0x04, 0, 1, 0xD8A},
+//     {&RecordOverrides, 0x24, 0x02, 0x01, 0, 1, 0xD8A},
+//     {&VictoryAnnouncers, 0x28, 0x04, 0x04, 0, 2, 0xD8A},
+//     {&VictoryCameraDistances[1], 0x30, 0x14, 0x10, 0, 2, 0xD8A},
+// };
 
-// [dest] [offset] [stride] [size] [needsEditFlag] [version] [magic]
-ParserLayout CSSConfigLayout[] = {
-    {&ftSlotCharacters, 0x10, 0x10, 0x02, 1, 1, 0xD8A},
-    {&VictoryFanfares, 0x12, 0x10, 0x01, 0, 1, 0xD8A},
-    {&RecordOverrides, 0x13, 0x10, 0x01, 2, 1, 0xD8A},
-    {&VictoryAnnouncers, 0x14, 0x10, 0x04, 0, 2, 0xD8A},
-    {&VictoryCameraDistances, 0x1C, 0x10, 0x04, 0, 2, 0xD8A},
-    {&VictoryCameraDistances, 0x20, 0x20, 0x20, 0, 2, 0xD8A},
-};
+// // [dest] [offset] [stride] [size] [needsEditFlag] [version] [magic]
+// ParserLayout CSSConfigLayout[] = {
+//     {&ftSlotCharacters, 0x10, 0x10, 0x02, 1, 1, 0xD8A},
+//     {&VictoryFanfares, 0x12, 0x10, 0x01, 0, 1, 0xD8A},
+//     {&RecordOverrides, 0x13, 0x10, 0x01, 2, 1, 0xD8A},
+//     {&VictoryAnnouncers, 0x14, 0x10, 0x04, 0, 2, 0xD8A},
+//     {&VictoryCameraDistances, 0x1C, 0x10, 0x04, 0, 2, 0xD8A},
+//     {&VictoryCameraDistances, 0x20, 0x20, 0x20, 0, 2, 0xD8A},
+// };
