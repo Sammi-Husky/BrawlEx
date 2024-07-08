@@ -21,9 +21,9 @@ void _prolog()
     }
 
     readConfigs();
-    // ensureValidData();
+    ensureValidData();
     applyPatches();
-    // clearCaches();
+    clearCaches();
 }
 
 void _epilog()

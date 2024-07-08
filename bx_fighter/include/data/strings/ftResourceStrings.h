@@ -2,7 +2,7 @@
 
 #include "bx.h"
 
-char ftResourcePathStrings[MAX_CHARS][0x30] = {
+static char ftResourcePathStrings[MAX_CHARS][0x30] = {
     "mario/FitMario.pac",
     "donkey/FitDonkey.pac",
     "link/FitLink.pac",

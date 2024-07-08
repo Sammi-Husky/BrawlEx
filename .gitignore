@@ -6,3 +6,4 @@ dump/
 *.elf
 *.map
 *.py
+.vscode

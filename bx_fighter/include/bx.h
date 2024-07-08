@@ -4,8 +4,8 @@
 #define BX_VER "2.5"
 #define CONFIG_VER 2
 
-#include "types.h"
 #include "StaticAssert.h"
+#include "types.h"
 
 struct PatchData
 {
@@ -61,7 +61,7 @@ struct ParserLayout
     int offset;
     u16 stride;
     u16 size;
-    char editFlags;
+    char neededEditLevel;
     char verExclusivity;
     u16 magic;
 };
@@ -126,5 +126,30 @@ struct CSSSlotInfo
     int unk;
 };
 
+struct CosmeticSlot
+{
+    char cosmeticID;
+    char unk1;
+    char primaryChar;
+    char secondaryChar;
+    char franchise;
+    char unk2;
+    char unk3;
+    char unk4;
+    int announcerSFX;
+    char unk5;
+    char unk6;
+    char unk7;
+    char unk8;
+};
+
+struct RecordOverride
+{
+    char recordBank;
+    char unk;
+};
+
 void applyPatches();
 void readConfigs();
+void ensureValidData();
+void clearCaches();

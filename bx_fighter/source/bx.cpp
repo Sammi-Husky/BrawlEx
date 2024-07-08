@@ -2,17 +2,22 @@
 #include "data/patches.h"
 #include "parser.h"
 
-#include "gf/gf_file_io_handle.h"
+#include "OS/OSCache.h"
 #include "gf/gf_file_io.h"
+#include "gf/gf_file_io_handle.h"
+#include "modding.h"
 #include "printf.h"
 
-extern char MOD_PATCH_DIR[];
-// TODO: param layouts
+static char fighterConfigPath[0x30] = "%spf/BrawlEx/FighterConfig/Fighter%02X.dat";
+static char SlotConfigPath[0x30] = "%spf/BrawlEx/SlotConfig/Slot%02X.dat";
+static char CSSSlotConfigPath[0x30] = "%spf/BrawlEx/CSSSlotConfig/CSSSlot%02X.dat";
+static char CosmeticConfigPath[0x30] = "%spf/BrawlEx/CosmeticConfig/Cosmetic%02X.dat";
+
 ConfigInfo info[] = {
-    {"%spf/BrawlEx/FighterConfig/Fighter%02X.dat", FighterConfigLayout, MAX_CHARS, 0, 0xd8a},
-    {"%spf/BrawlEx/SlotConfig/Slot%02X.dat", SlotConfigLayout, MAX_CHARS, 0, 0xd8a},
-    {"%spf/BrawlEx/CSSSlotConfig/CSSSlot%02X.dat", CSSConfigLayout, MAX_CHARS, 0, 0xd8a},
-    {"%spf/BrawlEx/CosmeticConfig/Cosmetic%02X.dat", NULL, MAX_CHARS, 0, 0xd8a},
+    {fighterConfigPath,  FighterConfigLayout,  MAX_CHARS, 0, 0xd8a},
+    {SlotConfigPath,     SlotConfigLayout,     MAX_CHARS, 0, 0xd8a},
+    {CSSSlotConfigPath,  CSSConfigLayout,      MAX_CHARS, 0, 0xd8a},
+    {CosmeticConfigPath, CosmeticConfigLayout, MAX_CHARS, 0, 0xd8a},
 };
 
 void patchInstructions(u16 *addr1, u16 *addr2, u32 data)
@@ -78,7 +83,6 @@ void applyPatch(char *patch)
         }
     }
 }
-
 void applyPatches()
 {
     PatchSet *patchSets = (PatchSet *)&GlobalPatches;
@@ -98,7 +102,6 @@ void applyPatches()
         patchSets++;
     }
 }
-
 void readConfigs()
 {
     for (int i = 0; i < 4; i++)
@@ -123,15 +126,55 @@ void readConfigs()
                 {
                     if (addr->version <= CONFIG_VER && layout->verExclusivity <= addr->version)
                     {
-                        if (!layout->editFlags || layout->editFlags & addr->editFlag)
+                        if (!layout->neededEditLevel || layout->neededEditLevel & addr->editFlag)
                         {
-                            memcpy(reinterpret_cast<char *>(layout->pDest) + layout->stride * i,
-                                   reinterpret_cast<char *>(addr) + layout->offset,
-                                   layout->size);
+                            memcpy(reinterpret_cast<char *>(layout->pDest) + layout->stride * x,
+                                   reinterpret_cast<char *>(addr) + layout->offset, layout->size);
                         }
                     }
+                    layout++;
                 }
             }
         }
     }
+}
+void ensureValidData()
+{
+    for (int i = 0; i < MAX_CHARS; i++)
+    {
+        if (TextureLoadFuncs[i] > 5)
+            TextureLoadFuncs[i] = 0;
+
+        if (AIControllers[i] > 0x32)
+            AIControllers[i] = 0x32;
+
+        int finalFlags = FinalResourceFlags[i];
+        if (finalFlags & 0x80)
+        {
+            int tmp = finalFlags & 0xF;
+            if (finalFlags & 0xF == 0)
+                tmp = 1;
+
+            if (FighterLoadFlags[i] & 2 == 0)
+                tmp = 0;
+
+            FinalResourceFlags[i] = finalFlags;
+        }
+
+        if (RecordOverrides[i].recordBank > 0x22)
+            RecordOverrides[i].recordBank = 0;
+    }
+}
+
+/**
+ * @brief Clears the data and instruction caches for main.dol and
+ * sora_melee.
+ *
+ * @note It is important to call this function after any patching
+ * is done or you will experience weird behavior or crashing.
+ */
+void clearCaches()
+{
+    DCFlushRange(reinterpret_cast<void *>(0x80004000), 0xb89b60);
+    ICInvalidateRange(reinterpret_cast<void *>(0x80004000), 0xb89b60);
 }
