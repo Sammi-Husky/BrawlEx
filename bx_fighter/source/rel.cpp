@@ -22,7 +22,7 @@ void _prolog()
 
     readConfigs();
     ensureValidData();
-    applyPatches();
+    // applyPatches();
     clearCaches();
 }
 
