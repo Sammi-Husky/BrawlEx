@@ -1,0 +1,57 @@
+{
+  "Name": "sora_menu_sel_char_access",
+  "Type": "rel",
+  "ModuleID": 17,
+  "ModuleAlign": 32,
+  "BSSAlign": 8,
+  "FixSize": 6864,
+  "Sections": [
+    null,
+    {
+      "Path": "Section[1].asm",
+      "SectionID": 1,
+      "HasCode": true,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[2].asm",
+      "SectionID": 2,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[3].asm",
+      "SectionID": 3,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 28
+    },
+    {
+      "Path": "Section[4].asm",
+      "SectionID": 4,
+      "HasCode": false,
+      "IsBSS": false,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    {
+      "Path": "Section[5].asm",
+      "SectionID": 5,
+      "HasCode": false,
+      "IsBSS": true,
+      "Expand": false,
+      "ExpandSize": 0
+    },
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ]
+}
