@@ -14331,12 +14331,16 @@ ftKirby__copySetup:
     /* 0000D404: */    mr r29,r5
     /* 0000D408: */    mr r27,r6
     /* 0000D40C: */    mr r28,r7
-    /* 0000D410: */    cmpwi r6,0x5
-    /* 0000D414: */    beq- loc_D57C
-    /* 0000D418: */    cmpwi r6,0x32
-    /* 0000D41C: */    blt- loc_D428
-    /* 0000D420: */    cmpwi r6,0x35
-    /* 0000D424: */    ble- loc_D57C
+    mr r3, r27
+    bl ftKirbyCopyAbilityModule__getCopyTopStatusKind 
+    cmpwi r3, -1
+    beq+ loc_D57C
+    /* 0000D410: */    #cmpwi r6,0x5
+    /* 0000D414: */    #beq- loc_D57C
+    /* 0000D418: */    #cmpwi r6,0x32
+    /* 0000D41C: */    #blt- loc_D428
+    /* 0000D420: */    #cmpwi r6,0x35
+    /* 0000D424: */    #ble- loc_D57C
 loc_D428:
     /* 0000D428: */    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_2E68")]
     /* 0000D42C: */    lwz r3,0x0(r3)                           [R_PPC_ADDR16_LO(27, 6, "loc_2E68")]

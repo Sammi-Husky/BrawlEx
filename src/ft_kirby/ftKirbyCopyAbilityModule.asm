@@ -937,7 +937,7 @@ loc_1D034:
     /* 0001D034: */    lbz r0,0xC(r30)
     /* 0001D038: */    cmplwi r0,0x1
     /* 0001D03C: */    bne- loc_1D58C
-    /* 0001D040: */    cmpwi r23,0x19
+    /* 0001D040: */    cmpwi r23,0x19   # TODO: Make table for these checks?
     /* 0001D044: */    beq- loc_1D0A0
     /* 0001D048: */    bge- loc_1D070
     /* 0001D04C: */    cmpwi r23,0x12
