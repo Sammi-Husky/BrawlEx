@@ -1,5 +1,7 @@
 #include "bx.h"
+#include "data/aiControllers.h"
 #include "data/patches.h"
+#include "data/texLoadFuncs.h"
 #include "parser.h"
 
 #include "OS/OSCache.h"
@@ -142,11 +144,26 @@ void ensureValidData()
 {
     for (int i = 0; i < MAX_CHARS; i++)
     {
-        if (TextureLoadFuncs[i] > 5)
-            TextureLoadFuncs[i] = 0;
+        int loadFuncId = TexLoaderMapping[i];
+        if (loadFuncId > 5)
+        {
 
-        if (AIControllers[i] > 0x32)
-            AIControllers[i] = 0x32;
+            TexLoaderMapping[i] = (int)TexLoadFunctions[0];
+        }
+        else
+        {
+            TexLoaderMapping[i] = (int)TexLoadFunctions[loadFuncId];
+        }
+
+        int controlID = AIControllerMapping[i];
+        if (controlID > 0x32)
+        {
+            AIControllerMapping[i] = (int)AIControllerFunctions[0x32];
+        }
+        else
+        {
+            AIControllerMapping[i] = (int)AIControllerFunctions[controlID];
+        }
 
         int finalFlags = FinalResourceFlags[i];
         if (finalFlags & 0x80)

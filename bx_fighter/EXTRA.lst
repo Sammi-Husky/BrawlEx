@@ -1,0 +1,9 @@
+// Texture Load Functions
+27,1,0018C5AC:texLoadFunc1
+27,1,0018C40C:texLoadFunc2
+27,1,0018C440:texLoadFunc3
+27,1,0018C480:texLoadFunc4
+27,1,0018C4B0:texLoadFunc5
+27,1,0018C554:texLoadFunc6
+
+// AI Controller Functions
