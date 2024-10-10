@@ -937,43 +937,47 @@ loc_1D034:
     /* 0001D034: */    lbz r0,0xC(r30)
     /* 0001D038: */    cmplwi r0,0x1
     /* 0001D03C: */    bne- loc_1D58C
-    /* 0001D040: */    cmpwi r23,0x19   # TODO: Make table for these checks?
-    /* 0001D044: */    beq- loc_1D0A0
-    /* 0001D048: */    bge- loc_1D070
-    /* 0001D04C: */    cmpwi r23,0x12
-    /* 0001D050: */    beq- loc_1D090
-    /* 0001D054: */    bge- loc_1D064
-    /* 0001D058: */    cmpwi r23,0x1
-    /* 0001D05C: */    beq- loc_1D088
-    /* 0001D060: */    b loc_1D0B4
-loc_1D064:
-    /* 0001D064: */    cmpwi r23,0x14
-    /* 0001D068: */    bge- loc_1D0B4
-    /* 0001D06C: */    b loc_1D098
-loc_1D070:
-    /* 0001D070: */    cmpwi r23,0x2E
-    /* 0001D074: */    beq- loc_1D0B0
-    /* 0001D078: */    bge- loc_1D0B4
-    /* 0001D07C: */    cmpwi r23,0x25
-    /* 0001D080: */    beq- loc_1D0A8
-    /* 0001D084: */    b loc_1D0B4
-loc_1D088:
-    /* 0001D088: */    li r28,0x0
-    /* 0001D08C: */    b loc_1D0B4
-loc_1D090:
-    /* 0001D090: */    li r28,0x1
-    /* 0001D094: */    b loc_1D0B4
-loc_1D098:
-    /* 0001D098: */    li r28,0x2
-    /* 0001D09C: */    b loc_1D0B4
-loc_1D0A0:
-    /* 0001D0A0: */    li r28,0x3
-    /* 0001D0A4: */    b loc_1D0B4
-loc_1D0A8:
-    /* 0001D0A8: */    li r28,0x4
-    /* 0001D0AC: */    b loc_1D0B4
-loc_1D0B0:
-    /* 0001D0B0: */    li r28,0x5
+    lis r12,0x0                              [R_PPC_ADDR16_HA(96, 7, "loc_ftKirbyCopyAbilityNodeConvertDataIndex")]
+    addi r12,r12,0x0                         [R_PPC_ADDR16_LO(96, 7, "loc_ftKirbyCopyAbilityNodeConvertDataIndex")]
+    lbzx r28, r12, r23
+
+#     /* 0001D040: */    cmpwi r23,0x19   
+#     /* 0001D044: */    beq- loc_1D0A0
+#     /* 0001D048: */    bge- loc_1D070
+#     /* 0001D04C: */    cmpwi r23,0x12
+#     /* 0001D050: */    beq- loc_1D090
+#     /* 0001D054: */    bge- loc_1D064
+#     /* 0001D058: */    cmpwi r23,0x1
+#     /* 0001D05C: */    beq- loc_1D088
+#     /* 0001D060: */    b loc_1D0B4
+# loc_1D064:
+#     /* 0001D064: */    cmpwi r23,0x14
+#     /* 0001D068: */    bge- loc_1D0B4
+#     /* 0001D06C: */    b loc_1D098
+# loc_1D070:
+#     /* 0001D070: */    cmpwi r23,0x2E
+#     /* 0001D074: */    beq- loc_1D0B0
+#     /* 0001D078: */    bge- loc_1D0B4
+#     /* 0001D07C: */    cmpwi r23,0x25
+#     /* 0001D080: */    beq- loc_1D0A8
+#     /* 0001D084: */    b loc_1D0B4
+# loc_1D088:
+#     /* 0001D088: */    li r28,0x0
+#     /* 0001D08C: */    b loc_1D0B4
+# loc_1D090:
+#     /* 0001D090: */    li r28,0x1
+#     /* 0001D094: */    b loc_1D0B4
+# loc_1D098:
+#     /* 0001D098: */    li r28,0x2
+#     /* 0001D09C: */    b loc_1D0B4
+# loc_1D0A0:
+#     /* 0001D0A0: */    li r28,0x3
+#     /* 0001D0A4: */    b loc_1D0B4
+# loc_1D0A8:
+#     /* 0001D0A8: */    li r28,0x4
+#     /* 0001D0AC: */    b loc_1D0B4
+# loc_1D0B0:
+#     /* 0001D0B0: */    li r28,0x5
 loc_1D0B4:
     /* 0001D0B4: */    lis r3,0x0                               [R_PPC_ADDR16_HA(27, 6, "loc_320C")]
     /* 0001D0B8: */    addi r3,r3,0x0                           [R_PPC_ADDR16_LO(27, 6, "loc_320C")]
