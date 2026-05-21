@@ -64,6 +64,7 @@ void applyPatch(char *patch)
         if (count == 0)
         {
             patchInstructions(((PatchData *)patch)->dest1, ((PatchData *)patch)->dest2, data);
+            patch += 0x10;
             continue;
         }
 
@@ -93,7 +94,7 @@ void applyPatches()
         if (patchSets->flags & 0xfff != 0xd8a)
             break;
 
-        if (patchSets->flags >> 0xC)
+        if (patchSets->flags >> 0xC == 0)
         {
             applyPatch(patchSets->patchData);
         }
