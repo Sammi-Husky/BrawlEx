@@ -2,6 +2,7 @@
 
 #include "bx.h"
 #include "data/data.h"
+#include "data/ftDataProvderData.h"
 
 // TODO: all patches
 
@@ -9,7 +10,7 @@
 extern u16 ftManagerEntry11, ftManagerEntry12;
 extern u16 ftManagerEntry21, ftManagerEntry22;
 extern u16 ftDataProviderReq11, ftDataProviderReq12;
-extern u16 ftRes_1419BE, ftRes_142156;
+extern u16 ftRes_1419BC, ftRes_142154;
 extern u16 ftRes_1421AE, ftRes_1421D6;
 extern u16 ftRes_14225A, ftRes_142282;
 extern u16 ftRes_1422D6, ftRes_1422FE;
@@ -20,33 +21,54 @@ extern u16 ftRes_14246E, ftRes_142496;
 extern u16 ftRes_1424F2, ftRes_14251A;
 extern u16 ftRes_142522, ftRes_142536;
 extern u16 ftRes_142576, ftRes_14259E;
-extern u16 ftRes_1425BA, ftRes_1425DA;
+extern u16 ftRes_1425BA, ftRes_1425D8;
 extern u16 ftRes_142632, ftRes_14265A;
 extern u16 ftRes_142732, ftRes_142756;
 extern u16 ftRes_14278A, ftRes_1427AE;
 extern u16 ftRes_142866, ftRes_14288A;
 extern u16 ftRes_14293E, ftRes_142962;
 extern u16 ftRes_142A5E, ftRes_142ABA;
-extern u16 ftRes_142B02, ftRes_142B1E;
+extern u16 ftRes_142B00, ftRes_142B1E;
 extern u16 ftRes_142B36, ftRes_142B66;
 extern u16 ftRes_142BC2, ftRes_142BE6;
 extern u16 ftRes_142C1A, ftRes_142C3E;
-extern u16 ftRes_142CB2, ftRes_142DFE;
+extern u16 ftRes_142CB0, ftRes_142DFC;
 extern u16 ftRes_142E1A, ftRes_142E32;
 extern u16 ftRes_142E62, ftRes_142EFA;
-extern u16 ftRes_142F1E, ftRes_142F8E;
-extern u16 ftRes_1430DA, ftRes_1430F6;
+extern u16 ftRes_142F1E, ftRes_142F8C;
+extern u16 ftRes_1430D8, ftRes_1430F6;
 extern u16 ftRes_14310E, ftRes_14313E;
 extern u16 ftRes_1431D6, ftRes_1431FA;
-extern u16 ftRes_14326A, ftRes_1433AA;
-extern u16 ftRes_143422, ftRes_14345E;
+extern u16 ftRes_143268, ftRes_1433A8;
+extern u16 ftRes_143420, ftRes_14345C;
 extern u16 ftRes_143476, ftRes_14349A;
-extern u16 ftRes_1434D2, ftRes_1434EA;
-extern u16 ftRes_14352A, ftRes_143546;
+extern u16 ftRes_1434D0, ftRes_1434EA;
+extern u16 ftRes_143528, ftRes_143546;
 extern u16 ftRes_143B8A, ftRes_143B92;
 extern u16 ftRes_14414A, ftRes_14416A;
-extern u16 ftRes_1441BA, ftRes_144346;
-extern u16 ftRes_144382, ftRes_1443EE;
+extern u16 ftRes_1441B8, ftRes_144344;
+extern u16 ftRes_144380, ftRes_1443EC;
+
+extern u16 ftRes_141cdc;
+extern u16 ftRes_142194;
+extern u16 ftRes_142240;
+extern u16 ftRes_1422bc;
+extern u16 ftRes_142344;
+extern u16 ftRes_1423d4;
+extern u16 ftRes_142450;
+extern u16 ftRes_1424d8;
+extern u16 ftRes_14255c;
+extern u16 ftRes_142618;
+extern u16 ftRes_142770;
+extern u16 ftRes_142848;
+extern u16 ftRes_142920;
+extern u16 ftRes_142a9c;
+extern u16 ftRes_142b4c;
+extern u16 ftRes_142c00;
+extern u16 ftRes_142e48;
+extern u16 ftRes_142ee0;
+extern u16 ftRes_143124;
+extern u16 ftRes_1431bc;
 
 // Final resource flag patches
 extern u16 finalRscPatch1, finalRscPatch2;
@@ -397,84 +419,106 @@ extern char pAllStarFix;
 extern char pUnkPatch3;
 
 PatchData ftResourcePatches[] = {
-    {&ftManagerEntry11,    &ftManagerEntry12,    (u32)&EntryResourceFlags,   0,           0xD8A      },
-    {&ftManagerEntry21,    &ftManagerEntry22,    (u32)&ResultResourceFlags,  0,           0xD8A      },
-    {&ftDataProviderReq11, &ftDataProviderReq12, (u32)&FighterResourcePaths, 0,           0xD8A      },
-    {0,                    &ftRes_1419BE,        0x000006C0,                 0,           0xD8A      },
-    {0,                    &ftRes_142156,        0x000008E0,                 0,           0xD8A      },
-    {0,                    &ftRes_1421AE,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_1421D6,        0x00000A14,                 0,           0xD8A      },
-    {0,                    &ftRes_14225A,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142282,        0x00000A14,                 0,           0xD8A      },
-    {0,                    &ftRes_1422D6,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_1422FE,        0x00000A20,                 0,           0xD8A      },
-    {0,                    &ftRes_142306,        0x00000A14,                 0,           0xD8A      },
-    {0,                    &ftRes_14231A,        0x00000A20,                 0,           0xD8A      },
-    {0,                    &ftRes_142362,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_14238A,        0x00000A14,                 0,           0xD8A      },
-    {0,                    &ftRes_1423EE,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142432,        0x00000A18,                 0,           0xD8A      },
-    {0,                    &ftRes_14246E,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142496,        0x00000A14,                 0,           0xD8A      },
-    {0,                    &ftRes_1424F2,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_14251A,        0x00000A18,                 0,           0xD8A      },
-    {0,                    &ftRes_142522,        0x00000A14,                 0,           0xD8A      },
-    {0,                    &ftRes_142536,        0x00000A18,                 0,           0xD8A      },
-    {0,                    &ftRes_142576,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_14259E,        0x00000A1C,                 0,           0xD8A      },
-    {0,                    &ftRes_1425BA,        0x00000A1C,                 0,           0xD8A      },
-    {0,                    &ftRes_1425DA,        0x000008E0,                 0,           0xD8A      },
-    {0,                    &ftRes_142632,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_14265A,        0x00000A14,                 0,           0xD8A      },
-    {0,                    &ftRes_142732,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142756,        0x00000A28,                 0,           0xD8A      },
-    {0,                    &ftRes_14278A,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_1427AE,        0x00000A28,                 0,           0xD8A      },
-    {0,                    &ftRes_142866,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_14288A,        0x00000A2C,                 0,           0xD8A      },
-    {0,                    &ftRes_14293E,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142962,        0x00000A30,                 0,           0xD8A      },
-    {0,                    &ftRes_142A5E,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142ABA,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142B02,        0x000008E0,                 0,           0xD8A      },
-    {0,                    &ftRes_142B1E,        0x00000A24,                 0,           0xD8A      },
-    {0,                    &ftRes_142B36,        0x00000A24,                 0,           0xD8A      },
-    {0,                    &ftRes_142B66,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142BC2,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142BE6,        0x00000A24,                 0,           0xD8A      },
-    {0,                    &ftRes_142C1A,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142C3E,        0x00000A24,                 0,           0xD8A      },
-    {0,                    &ftRes_142CB2,        0x000004E0,                 0,           0xD8A      },
-    {0,                    &ftRes_142DFE,        0x000008E0,                 0,           0xD8A      },
-    {0,                    &ftRes_142E1A,        0x00000A34,                 0,           0xD8A      },
-    {0,                    &ftRes_142E32,        0x00000A34,                 0,           0xD8A      },
-    {0,                    &ftRes_142E62,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142EFA,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_142F1E,        0x00000A34,                 0,           0xD8A      },
-    {0,                    &ftRes_142F8E,        0x00000580,                 0,           0xD8A      },
-    {0,                    &ftRes_1430DA,        0x000008E0,                 0,           0xD8A      },
-    {0,                    &ftRes_1430F6,        0x00000A38,                 0,           0xD8A      },
-    {0,                    &ftRes_14310E,        0x00000A38,                 0,           0xD8A      },
-    {0,                    &ftRes_14313E,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_1431D6,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_1431FA,        0x00000A38,                 0,           0xD8A      },
-    {0,                    &ftRes_14326A,        0x00000440,                 0,           0xD8A      },
-    {0,                    &ftRes_1433AA,        0x00000220,                 0,           0xD8A      },
-    {0,                    &ftRes_143422,        0x00000440,                 0,           0xD8A      },
-    {0,                    &ftRes_14345E,        0x00000220,                 0,           0xD8A      },
-    {0,                    &ftRes_143476,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_14349A,        0x00000A20,                 0,           0xD8A      },
-    {0,                    &ftRes_1434D2,        0x00000220,                 0,           0xD8A      },
-    {0,                    &ftRes_1434EA,        0x00000A10,                 0,           0xD8A      },
-    {0,                    &ftRes_14352A,        0x00000220,                 0,           0xD8A      },
-    {0,                    &ftRes_143546,        0x00000A10,                 0,           0xD8A      },
-    {&ftRes_143B8A,        &ftRes_143B92,        (u32)&FighterRelStrings,    0,           0xD8A      },
-    {&ftRes_14414A,        &ftRes_14416A,        (u32)&FighterResourcePaths, 0,           0xD8A      },
-    {0,                    &ftRes_1441BA,        0x000006C0,                 0,           0xD8A      },
-    {0,                    &ftRes_144346,        0x000004E0,                 0,           0xD8A      },
-    {0,                    &ftRes_144382,        0x00000580,                 0,           0xD8A      },
-    {0,                    &ftRes_1443EE,        0x00000440,                 0,           0xD8A      },
-    {(u16 *)0xCCCCCCCC,    (u16 *)0xCCCCCCCC,    (u32)0xCCCCCCCC,            (u16)0xCCCC, (u16)0xCCCC}
+    {&ftManagerEntry11, &ftManagerEntry12, (u32)&EntryResourceFlags, 0, 0xD8A},
+    {&ftManagerEntry21, &ftManagerEntry22, (u32)&ResultResourceFlags, 0, 0xD8A},
+    {&ftDataProviderReq11, &ftDataProviderReq12, (u32)&ftDataProvider, 0, 0xD8A},
+    {&ftRes_1419BC, &ftRes_1419BC, 0x80BC0000 + offsetof(ftDataProviderData, FighterRelStrings), 0, 0xD8A},
+    {&ftRes_142154, &ftRes_142154, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {0, &ftRes_1421AE, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_1421D6, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
+    {0, &ftRes_14225A, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142282, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
+    {0, &ftRes_1422D6, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_1422FE, offsetof(ftDataProviderData, ResourceFormatStrings[5]), 0, 0xD8A},
+    {0, &ftRes_142306, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
+    {0, &ftRes_14231A, offsetof(ftDataProviderData, ResourceFormatStrings[5]), 0, 0xD8A},
+    {0, &ftRes_142362, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_14238A, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
+    {0, &ftRes_1423EE, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142432, offsetof(ftDataProviderData, ResourceFormatStrings[3]), 0, 0xD8A},
+    {0, &ftRes_14246E, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142496, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
+    {0, &ftRes_1424F2, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_14251A, offsetof(ftDataProviderData, ResourceFormatStrings[3]), 0, 0xD8A},
+    {0, &ftRes_142522, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
+    {0, &ftRes_142536, offsetof(ftDataProviderData, ResourceFormatStrings[3]), 0, 0xD8A},
+    {0, &ftRes_142576, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_14259E, offsetof(ftDataProviderData, ResourceFormatStrings[4]), 0, 0xD8A},
+    {0, &ftRes_1425BA, offsetof(ftDataProviderData, ResourceFormatStrings[4]), 0, 0xD8A},
+    {&ftRes_1425D8, &ftRes_1425D8, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {0, &ftRes_142632, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_14265A, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
+    {0, &ftRes_142732, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142756, offsetof(ftDataProviderData, ResourceFormatStrings[7]), 0, 0xD8A},
+    {0, &ftRes_14278A, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_1427AE, offsetof(ftDataProviderData, ResourceFormatStrings[7]), 0, 0xD8A},
+    {0, &ftRes_142866, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_14288A, offsetof(ftDataProviderData, ResourceFormatStrings[8]), 0, 0xD8A},
+    {0, &ftRes_14293E, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142962, offsetof(ftDataProviderData, ResourceFormatStrings[9]), 0, 0xD8A},
+    {0, &ftRes_142A5E, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142ABA, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {&ftRes_142B00, &ftRes_142B00, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {0, &ftRes_142B1E, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
+    {0, &ftRes_142B36, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
+    {0, &ftRes_142B66, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142BC2, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142BE6, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
+    {0, &ftRes_142C1A, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142C3E, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
+    {&ftRes_142CB0, &ftRes_142CB0, 0x80BC0000 + offsetof(ftDataProviderData, EntryResourceFlags), 0, 0xD8A},
+    {&ftRes_142DFC, &ftRes_142DFC, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {0, &ftRes_142E1A, offsetof(ftDataProviderData, ResourceFormatStrings[10]), 0, 0xD8A},
+    {0, &ftRes_142E32, offsetof(ftDataProviderData, ResourceFormatStrings[10]), 0, 0xD8A},
+    {0, &ftRes_142E62, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142EFA, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_142F1E, offsetof(ftDataProviderData, ResourceFormatStrings[10]), 0, 0xD8A},
+    {&ftRes_142F8C, &ftRes_142F8C, 0x80BC0000 + offsetof(ftDataProviderData, ResultResourceFlags), 0, 0xD8A},
+    {&ftRes_1430D8, &ftRes_1430D8, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {0, &ftRes_1430F6, offsetof(ftDataProviderData, ResourceFormatStrings[11]), 0, 0xD8A},
+    {0, &ftRes_14310E, offsetof(ftDataProviderData, ResourceFormatStrings[11]), 0, 0xD8A},
+    {0, &ftRes_14313E, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_1431D6, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_1431FA, offsetof(ftDataProviderData, ResourceFormatStrings[11]), 0, 0xD8A},
+    {&ftRes_143268, &ftRes_143268, 0x80BC0000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
+    {&ftRes_1433A8, &ftRes_1433A8, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {&ftRes_143420, &ftRes_143420, 0x80BC0000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
+    {&ftRes_14345C, &ftRes_14345C, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {0, &ftRes_143476, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {0, &ftRes_14349A, offsetof(ftDataProviderData, ResourceFormatStrings[5]), 0, 0xD8A},
+    {&ftRes_1434D0, &ftRes_1434D0, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {&ftRes_1434EA, &ftRes_1434EA, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {&ftRes_143528, &ftRes_143528, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {0, &ftRes_143546, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
+    {&ftRes_143B8A, &ftRes_143B92, (u32)&FighterRelStrings, 0, 0xD8A},
+    {&ftRes_14414A, &ftRes_14416A, (u32)&ftDataProvider, 0, 0xD8A},
+    {&ftRes_1441B8, &ftRes_1441B8, 0x80770000 + offsetof(ftDataProviderData, FighterRelStrings), 0, 0xD8A},
+    {&ftRes_144344, &ftRes_144344, 0x80D70000 + offsetof(ftDataProviderData, EntryResourceFlags), 0, 0xD8A},
+    {&ftRes_144380, &ftRes_144380, 0x80D70000 + offsetof(ftDataProviderData, ResultResourceFlags), 0, 0xD8A},
+    {&ftRes_1443EC, &ftRes_1443EC, 0x81170000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
+    // Fighter resource string patches
+    {&ftRes_141cdc, &ftRes_141cdc, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142194, &ftRes_142194, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142240, &ftRes_142240, 0x807c0000, 0, 0xD8A},
+    {&ftRes_1422bc, &ftRes_1422bc, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142344, &ftRes_142344, 0x807c0000, 0, 0xD8A},
+    {&ftRes_1423d4, &ftRes_1423d4, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142450, &ftRes_142450, 0x807c0000, 0, 0xD8A},
+    {&ftRes_1424d8, &ftRes_1424d8, 0x807c0000, 0, 0xD8A},
+    {&ftRes_14255c, &ftRes_14255c, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142618, &ftRes_142618, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142770, &ftRes_142770, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142848, &ftRes_142848, 0x809c0000, 0, 0xD8A},
+    {&ftRes_142920, &ftRes_142920, 0x809c0000, 0, 0xD8A},
+    {&ftRes_142a9c, &ftRes_142a9c, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142b4c, &ftRes_142b4c, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142c00, &ftRes_142c00, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142e48, &ftRes_142e48, 0x807c0000, 0, 0xD8A},
+    {&ftRes_142ee0, &ftRes_142ee0, 0x807c0000, 0, 0xD8A},
+    {&ftRes_143124, &ftRes_143124, 0x807c0000, 0, 0xD8A},
+    {&ftRes_1431bc, &ftRes_1431bc, 0x807c0000, 0, 0xD8A},
+    // Null termination
+    {(u16 *)0xCCCCCCCC, (u16 *)0xCCCCCCCC, (u32)0xCCCCCCCC, (u16)0xCCCC, (u16)0xCCCC}
 };
 
 // Final resource flag patches
@@ -489,7 +533,7 @@ PatchData finalRscFlags[] = {
 
 // MotionEtcFlags patches (counted PatchData + MultiPatch list)
 MultiPatchBlockTerminated<11> motionEtcFlags = {
-    {0, 0, (u32)&FighterSoundbanks, 0x000B, 0x0D8A},
+    {0, 0, (u32)&FighterLoadFlags, 0x000B, 0x0D8A},
     {
      {&motionEtcPatch1A, &motionEtcPatch1B},
      {&motionEtcPatch2A, &motionEtcPatch2B},
@@ -857,7 +901,8 @@ loc_0x34:
 
 loc_0x50:
   nop 
-  nop 
+  nop
+  nop
 }
 
 static asm void unkPatch1()

@@ -8,4 +8,3 @@
 #include "data/ftExtendParamAccessors.h"
 #include "data/pacData.h"
 #include "data/recordOverrides.h"
-#include "data/resourceFormatStrings.h"
