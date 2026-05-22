@@ -31,6 +31,19 @@ struct PatchSet
     u16 flags;
 };
 
+template <unsigned N> struct MultiPatchBlock
+{
+    PatchData header;
+    MultiPatch patches[N];
+} __attribute__((aligned(0x10)));
+
+template <unsigned N> struct MultiPatchBlockTerminated
+{
+    PatchData header;
+    MultiPatch patches[N] __attribute__((aligned(0x10)));
+    PatchData terminator;
+};
+
 struct ftSlotCharacterEntry
 {
     int slotCharacters[4];

@@ -50,31 +50,31 @@ void patchInstructions(u16 *addr1, u16 *addr2, u32 data)
         else
         {
             // if both patch addrs are the same, just write data to the first
-            *addr1 = data;
+            *(u32 *)addr1 = data;
         }
     }
 }
 void applyPatch(char *patch)
 {
-    while (((PatchData *)patch)->magic != 0xd8a)
+    char *addr = patch;
+    while (((PatchData *)addr)->magic == 0xd8a)
     {
-        u32 count = ((PatchData *)patch)->count;
-        u32 data = ((PatchData *)patch)->data;
+        u32 count = ((PatchData *)addr)->count;
+        u32 data = ((PatchData *)addr)->data;
 
         if (count == 0)
         {
-            patchInstructions(((PatchData *)patch)->dest1, ((PatchData *)patch)->dest2, data);
-            patch += 0x10;
+            patchInstructions(((PatchData *)addr)->dest1, ((PatchData *)addr)->dest2, data);
+            addr += 0x10;
             continue;
         }
 
-        patch += 0x10;
-
         // iterate over all patches
+        addr += 0x10;
         for (int i = count; i > 0; i--)
         {
-            patchInstructions(((MultiPatch *)patch)->dest1, ((MultiPatch *)patch)->dest2, data);
-            patch += 0x8;
+            patchInstructions(((MultiPatch *)addr)->dest1, ((MultiPatch *)addr)->dest2, data);
+            addr += 0x8;
         }
 
         // if count was an odd number, our final address won't be aligned to 0x10
@@ -82,7 +82,7 @@ void applyPatch(char *patch)
         // so we can do patchData->magic and get a valid value
         if (count & 1)
         {
-            patch += 0x8;
+            addr += 0x8;
         }
     }
 }
@@ -91,7 +91,7 @@ void applyPatches()
     PatchSet *patchSets = (PatchSet *)&GlobalPatches;
     while (true)
     {
-        if (patchSets->flags & 0xfff != 0xd8a)
+        if ((patchSets->flags & 0xfff) != 0xd8a)
             break;
 
         if (patchSets->flags >> 0xC == 0)
@@ -131,7 +131,7 @@ void readConfigs()
                     {
                         if (!layout->neededEditLevel || layout->neededEditLevel & addr->editFlag)
                         {
-                            memcpy(reinterpret_cast<char *>(layout->pDest) + layout->stride * x,
+                            memcpy(reinterpret_cast<char *>(layout->pDest) + (layout->stride * x),
                                    reinterpret_cast<char *>(addr) + layout->offset, layout->size);
                         }
                     }
