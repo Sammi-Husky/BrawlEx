@@ -1,20 +1,7 @@
 #pragma once
 #include "bx.h"
 
-#include "data/FighterConfigData.h"
-#include "data/data.h"
-
-struct ftDataProviderData
-{
-    char **FighterResourcePaths;
-    char **KirbyResourcePaths;
-    char *KirbyResourceFlags;
-    char *EntryResourceFlags;
-    char *ResultResourceFlags;
-    char **FighterRelStrings;
-    short *FighterColorFlags;
-    char **ResourceFormatStrings[12];
-};
+#include "data.h"
 
 extern char *cmnFighterPath;
 extern char *pacExtensionStr;
@@ -28,6 +15,18 @@ extern char *etcStr;
 extern char *motionEtcStr;
 extern char *entryStr;
 extern char *resultStr;
+
+struct ftDataProviderData
+{
+    char **FighterResourcePaths;
+    char **KirbyResourcePaths;
+    char *KirbyResourceFlags;
+    char *EntryResourceFlags;
+    char *ResultResourceFlags;
+    char **FighterRelStrings;
+    short *FighterColorFlags;
+    char **ResourceFormatStrings[12];
+};
 
 static ftDataProviderData ftDataProvider = {
     FighterResourcePaths,

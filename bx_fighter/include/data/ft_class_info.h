@@ -1,12 +1,10 @@
 #pragma once
 
 #include "bx.h"
-#include "data/ftClassInfo.h"
-
 extern u32 ftClassInfoRef;
 extern u32 ftClassInfoRefPT;
 
-static u32 *ftClassInfoTable[] = {
+static u32 *ftClassInfoTable[MAX_CHARS] = {
     &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef,   &ftClassInfoRef,
     &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef,   &ftClassInfoRef,
     &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef, &ftClassInfoRef,   &ftClassInfoRef,

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bx.h"
-#include "data/data.h"
+#include "data.h"
 
 static ParserLayout FighterConfigLayout[] = {
     // [dest] [offset] [stride] [size] [needsEditLevel] [version] [magic]
@@ -28,7 +28,7 @@ static ParserLayout SlotConfigLayout[] = {
     // [dest] [offset] [stride] [size] [needsEditLevel] [version] [magic]
     {&ftSlotCharacters,       0x10, 0x10, 0x10, 1, 1, 0xD8A},
     {&VictorySongs,           0x20, 0x04, 0x04, 0, 1, 0xD8A},
-    {&RecordOverrides,        0x24, 0x02, 0x01, 0, 1, 0xD8A},
+    {&FighterRecordSlots,     0x24, 0x02, 0x01, 0, 1, 0xD8A},
     {&VictoryAnnouncers,      0x28, 0x04, 0x04, 0, 2, 0xD8A},
     {&VictoryCameras[0].pos1, 0x30, 0x14, 0x10, 0, 2, 0xD8A},
     {(void *)0,               0x00, 0x00, 0x00, 0, 0, 0x000}  // null termination
