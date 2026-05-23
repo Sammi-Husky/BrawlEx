@@ -10,6 +10,14 @@ SECTIONS
         .dtors  :{}
         .rodata :{}
         .data : {}
+        .data.patch_arrays :{
+            patches.o(.rodata)
+            patches.o(.rodata.*)
+            patches.o(.data)
+            patches.o(.data.*)
+            patches.o(.text)
+            patches.o(.text.*)
+        }
         .bss    :{}
     }
 

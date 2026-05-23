@@ -18,7 +18,7 @@ include $(DEVKITPPC)/wii_rules
 TARGET		:=	bx_fighter
 RELID		:=  230
 BUILD		:=	build
-SOURCES		:=	source $(wildcard source/*) lib/BrawlHeaders/PowerPC_EABI_Support/Runtime/Src
+SOURCES		:=	source $(wildcard source/*) $(wildcard source/*/*) lib/BrawlHeaders/PowerPC_EABI_Support/Runtime/Src
 INCLUDES	:=	include
 
 #---------------------------------------------------------------------------------

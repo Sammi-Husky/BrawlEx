@@ -227,7 +227,7 @@ void printDebugInfo()
     OSReport("%-35s %08x\n", "[BrawlEx] VictoryCameras", &VictoryCameras);
     OSReport("%-35s %08x\n", "[BrawlEx] RecordOverrides", &FighterRecordSlots);
     OSReport("%-35s %08x\n", "[BrawlEx] SlotCharacters", &ftSlotCharacters);
-    OSReport("%-35s %08x\n", "[BrawlEx] AIControllers", &AIControllers);
+    OSReport("%-35s %08x\n", "[BrawlEx] AIControllerFunctions", &AIControllerFunctions);
     OSReport("%-35s %08x\n", "[BrawlEx] ftClassInfo", &ftClassInfoTable);
     OSReport("%-35s %08x\n", "[BrawlEx] ftExtendParamAccessors", &ftExtendParamAccessorTable);
     OSReport("%-35s %08x\n", "[BrawlEx] pacData", &fighterResourceTable);

@@ -9,4 +9,4 @@ struct FighterResourceRef
     char *unk3;
 };
 
-static FighterResourceRef fighterResourceTable[MAX_CHARS] = {0};
+extern FighterResourceRef fighterResourceTable[MAX_CHARS];
