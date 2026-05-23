@@ -24,6 +24,7 @@ void _prolog()
     ensureValidData();
     applyPatches();
     clearCaches();
+    printDebugInfo();
 }
 
 void _epilog()

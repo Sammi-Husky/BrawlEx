@@ -166,3 +166,4 @@ void applyPatches();
 void readConfigs();
 void ensureValidData();
 void clearCaches();
+void printDebugInfo();

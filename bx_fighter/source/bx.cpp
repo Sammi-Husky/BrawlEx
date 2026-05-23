@@ -1,10 +1,12 @@
 #include "bx.h"
 #include "data/aiControllers.h"
+#include "data/data.h"
 #include "data/patches.h"
 #include "data/texLoadFuncs.h"
 #include "parser.h"
 
 #include "OS/OSCache.h"
+#include "OS/OSError.h"
 #include "gf/gf_file_io.h"
 #include "gf/gf_file_io_handle.h"
 #include "modding.h"
@@ -195,4 +197,42 @@ void clearCaches()
 {
     DCFlushRange(reinterpret_cast<void *>(0x80004000), 0xb89b60);
     ICInvalidateRange(reinterpret_cast<void *>(0x80004000), 0xb89b60);
+}
+
+void printDebugInfo()
+{
+    OSReport("----------------------------------------------------------------\n");
+    OSReport("%-35s %8s %8s\n", "[BrawlEx] Debug Info", "Table1", "Table2");
+    OSReport("----------------------------------------------------------------\n");
+    OSReport("%-35s %08x   %08x\n", "[BrawlEx] FighterResourcePaths", FighterResourcePaths, ftResourcePathStrings);
+    OSReport("%-35s %08x   %08x\n", "[BrawlEx] FighterRelPaths", FighterRelStrings, ftOverlayFilenames);
+    OSReport("%-35s %08x   %08x\n", "[BrawlEx] KirbyResourcePaths", KirbyResourcePaths, ftKirbyResourcePathStrings);
+    OSReport("%-35s %08x   %08x\n", "[BrawlEx] FighterNames", FighterInternalNames, ftInternalNameStrings);
+    OSReport("%-35s %08x   %08x\n", "[BrawlEx] VictoryNameTable", VictoryNameTable, VictorySongs);
+    OSReport("%-35s %08x\n", "[BrawlEx] AIControllerMapping", AIControllerMapping);
+    OSReport("%-35s %08x\n", "[BrawlEx] FighterLoadFlags", FighterLoadFlags);
+    OSReport("%-35s %08x\n", "[BrawlEx] KirbyResourceFlags", KirbyResourceFlags);
+    OSReport("%-35s %08x\n", "[BrawlEx] EntryResourceFlags", EntryResourceFlags);
+    OSReport("%-35s %08x\n", "[BrawlEx] ResultResourceFlags", ResultResourceFlags);
+    OSReport("%-35s %08x\n", "[BrawlEx] FinalResourceFlags", FinalResourceFlags);
+    OSReport("%-35s %08x\n", "[BrawlEx] FighterColorFlags", FighterColorFlags);
+    OSReport("%-35s %08x\n", "[BrawlEx] EntryArticleFlags", EntryArticleFlags);
+    OSReport("%-35s %08x\n", "[BrawlEx] FighterSoundbanks", FighterSoundbanks);
+    OSReport("%-35s %08x\n", "[BrawlEx] KirbySoundbanks", KirbySoundbanks);
+    OSReport("%-35s %08x\n", "[BrawlEx] TexLoaderMapping", TexLoaderMapping);
+    OSReport("%-35s %08x\n", "[BrawlEx] FighterConstants", FighterConstants);
+    OSReport("%-35s %08x\n", "[BrawlEx] CSSSlotColors", CSSSlotColors);
+    OSReport("%-35s %08x\n", "[BrawlEx] CSSSlotInfo", CSSInfo);
+    OSReport("%-35s %08x\n", "[BrawlEx] CosmeticSlots", CosmeticSlots);
+    OSReport("%-35s %08x\n", "[BrawlEx] VictorySongs", VictorySongs);
+    OSReport("%-35s %08x\n", "[BrawlEx] VictoryAnnouncers", VictoryAnnouncers);
+    OSReport("%-35s %08x\n", "[BrawlEx] VictoryCameras", VictoryCameras);
+    OSReport("%-35s %08x\n", "[BrawlEx] RecordOverrides", RecordOverrides);
+    OSReport("%-35s %08x\n", "[BrawlEx] SlotCharacters", ftSlotCharacters);
+    OSReport("%-35s %08x\n", "[BrawlEx] AIControllers", AIControllers);
+    OSReport("%-35s %08x\n", "[BrawlEx] ftClassInfo", ftClassInfoTable);
+    OSReport("%-35s %08x\n", "[BrawlEx] ftExtendParamAccessors", ftExtendParamAccessorTable);
+    OSReport("%-35s %08x\n", "[BrawlEx] pacData", fighterResourceTable);
+    OSReport("%-35s %08x\n", "[BrawlEx] resourceFmtStrings", ResourceFormatStrings);
+    OSReport("%-35s %08x\n", "[BrawlEx] texLoadFunctions", TexLoadFunctions);
 }
