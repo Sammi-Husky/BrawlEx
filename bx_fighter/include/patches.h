@@ -5,8 +5,6 @@
 
 #include "data_provider.h"
 
-// TODO: all patches
-
 // Fighter resource patches
 extern u16 ftManagerEntry11, ftManagerEntry12;
 extern u16 ftManagerEntry21, ftManagerEntry22;
