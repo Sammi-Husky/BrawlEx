@@ -1,11 +1,35 @@
 #include "patches.h"
 
 PatchData ftResourcePatches[] = {
+    // =====================================
+    // ftManager::entry
+    // =====================================
     {&ftManagerEntry11, &ftManagerEntry12, (u32)&EntryResourceFlags, 0, 0xD8A},
     {&ftManagerEntry21, &ftManagerEntry22, (u32)&ResultResourceFlags, 0, 0xD8A},
+
+    // =====================================
+    // ftDataProvider::req patches
+    // =====================================
+
+    // Main patch puts custom data provider struct in r28 and patches all
+    // table accesses to read the table from that instead of hardcoded offsets
     {&ftDataProviderReq11, &ftDataProviderReq12, (u32)&ftDataProvider, 0, 0xD8A},
     {&ftRes_1419BC, &ftRes_1419BC, 0x80BC0000 + offsetof(ftDataProviderData, FighterRelStrings), 0, 0xD8A},
     {&ftRes_142154, &ftRes_142154, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {&ftRes_1425D8, &ftRes_1425D8, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {&ftRes_142B00, &ftRes_142B00, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {&ftRes_142CB0, &ftRes_142CB0, 0x80BC0000 + offsetof(ftDataProviderData, EntryResourceFlags), 0, 0xD8A},
+    {&ftRes_142DFC, &ftRes_142DFC, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {&ftRes_142F8C, &ftRes_142F8C, 0x80BC0000 + offsetof(ftDataProviderData, ResultResourceFlags), 0, 0xD8A},
+    {&ftRes_1430D8, &ftRes_1430D8, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
+    {&ftRes_143268, &ftRes_143268, 0x80BC0000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
+    {&ftRes_1433A8, &ftRes_1433A8, 0x809C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {&ftRes_143420, &ftRes_143420, 0x80BC0000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
+    {&ftRes_14345C, &ftRes_14345C, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {&ftRes_1434D0, &ftRes_1434D0, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {&ftRes_143528, &ftRes_143528, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+
+    // Resource file format string patches
     {0, &ftRes_1421AE, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_1421D6, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
     {0, &ftRes_14225A, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
@@ -27,7 +51,6 @@ PatchData ftResourcePatches[] = {
     {0, &ftRes_142576, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_14259E, offsetof(ftDataProviderData, ResourceFormatStrings[4]), 0, 0xD8A},
     {0, &ftRes_1425BA, offsetof(ftDataProviderData, ResourceFormatStrings[4]), 0, 0xD8A},
-    {&ftRes_1425D8, &ftRes_1425D8, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
     {0, &ftRes_142632, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_14265A, offsetof(ftDataProviderData, ResourceFormatStrings[2]), 0, 0xD8A},
     {0, &ftRes_142732, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
@@ -40,7 +63,6 @@ PatchData ftResourcePatches[] = {
     {0, &ftRes_142962, offsetof(ftDataProviderData, ResourceFormatStrings[9]), 0, 0xD8A},
     {0, &ftRes_142A5E, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_142ABA, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
-    {&ftRes_142B00, &ftRes_142B00, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
     {0, &ftRes_142B1E, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
     {0, &ftRes_142B36, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
     {0, &ftRes_142B66, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
@@ -48,36 +70,21 @@ PatchData ftResourcePatches[] = {
     {0, &ftRes_142BE6, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
     {0, &ftRes_142C1A, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_142C3E, offsetof(ftDataProviderData, ResourceFormatStrings[6]), 0, 0xD8A},
-    {&ftRes_142CB0, &ftRes_142CB0, 0x80BC0000 + offsetof(ftDataProviderData, EntryResourceFlags), 0, 0xD8A},
-    {&ftRes_142DFC, &ftRes_142DFC, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
     {0, &ftRes_142E1A, offsetof(ftDataProviderData, ResourceFormatStrings[10]), 0, 0xD8A},
     {0, &ftRes_142E32, offsetof(ftDataProviderData, ResourceFormatStrings[10]), 0, 0xD8A},
     {0, &ftRes_142E62, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_142EFA, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_142F1E, offsetof(ftDataProviderData, ResourceFormatStrings[10]), 0, 0xD8A},
-    {&ftRes_142F8C, &ftRes_142F8C, 0x80BC0000 + offsetof(ftDataProviderData, ResultResourceFlags), 0, 0xD8A},
-    {&ftRes_1430D8, &ftRes_1430D8, 0x807C0000 + offsetof(ftDataProviderData, FighterColorFlags), 0, 0xD8A},
     {0, &ftRes_1430F6, offsetof(ftDataProviderData, ResourceFormatStrings[11]), 0, 0xD8A},
     {0, &ftRes_14310E, offsetof(ftDataProviderData, ResourceFormatStrings[11]), 0, 0xD8A},
     {0, &ftRes_14313E, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_1431D6, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_1431FA, offsetof(ftDataProviderData, ResourceFormatStrings[11]), 0, 0xD8A},
-    {&ftRes_143268, &ftRes_143268, 0x80BC0000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
-    {&ftRes_1433A8, &ftRes_1433A8, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
-    {&ftRes_143420, &ftRes_143420, 0x80BC0000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
-    {&ftRes_14345C, &ftRes_14345C, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
     {0, &ftRes_143476, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_14349A, offsetof(ftDataProviderData, ResourceFormatStrings[5]), 0, 0xD8A},
-    {&ftRes_1434D0, &ftRes_1434D0, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
-    {&ftRes_1434EA, &ftRes_1434EA, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
-    {&ftRes_143528, &ftRes_143528, 0x807C0000 + offsetof(ftDataProviderData, KirbyResourcePaths), 0, 0xD8A},
+    {0, &ftRes_1434EA, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
     {0, &ftRes_143546, offsetof(ftDataProviderData, ResourceFormatStrings[1]), 0, 0xD8A},
-    {&ftRes_143B8A, &ftRes_143B92, (u32)&FighterRelStrings, 0, 0xD8A},
-    {&ftRes_14414A, &ftRes_14416A, (u32)&ftDataProvider, 0, 0xD8A},
-    {&ftRes_1441B8, &ftRes_1441B8, 0x80770000 + offsetof(ftDataProviderData, FighterRelStrings), 0, 0xD8A},
-    {&ftRes_144344, &ftRes_144344, 0x80D70000 + offsetof(ftDataProviderData, EntryResourceFlags), 0, 0xD8A},
-    {&ftRes_144380, &ftRes_144380, 0x80D70000 + offsetof(ftDataProviderData, ResultResourceFlags), 0, 0xD8A},
-    {&ftRes_1443EC, &ftRes_1443EC, 0x81170000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
+
     // Fighter resource string patches
     {&ftRes_141cdc, &ftRes_141cdc, 0x807c0000, 0, 0xD8A},
     {&ftRes_142194, &ftRes_142194, 0x807c0000, 0, 0xD8A},
@@ -99,6 +106,18 @@ PatchData ftResourcePatches[] = {
     {&ftRes_142ee0, &ftRes_142ee0, 0x807c0000, 0, 0xD8A},
     {&ftRes_143124, &ftRes_143124, 0x807c0000, 0, 0xD8A},
     {&ftRes_1431bc, &ftRes_1431bc, 0x807c0000, 0, 0xD8A},
+
+    //================================
+    // ftDataProvider::remove patches
+    //================================
+    // Main patch puts custom data provider struct in r23 and patches all
+    // table accesses to read the table from that instead of hardcoded offsets
+    {&ftRes_14414A, &ftRes_14416A, (u32)&ftDataProvider, 0, 0xD8A},
+    {&ftRes_1441B8, &ftRes_1441B8, 0x80770000 + offsetof(ftDataProviderData, FighterRelStrings), 0, 0xD8A},
+    {&ftRes_144344, &ftRes_144344, 0x80D70000 + offsetof(ftDataProviderData, EntryResourceFlags), 0, 0xD8A},
+    {&ftRes_144380, &ftRes_144380, 0x80D70000 + offsetof(ftDataProviderData, ResultResourceFlags), 0, 0xD8A},
+    {&ftRes_1443EC, &ftRes_1443EC, 0x81170000 + offsetof(ftDataProviderData, KirbyResourceFlags), 0, 0xD8A},
+
     // Null termination
     {(u16 *)0xCCCCCCCC, (u16 *)0xCCCCCCCC, (u32)0xCCCCCCCC, (u16)0xCCCC, (u16)0xCCCC}
 };
@@ -566,4 +585,3 @@ PatchSet GlobalPatches[] = {
     {&pUnkPatch3, (char *)&unkPatch3, 0, 0x10, 0x1d8a},
     {(char *)0xCCCCCCCC, (char *)0xCCCCCCCC, (u32)0xCCCCCCCC, (u16)0xCCCC, (u16)0xCCCC}
 };
-
