@@ -11,10 +11,10 @@ SECTIONS
         .rodata :{}
         .data : {}
         .data.patch_arrays :{
-            patches.o(.rodata)
-            patches.o(.rodata.*)
-            patches.o(.data)
-            patches.o(.data.*)
+            patches.cpp.obj(.rodata)
+            patches.cpp.obj(.rodata.*)
+            patches.cpp.obj(.data)
+            patches.cpp.obj(.data.*)
         }
         .bss    :{}
     }
